@@ -1,0 +1,42 @@
+#set-my-status-textarea {
+    width: 70%;
+    height: 175px;
+    margin: 2em;
+    font-size: 1.5em;
+}
+
+#set-my-status-btn {
+    margin-top: .25em;
+    margin-left: 2em;
+}
+
+#set-my-geoloc-btn {
+    margin-bottom: .25em;
+    margin-left: 2em;
+}
+
+#my-geoloc {
+    margin-left: 2em;
+    font-size: 1.25em;
+}
+
+.status-update {
+    border: 1px solid #aaa;
+    margin-bottom: 3px;
+}
+
+.status-update-username {
+    font-weight: bolder;
+}
+
+.status-text {
+    font-weight: bold;
+}
+
+.status-metadata {
+    font-size: 70%;
+}
+
+#feed {
+    padding: 2em;
+}
