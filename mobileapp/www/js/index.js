@@ -178,7 +178,7 @@ var app = {
   logout: function () {
     app.session = null;
     app.hideMenu();
-    app.switchView('#account-login', 'Crypton Messenger');
+    app.switchView('#account-login', 'Stati.es');
     $('#tasks-btn').removeClass('active');
     app.alert('You are logged out', 'info');
     $('#password-login').focus();
@@ -377,7 +377,11 @@ var app = {
       }
       var prefs = rawContainer;
       prefs.keys['first-run'] = Date.now();
-      prefs.save();
+      prefs.save(function (err) {
+        if (err) {
+          console.error('firstRunComplete: cannot save prefs?: ', err);
+        }
+      });
     });
   },
 
@@ -452,6 +456,10 @@ var app = {
           } else {
             app.alert(username + ' is now a trusted contact', 'info');
             $('#verify-user-success-msg').children().remove();
+            if (app.postPeerTrustCallback && typeof app.postPeerTrustCallback == 'function') {
+              // We can do container sharing and other things via this [optional] function:
+              app.postPeerTrustCallback(peer);
+            }
             // TODO: remove click events from buttons
             app.switchView('#scan-select', 'Verify ID Card');
           }

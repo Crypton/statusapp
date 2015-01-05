@@ -1,5 +1,5 @@
 #set-my-status-textarea {
-    width: 70%;
+    width: 80%;
     height: 175px;
     margin: 2em;
     font-size: 1.5em;
@@ -23,6 +23,7 @@
 .status-update {
     border: 1px solid #aaa;
     margin-bottom: 3px;
+    padding: 1em;
 }
 
 .status-update-username {
@@ -39,4 +40,10 @@
 
 #feed {
     padding: 2em;
+}
+
+#my-status {
+    border: 3px solid #000;
+    margin: 2em;
+    padding: 1em;
 }

@@ -974,6 +974,9 @@ Account.prototype.wrapAllKeys = function (wrappingKey, privateKeys, session) {
 var Session = crypton.Session = function (id) {
   this.id = id;
   this.peers = [];
+
+  // XXXddahl: UPSTREAM THIS CHANGE??
+
   this.events = {};
   this.containers = [];
   this.inbox = new crypton.Inbox(this);
@@ -995,6 +998,9 @@ var Session = crypton.Session = function (id) {
     // if any of the cached containers match the HMAC
     // in the notification, sync the container and
     // call the listener if one has been set
+
+    // XXXddahl: must upstream this change!!!
+
     for (var i = 0; i < that.containers.length; i++) {
       var container = that.containers[i];
       var temporaryHmac = container.containerNameHmac || container.getPublicName();
