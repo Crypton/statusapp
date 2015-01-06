@@ -973,10 +973,10 @@ Account.prototype.wrapAllKeys = function (wrappingKey, privateKeys, session) {
  */
 var Session = crypton.Session = function (id) {
   this.id = id;
-  this.peers = [];
+  // XXXddahl: UPSTREAM peers = {};
+  this.peers = {};
 
-  // XXXddahl: UPSTREAM THIS CHANGE??
-
+  // XXXddahl: UPSTREAM THIS CHANGE
   this.events = {};
   this.containers = [];
   this.inbox = new crypton.Inbox(this);

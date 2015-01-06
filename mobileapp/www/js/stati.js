@@ -2,6 +2,8 @@ app.STATUS_CONTAINER = '_my_status_';
 
 app.FEED_CONTAINER = '_my_feed_';
 
+app.FEED_LABEL = 'Stati.es Feed';
+
 app.INITIAL_STATUS_MESSAGE = 'Current Status: null';
 
 app.isReady = false;
@@ -9,6 +11,7 @@ app.isReady = false;
 app.statusContainer = null;
 
 app.postPeerTrustCallback = function postPeerTrustCallback(peer) {
+  console.log('postPeerTrustCallback()');
   // We now trust this peer and can share containers, etc.
   // This is generally only ever called once after adding a contact
   // and trusting them.
@@ -24,8 +27,7 @@ app.setCustomEvents = function setCustomEvents () {
 
   $('#my-feed').click(function () {
     app.hideMenu();
-    // XXXddahl:  reset status UI
-    app.switchView('#feed', 'Stati.es Feed');
+    app.loadAndViewMyStatus();
   });
 
   $('#set-my-status-btn').click(function (){
@@ -40,6 +42,15 @@ app.setCustomEvents = function setCustomEvents () {
 app.customInitialization = function customInitialization() {
   console.log('customInitialization()');
   app.createStatusContainer();
+  app.username = app.session.account.username;
+};
+
+app.getContainerByName = function getContainerByName(container) {
+  for (var i = 0; i < app.session.containers.length; i++) {
+    if (app.session.containers[i].name == container) {
+      return app.session.containers[i];
+    }
+  }
 };
 
 app.setMyStatus = function setMyStatus() {
@@ -59,15 +70,71 @@ app.setMyStatus = function setMyStatus() {
     // clean up form
     $('#set-my-status-textarea').val('');
 
-    // Update local status
-    $('#my-handle').text(app.session.account.username);
-    $('#my-status-text').text(app.statusContainer.keys['myStatus']);
-    $('#my-status-location').text(app.statusContainer.keys['location']);
-    $('#my-status-updated').text(app.statusContainer.keys['updated']);
-
-    // change view to #feed
-    app.switchView('#feed', 'Stati.es Feed');
+    app.loadAndViewMyStatus();
   });
+};
+
+app.loadAndViewMyStatus = function loadAndViewMyStatus () {
+  var statusData = { username: app.username,
+                     myStatus: app.statusContainer.keys['myStatus'],
+                     location: app.statusContainer.keys['location'],
+                     updated: new Date(app.statusContainer.keys['updated'])
+                   };
+
+  app.displayMyStatus(statusData);
+
+  app.switchView('#feed', app.FEED_LABEL);
+
+  app.shareStatusWithAll();
+};
+
+app.displayMyStatus = function displayMyStatus (statusData) {
+  $('#my-handle').text(statusData.username);
+  $('#my-status-text').text(statusData.myStatus);
+  $('#my-status-location').text(statusData.location);
+  $('#my-status-updated').text(statusData.updated);
+};
+
+app.addSharedContainerToFeed = function (containerNameHmac, peerName) {
+  console.log('addSharedContainerToFeed()');
+  app.session.load(app.FEED_CONTAINER, function (err, feedContainer) {
+    if (err) {
+      console.error(err);
+      return;
+    }
+
+    if (feedContainer.keys['feed'][containerNameHmac]) {
+      return;
+    }
+    feedContainer.keys['feed'][containerNameHmac] = {
+      containerNameHmac: containerNameHmac,
+      peerName: peerName,
+      updated: Date.now()
+    };
+  });
+},
+
+app.shareStatusWithAll = function shareStatusWithAll() {
+  console.log('shareStatusWithAll()');
+  // XXXddahl: This is a bit naive as we should not assume that we are sharing our status with every contact. Ok for now though.
+  var contactsContainer = app.getContainerByName('_trust_state');
+  var shareArr = [];
+  var contacts = Object.keys(contactsContainer.keys);
+  for (var i = 0; i < contacts.length; i++) {
+    var peerName = contacts[i]
+    // We should just share our container with each peer
+    var shareCallback = function _shareCallback() {
+      app.shareStatus(peerName);
+    };
+    shareArr.push(shareCallback);
+  }
+
+  var timeout = 0;
+  // XXXddahl: yes, again this is naive, but ok for now or smaller status groups
+  for (i = 0; i < shareArr.length; i++) {
+    timeout = timeout + 5000;
+    setTimeout(shareArr.pop(), timeout);
+  }
 };
 
 app.createStatusContainer = function createStatusContainer() {
@@ -92,10 +159,13 @@ app.createStatusContainer = function createStatusContainer() {
           console.error(err);
           return;
         }
-
-        if (!feedContainer.keys['feed']) {
-          feedContainer.keys['feed'] = [];
+        if (!app.feedContainer) {
+          app.feedContainer = feedContainer;
         }
+        if (!feedContainer.keys['feed']) {
+          feedContainer.keys['feed'] = {};
+        }
+
         feedContainer.save(function (err) {
           app.isReady = true;
           // set message event handler
@@ -121,6 +191,8 @@ app.createStatusContainer = function createStatusContainer() {
             });
           }, 20000);
 
+          // Switch to the Feed view
+          app.loadAndViewMyStatus();
         }); // feedContainer saved
       }); // feed container created/loaded
 
@@ -130,7 +202,8 @@ app.createStatusContainer = function createStatusContainer() {
 
 app.pollInProgress = false;
 
-app.shareStatus = function shareStatus(peerObj) {
+app.shareStatus = function shareStatus (peerObj) {
+  console.log('shareStatus()');
   if (typeof peerObj == 'string') {
     // share status container with peer
     app.session.getPeer(peerObj, function (err, peer) {
@@ -145,13 +218,15 @@ app.shareStatus = function shareStatus(peerObj) {
         }
       });
     });
-  } else {
+  } else if (typeof peerObj == 'object') {
     app.statusContainer.share(peerObj, function (err) {
       if (err) {
         console.error(err, 'Cannot shareStatus!');
         return;
       }
     });
+  } else {
+    console.error('peerObject is wrong type!');
   }
 };
 
@@ -159,20 +234,17 @@ app.revokeSharedStatus = function revokeSharedStatus(peer) {
   // revoke shared status with peer
 };
 
-app.viewStatusUpdates = function viewStatusUpdates() {
-  // switch to UI wih all shared status updates
-  app.switchView('#feed', 'Stati.es Feed');
-};
-
 app.handleMessage = function handleMessage(message) {
   // just add the shared container hmac + username to the feed container
   console.log('handleMessage();');
+  console.log(message);
   if (message.headers.action != 'containerShare') {
     return;
   }
 
   var username = message.payload.fromUsername;
   var containerNameHmac = message.payload.containerNameHmac;
+
   app.session.getPeer(username, function (err, peer) {
     if (err) {
       console.error(err);
@@ -191,7 +263,10 @@ app.handleMessage = function handleMessage(message) {
       // check for existing status, remove from DOM, re-create status, prepend to the top of the list
       app.updatePeerStatus(username, statusContainer);
       // app.pollInProgress = false;
-      app.watchContainer(statusContainer);
+      // XXXddahl: We do not need to watch container if _listener is present
+      if (!statusContainer._listener) {
+        app.watchContainer(statusContainer);
+      }
     });
   });
 };
@@ -204,6 +279,26 @@ app.watchContainer = function watchContainer(statusContainer) {
     var username = this.peer.username;
     app.updatePeerStatus(username, this);
   });
+  // add the statusContainer meta data to our feedContainer
+  app.session.load(app.FEED_CONTAINER, function (err, feedContainer) {
+    if (err) {
+      console.error(err);
+      return;
+    }
+
+    feedContainer.keys['feed'][statusContainer.nameHmac] = {
+      containerNameHmac: statusContainer.nameHmac,
+      peerName: statusContainer.peer.username,
+      updated: Date.now()
+    };
+
+    feedContainer.save(function (err) {
+      if (err) {
+        console.error('Cannot save feedContainer!', err);
+      }
+    });
+  });
+
 };
 
 app.checkContainerCacheStatus =
@@ -253,54 +348,6 @@ app.createStatusUpdateNode = function (username, feedContainer) {
   return $(statusUpdate);
 };
 
-// app.loadFeed = function loadFeed() {
-//   console.log('loadFeed()');
-//   app.loadOrCreateContainer(app.FEED_CONTAINER, function (err, container) {
-//     if (err) {
-//       console.error(err);
-//       app.alert('Cannot load feed, try again in a moment');
-//       return;
-//     }
-
-//     if (!container.keys['feed']) {
-//       container.keys['feed'] = [];
-//     }
-
-//     app.feed = container.keys['feed'];
-
-//     var feedLength = app.feed.length;
-//     var length = 10;
-//     if (feedLength < 10) {
-//       length = feedLength;
-//     }
-
-//     for (var i = 0; i < length; i++) {
-//       app.session.getPeer(app.feed[i].username, function (err, peer) {
-//         if (err) {
-//           console.error(err);
-//           return;
-//         }
-//         app.session.loadWithHmac(app.feed[i].containerHmac, peer, function (err, feedContainer) {
-//           if (err) {
-//             console.error(err);
-//             return;
-//           }
-
-//           var username = app.feed[i].username;
-//           var statusUpdate = app.createStatusUpdateNode(username, feedContainer);
-
-//           $('#my-feed-entries').append(statusUpdate);
-//           feedContainer.save(function (err) {
-//             if (err) {
-//               console.error('Cannot save feed container!');
-//             }
-//           });
-//         });
-//       });
-//     }
-//   });
-// };
-
 app.setMyLocation = function setMyLocation(highAccuracy) {
   // set location data to the location div
   var accuracy = highAccuracy || false;
@@ -323,6 +370,16 @@ app.setMyLocation = function setMyLocation(highAccuracy) {
 };
 
 // XXXddahl: TODO
+
+// on login: *load latest status*, switch to feed screen
+  // iterate feed container, setInterval on each
+
+// style feed page
+
 // makePictureAvatar(base64PngData)
+
 // makeAsciiAvatar()
+
+// Check for the user's current TZ and use it to display all dates
+
 //
