@@ -75,6 +75,7 @@ app.setMyStatus = function setMyStatus() {
 };
 
 app.loadAndViewMyStatus = function loadAndViewMyStatus () {
+  console.log('loadAndViewMyStatus()', arguments);
   var statusData = { username: app.username,
                      myStatus: app.statusContainer.keys['myStatus'],
                      location: app.statusContainer.keys['location'],
@@ -84,11 +85,12 @@ app.loadAndViewMyStatus = function loadAndViewMyStatus () {
   app.displayMyStatus(statusData);
 
   app.switchView('#feed', app.FEED_LABEL);
-
+  // XXXddahl: keep track of recently shared status. Try not to call this except when needed
   app.shareStatusWithAll();
 };
 
 app.displayMyStatus = function displayMyStatus (statusData) {
+  console.log('displayMyStatus()', arguments);
   $('#my-handle').text(statusData.username);
   $('#my-status-text').text(statusData.myStatus);
   $('#my-status-location').text(statusData.location);
@@ -96,7 +98,7 @@ app.displayMyStatus = function displayMyStatus (statusData) {
 };
 
 app.addSharedContainerToFeed = function (containerNameHmac, peerName) {
-  console.log('addSharedContainerToFeed()');
+  console.log('addSharedContainerToFeed()', arguments);
   app.session.load(app.FEED_CONTAINER, function (err, feedContainer) {
     if (err) {
       console.error(err);
@@ -139,6 +141,7 @@ app.shareStatusWithAll = function shareStatusWithAll() {
 
 app.createStatusContainer = function createStatusContainer() {
   // Check if it is already created first...
+  console.log('createStatusContainer()');
   app.loadOrCreateContainer(app.STATUS_CONTAINER, function (err, container) {
     if (err) {
       console.error(err);
@@ -170,6 +173,7 @@ app.createStatusContainer = function createStatusContainer() {
           app.isReady = true;
           // set message event handler
           app.session.on('message', function (message) {
+            console.log('session.on("message") event called', message);
             app.handleMessage(message);
           });
 
@@ -183,13 +187,17 @@ app.createStatusContainer = function createStatusContainer() {
             // the time. getAllMetadata() will allow us to discover new
             // peer sharing events without any decryption
 
+            // XXXddahl: use getAllMetaData, setTimeout on each call to get(id) ??
+            // XXXddahl: Can we postMessage to a worker the cipherMessage + keys?
+
+
             app.session.inbox.poll(function (err, messages) {
               app.pollInProgress = true;
               for (var prop in app.session.inbox.messages) {
                 app.handleMessage(app.session.inbox.messages[prop]);
               }
             });
-          }, 20000);
+          }, 10000);
 
           // Switch to the Feed view
           app.loadAndViewMyStatus();
@@ -203,7 +211,7 @@ app.createStatusContainer = function createStatusContainer() {
 app.pollInProgress = false;
 
 app.shareStatus = function shareStatus (peerObj) {
-  console.log('shareStatus()');
+  console.log('shareStatus()', arguments);
   if (typeof peerObj == 'string') {
     // share status container with peer
     app.session.getPeer(peerObj, function (err, peer) {
@@ -236,8 +244,7 @@ app.revokeSharedStatus = function revokeSharedStatus(peer) {
 
 app.handleMessage = function handleMessage(message) {
   // just add the shared container hmac + username to the feed container
-  console.log('handleMessage();');
-  console.log(message);
+  console.log('handleMessage();', arguments);
   if (message.headers.action != 'containerShare') {
     return;
   }
@@ -250,7 +257,7 @@ app.handleMessage = function handleMessage(message) {
       console.error(err);
       return;
     }
-    // XXXddahl: check if we have a cached conatiner, if so, it should already be watched()
+    // XXXddahl: check if we have a cached container, if so, it should already be watched()
     if (app.checkContainerCacheStatus(containerNameHmac)) {
       return;
     }
@@ -260,6 +267,10 @@ app.handleMessage = function handleMessage(message) {
         console.error(err);
         return;
       }
+
+      // delete this inbox message
+      app.deleteInboxMessage(message.messageId);
+
       // check for existing status, remove from DOM, re-create status, prepend to the top of the list
       app.updatePeerStatus(username, statusContainer);
       // app.pollInProgress = false;
@@ -271,7 +282,41 @@ app.handleMessage = function handleMessage(message) {
   });
 };
 
+app.deleteInboxMessage = function (messageId) {
+  console.log('deleteInboxMessage()', arguments);
+  app.session.inbox.delete(messageId, function (err) {
+    if (err) {
+      console.error('Cannot delete message, ID: ' + messageId, err);
+      return;
+    }
+    app.purgeInboxMessage(messageId);
+  });
+};
+
+app.purgeReadMessages = function purgeReadMessages() {
+  var ids = Object.keys(app.session.inbox.messages);
+  for (var i = 0; i < ids.length; i++) {
+    app.deleteInboxMessage(ids[i]);
+  }
+};
+
+app.purgeInboxMessage = function purgeInboxMessage (id) {
+  console.log('purgeInboxMessage()', arguments);
+  if (!id) {
+    return;
+  }
+  var _id = new Number(id);
+  for (var i = 0; i < app.session.inbox.rawMessages.length; i++) {
+    if (app.session.inbox.rawMessages[i].messageId == id) {
+      app.session.inbox.rawMessages.splice(i, 1);
+      break;
+    }
+  }
+  delete app.session.inbox.messages[id];
+};
+
 app.watchContainer = function watchContainer(statusContainer) {
+  console.log('watchContainer()', arguments);
   statusContainer.watch(function () {
     // Need to update the status data here.
     // XXXddahl: is this function part of the container object?
@@ -324,7 +369,7 @@ app.updatePeerStatus = function updatePeerStatus(username, statusContainer) {
 };
 
 app.createStatusUpdateNode = function (username, feedContainer) {
-
+  console.log('createStatusUpdateNode()', arguments);
   var statusUpdate = '<div class="status-update" id="'
                    + username + '-status'
                    + '">'
@@ -382,4 +427,4 @@ app.setMyLocation = function setMyLocation(highAccuracy) {
 
 // Check for the user's current TZ and use it to display all dates
 
-//
+// Add a "mood" checkbox with a color picker:)

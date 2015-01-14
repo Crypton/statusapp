@@ -989,6 +989,12 @@ var Session = crypton.Session = function (id) {
   // watch for incoming Inbox messages
   this.socket.on('message', function (data) {
     that.inbox.get(data.messageId, function (err, message) {
+      if (err) {
+        // XXXddahl: upstream this change
+        console.error('Failed getting message ID ' + data.messageId,  err);
+        console.log('Failed data object: ', data);
+        return;
+      }
       that.emit('message', message);
     });
   });
@@ -2492,8 +2498,13 @@ Inbox.prototype.delete = function (id, callback) {
 
   // TODO handle errs
   var tx = new crypton.Transaction(this.session, function (err) {
+    if (err) {
+      console.error(err);
+    }
     tx.save(chunk, function (err) {
+      console.error(err);
       tx.commit(function (err) {
+        console.error(err);
         callback();
       });
     });
@@ -2600,7 +2611,12 @@ Diff.create = function (old, current) {
 // TODO should we switch the order of these arguments?
 Diff.apply = function (delta, old) {
   var current = JSON.parse(JSON.stringify(old));
-  jsondiffpatch.patch(current, delta);
+  try {
+    jsondiffpatch.patch(current, delta);
+  } catch (ex) {
+    console.error(ex);
+    console.error(ex.stack);
+  }
   return current;
 };
 
@@ -5235,6 +5251,7 @@ function toSource (obj, name) {
 
 
 })();
+
 /*
 *   Json Diff Patch
 *   ---------------

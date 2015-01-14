@@ -341,6 +341,8 @@ var app = {
           return;
         }
 
+        $('#tasks-btn').addClass('active');
+
         var prefs = rawContainer.keys;
         if (!prefs['first-run']) {
           app.firstRun();
@@ -349,9 +351,8 @@ var app = {
 
         $('#password-login').val('');
         app.displayMyFingerprint(true);
-        app.switchView('#my-fingerprint-id', 'ID Card');
-        $('#tasks-btn').addClass('active');
-        app.alert('Loading ID card', 'info');
+        // app.switchView('#my-fingerprint-id', 'ID Card');
+        // app.alert('Loading ID card', 'info');
       });
     }
 
@@ -765,6 +766,7 @@ var app = {
   },
 
   loadOrCreateContainer: function (containerName, callback) {
+    console.log('loadOrCreateContainer()', arguments);
     app.session.load(containerName, function (err, container) {
       if (err) {
         return app.session.create(containerName, function (err) {
