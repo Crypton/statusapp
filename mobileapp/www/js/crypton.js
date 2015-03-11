@@ -1049,6 +1049,7 @@ Session.prototype.load = function (containerName, callback) {
   var that = this;
   this.getContainer(containerName, function (err, container) {
     if (err) {
+      console.error(err);
       callback(err);
       return;
     }
@@ -1399,6 +1400,7 @@ var Container = crypton.Container = function (session) {
   //this.version = +new Date();
   this.version = 0;
   this.name = null;
+  this.mostRecentCiphertextPayload = null;
 };
 
 /**!
@@ -1474,7 +1476,33 @@ Container.prototype.save = function (callback, options) {
     that.recordCount++;
 
     var rawPayloadCiphertext = sjcl.encrypt(that.sessionKey, JSON.stringify(payload), crypton.cipherOptions);
-    var payloadCiphertextHash = sjcl.hash.sha256.hash(JSON.stringify(rawPayloadCiphertext));
+    // var payloadCiphertextHash = sjcl.hash.sha256.hash(JSON.stringify(rawPayloadCiphertext));
+    // XXXddahl:
+    // Do we have access to the previous record?
+    // We need to sign(hash(record N, record M))
+    // Sign the concatenation of the previous record and this record
+    // Save as the 'payload signature'
+    // Now we just verify the final record
+    // HOW TO GET PREVIOUS "VERSION"
+
+    var versionIdxArr = Object.keys(that.versions);
+    var versionCount = versionIdxArr.length;
+    var payloadCiphertextHash;
+
+    if (versionCount == 1) {
+      // This is the first save() called
+      // we hash + sign this record only
+      payloadCiphertextHash = sjcl.hash.sha256.hash(JSON.stringify(rawPayloadCiphertext));
+    } else if (versionCount > 1) {
+      // Get previous version to hash with this version
+      var concatenatedCiphertext = rawPayloadCiphertext + that.mostRecentCiphertextPayload;
+      payloadCiphertextHash = sjcl.hash.sha256.hash(JSON.stringify(concatenatedCiphertext));
+      that.mostRecentCiphertextPayload = rawPayloadCiphertext;
+    } else {
+      // Zero length version count?
+      return callback('Cannot save, zero length version count encountered!');
+    }
+
     var payloadSignature = that.session.account.signKeyPrivate.sign(payloadCiphertextHash, crypton.paranoia);
 
     var payloadCiphertext = {
@@ -1649,7 +1677,7 @@ Container.prototype.parseHistory = function (records, callback) {
     });
   }, function (err) {
     if (err) {
-      console.log('Hit error parsing container history');
+      console.error('Hit error parsing container history: ', err);
       console.log(that);
       console.log(err);
 
@@ -1683,6 +1711,7 @@ Container.prototype.decryptRecord = function (recordIndex, record, callback) {
   var parsedRecord;
   try {
     parsedRecord = JSON.parse(record.payloadCiphertext);
+    this.mostRecentCiphertextPayload = parsedRecord;
   } catch (e) {}
 
   if (!parsedRecord) {
@@ -1747,13 +1776,15 @@ Container.prototype.sync = function (callback) {
     }
 
     that.parseHistory(records, function (err, keys, versions, recordIndexAfter) {
+      var versionIdxArr = Object.keys(versions);
       that.keys = keys;
       that.versions = versions;
-      that.version = Math.max.apply(Math, Object.keys(versions));
-      that.recordCount = that.recordCount + versions.count;
+      that.version = Math.max.apply(Math, versionIdxArr);
+      // that.recordCount = that.recordCount + versions.count; <-- GAH!!!!!
+      that.recordCount = that.recordCount + versionIdxArr.length;
 
       // TODO verify recordIndexAfter == recordCount?
-
+      console.log(err, keys, versions, recordIndexAfter, that.recordCount);
       callback(err);
     });
   });
@@ -2866,11 +2897,16 @@ work.decryptRecord = function (options, callback) {
   var record;
   try {
     record = JSON.parse(options.record);
-  } catch (e) {}
+  } catch (e) {
+    // XXXddahl: Not sure why we do this here if we already do it in Container.decryptRecord
+    console.error(e);
+  }
 
   if (!record) {
     return callback('Could not parse record');
   }
+
+  // XXXddahl: JUST DO THIS ONCE , FFS!
 
   // reconstruct the peer's public signing key
   // the key itself typically has circular references which
@@ -2882,17 +2918,21 @@ work.decryptRecord = function (options, callback) {
   var verified = false;
   var payloadCiphertextHash = sjcl.hash.sha256.hash(JSON.stringify(record.ciphertext));
 
-  try {
-    verified = peerSignKeyPub.verify(payloadCiphertextHash, record.signature);
-  } catch (e) {
-    console.error(e);
-  }
+  if (record.recordIndex == (record.recordCount + 1)) {
+    // This is the last record, verify the signature. We should avoid verifying all signatures.
+    try {
+      verified = peerSignKeyPub.verify(payloadCiphertextHash, record.signature);
+    } catch (e) {
+      console.log(e);
+    }
 
-  if (!verified) {
-    return callback('Record signature does not match expected signature');
+    if (!verified) {
+      return callback('Record signature does not match expected signature');
+    }
   }
 
   var payload;
+  console.log('work.decryptRecord().... decrypting record');
   try {
     payload = JSON.parse(sjcl.decrypt(sessionKey, record.ciphertext, crypton.cipherOptions));
   } catch (e) {}
@@ -2900,6 +2940,8 @@ work.decryptRecord = function (options, callback) {
   if (!payload) {
     return callback('Could not parse record payload');
   }
+
+  console.log('payload: ', payload);
 
   if (payload.recordIndex !== expectedRecordIndex) {
     // TODO revisit

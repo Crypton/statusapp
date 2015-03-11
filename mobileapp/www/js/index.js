@@ -16,7 +16,7 @@ var app = {
 
   APPNAME: 'Stati.es',
 
-  URL: 'https://stati.es',
+  URL: 'https://nulltxt.se',
 
   VERSION: "0.1",
 
