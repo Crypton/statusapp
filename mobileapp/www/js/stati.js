@@ -2,6 +2,13 @@ app.STATUS_CONTAINER = '_my_status_';
 
 app.FEED_CONTAINER = '_my_feed_';
 
+app.ITEMS = {
+  firstRun: 'firstRun',
+  feed: 'feed',
+  status: 'status',
+  avatar: 'avatar'
+};
+
 app.FEED_LABEL = 'Stati.es Feed';
 
 app.INITIAL_STATUS_MESSAGE = 'Current Status: null';
@@ -41,8 +48,49 @@ app.setCustomEvents = function setCustomEvents () {
 
 app.customInitialization = function customInitialization() {
   console.log('customInitialization()');
-  app.createStatusContainer();
-  app.username = app.session.account.username;
+
+  app.createInitialItems(function (err) {
+    if (err) {
+      return console.error(err);
+    }
+    console.log('Initial items fetched or created');
+  });
+};
+
+app.createInitialItems = function createInitialItems (callback) {
+  app.session.getOrCreateItem(app.ITEMS.feed, function (err, feed) {
+    if (err) {
+      callback(err);
+      return console.error(err);
+    }
+
+    if (!feed.value.feedHmacs) {
+      feed.value = { feedHmacs: [], lastUpdated: Date.now() };
+    }
+
+    app.session.getOrCreateItem(app.ITEMS.status, function (err, status) {
+      if (err) {
+        callback(err);
+        return console.error(err);
+      }
+
+      if (!status.value.status) {
+        status.value = { status: 'Hello World!', timestamp: Date.now() };
+      }
+
+      app.session.getOrCreateItem(app.ITEMS.avatar, function (err, avatar) {
+        if (err) {
+          callback(err);
+          return console.error(err);
+        }
+
+        if (avatar.value.avatar === undefined) {
+          avatar.value = { avatar: null };
+        }
+        callback(null);
+      });
+    });
+  });
 };
 
 app.getContainerByName = function getContainerByName(container) {

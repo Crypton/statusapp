@@ -325,12 +325,10 @@ var app = {
       app.session = session;
       app.setLoginStatus('Loading data...');
 
-      if (app.customInitialization && typeof app.customInitialization == 'function') {
-        app.customInitialization();
-      }
-
       // Check for first run
-      app.loadOrCreateContainer('_prefs_', function(err, rawContainer) {
+      app.session.getOrCreateItem('_prefs_', function(err, prefsItem) {
+        console.log('getting _prefs_');
+        app.customInitialization();
         $('#login-progress').hide();
         $('#login-buttons').show();
         $('#login-form').show();
@@ -343,8 +341,10 @@ var app = {
 
         $('#tasks-btn').addClass('active');
 
-        var prefs = rawContainer.keys;
-        if (!prefs['first-run']) {
+        app.username = app.session.account.username;
+
+        if (!prefsItem.value.firstRun) {
+          prefsItem.value = { firstRun: Date.now() };
           app.firstRun();
           return;
         }
