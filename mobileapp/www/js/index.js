@@ -350,9 +350,10 @@ var app = {
         }
 
         $('#password-login').val('');
-        app.displayMyFingerprint(true);
-        // app.switchView('#my-fingerprint-id', 'ID Card');
-        // app.alert('Loading ID card', 'info');
+        // Override displayInitialView in app to trigger new
+        // view after auth
+        // app.displayInitialView();
+        // sdisplayapp.displayMyFingerprint(true);
       });
     }
 
@@ -370,19 +371,16 @@ var app = {
   },
 
   firstRunComplete: function () {
-    app.loadOrCreateContainer('_prefs_',
-    function (err, rawContainer) {
+    app.session.getOrCreateItem('_prefs_',
+    function (err, prefsItem) {
       if (err) {
-        console.error('Cannot load prefs conatiner, firstRunComplete failed');
+        console.error('Cannot load prefs, firstRunComplete failed');
         return;
       }
-      var prefs = rawContainer;
-      prefs.keys['first-run'] = Date.now();
-      prefs.save(function (err) {
-        if (err) {
-          console.error('firstRunComplete: cannot save prefs?: ', err);
-        }
-      });
+
+      if (!prefsItem.value['first-run']) {
+        prefsItem.value = { 'first-run': Date.now() };
+      }
     });
   },
 
@@ -458,7 +456,6 @@ var app = {
             app.alert(username + ' is now a trusted contact', 'info');
             $('#verify-user-success-msg').children().remove();
             if (app.postPeerTrustCallback && typeof app.postPeerTrustCallback == 'function') {
-              // We can do container sharing and other things via this [optional] function:
               app.postPeerTrustCallback(peer);
             }
             // TODO: remove click events from buttons
