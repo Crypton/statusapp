@@ -9,7 +9,7 @@ app.ITEMS = {
   avatar: 'avatar'
 };
 
-app.FEED_LABEL = 'Stati.es Feed';
+app.FEED_LABEL = 'ZK StatusApp';
 
 app.INITIAL_STATUS_MESSAGE = 'Current Status: null';
 
@@ -30,6 +30,7 @@ app.setCustomEvents = function setCustomEvents () {
     app.hideMenu();
     // XXXddahl:  reset status UI
     app.switchView('#stati', 'Set Status');
+    $('#set-my-status-textarea').focus();
   });
 
   $('#my-feed').click(function () {
@@ -67,7 +68,7 @@ app.createInitialItems = function createInitialItems (callback) {
     }
 
     if (!feed.value.feedHmacs) {
-      feed.value = { feedHmacs: [], lastUpdated: Date.now() };
+      feed.value = { feedHmacs: {}, lastUpdated: Date.now() };
     }
 
     app.session.getOrCreateItem(app.ITEMS.status, function (err, status) {
@@ -98,13 +99,36 @@ app.createInitialItems = function createInitialItems (callback) {
   });
 };
 
+app.loadingFeed = false;
+
 app.loadRecentFeed = function loadRecentFeed() {
   // for now this is all feed hmacs we have in
   // items.feed.feedHmacs
+  if (app.loadingFeed == true) {
+    return;
+  }
+  var that = this;
+  this.loadingFeed = true;
+  var hmacs = [];
+  var feedHmacs = Object.keys(app.session.items.feed.value.feedHmacs);
+  var feedLength = feedHmacs.length;
+  if (!feedLength) {
+    return;
+  }
   var idx = 0;
-  window.setTimeout(function () {
-    var peerName = app.session.items.feed.value.feedHmacs[idx].peerName;
-    var itemNameHmac = app.session.items.feed.value.feedHmacs[idx].nameHmac;
+  // XXXddahl: Need a way to cancel this timeout
+  app.loadingInterval = window.setInterval(function () {
+    console.log('interval started...');
+    if (idx == feedHmacs.length) {
+      // Reached the end of the feed
+      window.clearInterval(that.loadingInterval);
+      that.loadingFeed = true;
+      that.loadingInterval = null;
+      return;
+    }
+    var itemNameHmac = feedHmacs[idx];
+    var peerName =
+      app.session.items.feed.value.feedHmacs[itemNameHmac].fromUser;
     app.session.getPeer(peerName, function (err, peer) {
       if (err) {
         return console.error(err);
@@ -114,12 +138,17 @@ app.loadRecentFeed = function loadRecentFeed() {
           return console.error(err);
         }
         // display the shared item!
-
+        app.updatePeerStatus(peerName, item.value);
+        if ((idx - 1) == feedLength) {
+          that.loadingFeed = false;
+          window.clearInterval(that.loadingInterval);
+          that.loadingInterval = null;
+        }
+        idx++;
       });
     });
-  }, 20000);
+  }, 5000);
 };
-
 
 app.getContainerByName = function getContainerByName(container) {
   for (var i = 0; i < app.session.containers.length; i++) {
@@ -157,17 +186,60 @@ app.displayInitialView = function displayInitialView() {
   // onSharedItemSync
   app.session.events.onSharedItemSync = function (item) {
     console.log('onSharedItemSync()', item);
-    app.updatePeerStatus(item.creator.username, item.value);
+    app.saveItemToFeed(item, function (err) {
+      if (err) {
+        return console.error(err);
+      }
+      app.updatePeerStatus(item.creator.username, item.value);
+    });
   };
+};
+
+app.saveItemToFeed = function saveItemToFeed (item, callback) {
+  var itemNameHmac = item.getPublicName();
+  var username = item.creator.username;
+
+  if (app.session.items.feed.value.feedHmacs[itemNameHmac]) {
+    console.log(itemNameHmac +  ' is already saved');
+    return callback(null);
+  }
+
+  app.session.items.feed.value.feedHmacs[itemNameHmac] = {
+    fromUser: username,
+    itemNameHmac: itemNameHmac,
+    timestamp: Date.now()
+  };
+
+  app.session.items.feed.save(function saveCallback (err) {
+    if (err) {
+      return callback(err);
+    }
+    app.session.getPeer(username, function (err, peer) {
+      if (err) {
+        console.error(err);
+        return callback(err);;
+      }
+      // We need to load and watch this container
+      app.session.getSharedItem(itemNameHmac, peer, function (err, statusItem) {
+        if (err) {
+          console.error(err);
+          return callback(err);
+        }
+        app.updatePeerStatus(username, statusItem.value);
+        callback(null);
+      });
+    });
+  });
 };
 
 app.loadAndViewMyStatus = function loadAndViewMyStatus () {
   console.log('loadAndViewMyStatus()', arguments);
-  var location = app.session.items.status.value.location;
+  var location = app.session.items.status.value.location
+    || 'undisclosed location';
   var statusData = { username: app.username,
                      myStatus: app.session.items.status.value.status,
-                     location: location || 'undisclosed location',
-                     updated: new Date(app.session.items.status.value.timestamp)
+                     location: location,
+                     timestamp: new Date(app.session.items.status.value.timestamp)
                    };
 
   app.displayMyStatus(statusData);
@@ -179,122 +251,9 @@ app.displayMyStatus = function displayMyStatus (statusData) {
   console.log('displayMyStatus()', arguments);
   $('#my-handle').text(statusData.username);
   $('#my-status-text').text(statusData.myStatus);
-  $('#my-status-location').text(statusData.location);
-  $('#my-status-updated').text(statusData.updated);
+  $('#my-status-location').text(statusData.location || 'undisclosed location');
+  $('#my-status-updated').text(statusData.timestamp);
 };
-
-// app.addSharedContainerToFeed = function (containerNameHmac, peerName) {
-//   console.log('addSharedContainerToFeed()', arguments);
-//   app.session.load(app.FEED_CONTAINER, function (err, feedContainer) {
-//     if (err) {
-//       console.error(err);
-//       return;
-//     }
-
-//     if (feedContainer.keys['feed'][containerNameHmac]) {
-//       return;
-//     }
-//     feedContainer.keys['feed'][containerNameHmac] = {
-//       containerNameHmac: containerNameHmac,
-//       peerName: peerName,
-//       updated: Date.now()
-//     };
-//   });
-// },
-
-// app.shareStatusWithAll = function shareStatusWithAll() {
-//   console.log('shareStatusWithAll()');
-//   // XXXddahl: This is a bit naive as we should not assume that we are sharing our status with every contact. Ok for now though.
-//   var contactsContainer = app.getContainerByName('_trust_state');
-//   var shareArr = [];
-//   var contacts = Object.keys(contactsContainer.keys);
-//   for (var i = 0; i < contacts.length; i++) {
-//     var peerName = contacts[i]
-//     // We should just share our container with each peer
-//     var shareCallback = function _shareCallback() {
-//       app.shareStatus(peerName);
-//     };
-//     shareArr.push(shareCallback);
-//   }
-
-//   var timeout = 0;
-//   // XXXddahl: yes, again this is naive, but ok for now or smaller status groups
-//   for (i = 0; i < shareArr.length; i++) {
-//     timeout = timeout + 5000;
-//     setTimeout(shareArr.pop(), timeout);
-//   }
-// };
-
-// app.createStatusContainer = function createStatusContainer() {
-//   // Check if it is already created first...
-//   console.log('createStatusContainer()');
-//   app.loadOrCreateContainer(app.STATUS_CONTAINER, function (err, container) {
-//     if (err) {
-//       console.error(err);
-//       app.alert(err, 'danger');
-//       return;
-//     }
-//     app.statusContainer = container;
-//     app.statusContainer['keys'].myStatus = app.INITIAL_STATUS_MESSAGE;
-//     app.statusContainer.save(function (err) {
-//       if (err) {
-//         console.error(err);
-//         app.alert(err, 'danger');
-//       }
-//       // now create/load the feed container
-//       app.loadOrCreateContainer(
-//         app.FEED_CONTAINER, function (err, feedContainer) {
-//         if (err) {
-//           console.error(err);
-//           return;
-//         }
-//         if (!app.feedContainer) {
-//           app.feedContainer = feedContainer;
-//         }
-//         if (!feedContainer.keys['feed']) {
-//           feedContainer.keys['feed'] = {};
-//         }
-
-//         feedContainer.save(function (err) {
-//           app.isReady = true;
-//           // set message event handler
-//           app.session.on('message', function (message) {
-//             console.log('session.on("message") event called', message);
-//             app.handleMessage(message);
-//           });
-
-//           app.inboxPollInterval = setInterval(function () {
-//             if (app.pollInProgress) { // XXXddahl: remove this check
-//               return;
-//             }
-
-//             // XXXddahl:
-//             // Perhaps want to avoid using poll() to avoid decrypting all
-//             // the time. getAllMetadata() will allow us to discover new
-//             // peer sharing events without any decryption
-
-//             // XXXddahl: use getAllMetaData, setTimeout on each call to get(id) ??
-//             // XXXddahl: Can we postMessage to a worker the cipherMessage + keys?
-
-
-//             app.session.inbox.poll(function (err, messages) {
-//               app.pollInProgress = true;
-//               for (var prop in app.session.inbox.messages) {
-//                 app.handleMessage(app.session.inbox.messages[prop]);
-//               }
-//             });
-//           }, 10000);
-
-//           // Switch to the Feed view
-//           app.loadAndViewMyStatus();
-//         }); // feedContainer saved
-//       }); // feed container created/loaded
-
-//     }); // status container saved
-//   }); // status container loaded
-// };
-
-// app.pollInProgress = false;
 
 app.shareStatus = function shareStatus (peerObj) {
   console.log('shareStatus()', arguments);
@@ -337,26 +296,63 @@ app.handleMessage = function handleMessage (message) {
 
   var username = message.payload.from;
   var itemNameHmac = message.payload.itemNameHmac;
+  // cache the hmac sent to us!
+  var newFeedHmac = {
+    fromUser: username,
+    itemNameHmac: itemNameHmac,
+    timestamp: Date.now()
+  };
 
-  app.session.getPeer(username, function (err, peer) {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    // We need to load and watch this container
-    app.session.getSharedItem(itemNameHmac, peer, function (err, statusItem) {
+  if (app.session.items.feed.value.feedHmacs[itemNameHmac]) {
+    app.session.getPeer(username, function (err, peer) {
       if (err) {
         console.error(err);
         return;
       }
-
-      // delete this inbox message
-      app.deleteInboxMessage(message.messageId);
-
-      // check for existing status, remove from DOM, re-create status, prepend to the top of the list
-      app.updatePeerStatus(username, statusItem.value);
+      // We need to load and watch this container
+      app.session.getSharedItem(itemNameHmac, peer, function (err, statusItem) {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        // delete this inbox message
+        app.deleteInboxMessage(message.messageId);
+        // check for existing status, remove from DOM,
+        // re-create status, prepend to the top of the list
+        app.updatePeerStatus(username, statusItem.value);
+      });
     });
-  });
+  } else {
+    app.session.items.feed.value.feedHmacs[itemNameHmac] = newFeedHmac;
+    app.session.items.feed.save(function saveCallback (err) {
+      if (err) {
+        console.error(err);
+      }
+      app.session.getPeer(username, function (err, peer) {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        // We need to load and watch this container
+        app.session.getSharedItem(itemNameHmac, peer, function (err, statusItem) {
+          if (err) {
+            console.error(err);
+            return;
+          }
+          // delete this inbox message
+          app.deleteInboxMessage(message.messageId);
+          // check for existing status, remove from DOM,
+          // re-create status, prepend to the top of the list
+          app.updatePeerStatus(username, statusItem.value);
+          app.saveItemToFeed(newFeedHmac, function (err) {
+            if (err) {
+              console.error('Cannot save Item to feed');
+            }
+          });
+        });
+      });
+    });
+  }
 };
 
 app.deleteInboxMessage = function (messageId) {
@@ -392,68 +388,39 @@ app.purgeInboxMessage = function purgeInboxMessage (id) {
   delete app.session.inbox.messages[id];
 };
 
-// app.watchContainer = function watchContainer(statusContainer) {
-//   console.log('watchContainer()', arguments);
-//   statusContainer.watch(function () {
-//     // Need to update the status data here.
-//     // XXXddahl: is this function part of the container object?
-//     // Can we just get the container with 'this'?
-//     var username = this.peer.username;
-//     app.updatePeerStatus(username, this);
-//   });
-//   // add the statusContainer meta data to our feedContainer
-//   app.session.load(app.FEED_CONTAINER, function (err, feedContainer) {
-//     if (err) {
-//       console.error(err);
-//       return;
-//     }
-
-//     feedContainer.keys['feed'][statusContainer.nameHmac] = {
-//       containerNameHmac: statusContainer.nameHmac,
-//       peerName: statusContainer.peer.username,
-//       updated: Date.now()
-//     };
-
-//     feedContainer.save(function (err) {
-//       if (err) {
-//         console.error('Cannot save feedContainer!', err);
-//       }
-//     });
-//   });
-
-// };
-
-// app.checkContainerCacheStatus =
-// function checkContainerCacheStatus(containerNameHmac) {
-//   for (var i = 0; i < app.session.containers.length; i++) {
-//     if (app.session.containers[i].nameHmac == containerNameHmac) {
-//       return true;
-//     }
-//   }
-//   return false;
-// };
-
 app.updatePeerStatus = function updatePeerStatus(username, statusItem) {
+  console.log('updatePeerStatus()', arguments);
+  var klass = '.' + username + '-' + statusItem.timestamp;
+  var checkDupes = $(klass);
+  if (checkDupes.length > 0) {
+    // Lets not prepend a duplicate status update:)
+    return;
+  }
   var statusNode = app.createStatusUpdateNode(username, statusItem);
   $('#my-feed-entries').prepend(statusNode);
 };
 
 app.createStatusUpdateNode = function (username, statusItem) {
   console.log('createStatusUpdateNode()', arguments);
-  var statusUpdate = '<div class="status-update">'
-                   + '<h4 class="status-update-username">'
+  var location = statusItem.location || 'undisclosed location';
+  var date = new Date(statusItem.timestamp);
+  var klass = username + '-' + statusItem.timestamp;
+  var statusUpdate = '<div class="status-update '
+                   + klass
+                   + '">'
+                   + '<h5 class="status-update-username">'
                    + username
-                   + '</h4>'
+                   + '</h5>'
                    + '<div class="status-update-data">'
                    + '<span class="status-text">'
                    + statusItem.status
                    + '</span>'
                    + '<ul class="status-metadata">'
                    + '<li>'
-                   + statusItem.location || 'undisclosed location'
+                   + location
                    + '</li>'
                    + '<li>'
-                   + new Date(statusItem.timestamp)
+                   +  date
                    + '</li>'
                    + '</ul>'
                    + '</div>';

@@ -1,13 +1,18 @@
 #set-my-status-textarea {
-    width: 80%;
-    height: 175px;
-    margin: 2em;
-    font-size: 1.5em;
+    width: 90%;
+    margin: 1em;
+    font-size: 1.6em;
+    height: 100px;
+    font-style: normal;
+    padding: 0.5em;
+    border-radius: 4px;
+    box-shadow: 1px 2px 2px #ddd;
 }
 
 #set-my-status-btn {
     margin-top: .25em;
     margin-left: 2em;
+    box-shadow: 1px 2px 2px #ddd;
 }
 
 #set-my-geoloc-btn {
@@ -22,6 +27,8 @@
 
 .status-update {
     margin-bottom: 3px;
+    padding-left: 1em;
+    border-bottom: 1px solid #FFF;
 }
 
 .status-update-username {
@@ -29,11 +36,13 @@
 }
 
 .status-text {
-    font-weight: bold;
+    font-size: 90%;
 }
 
 .status-metadata {
     font-size: 70%;
+    list-style-type: square;
+    padding-left: 1em;
 }
 
 #feed {
@@ -41,14 +50,29 @@
 }
 
 #my-status {
-    padding: 2em;
+    padding-top: 2em;
+    padding-left: 1em;
     background-color: #5e6ec7;
-    border-bottom: 3px solid #999;
+    border-bottom: 3px solid #FFF;
     color: white;
 }
 
 #my-feed-entries {
-    padding: 2em;
+    padding-top: 1em;
     color: white;
     background-color: #8895dc;
+}
+
+#my-handle {
+    font-size: 100%;
+}
+
+#my-status-text {
+    font-size: 80%;
+}
+
+#my-status-metadata {
+    font-size: 80%;
+    list-style-type: square;
+    padding-left: 1em;
 }

@@ -178,7 +178,7 @@ var app = {
   logout: function () {
     app.session = null;
     app.hideMenu();
-    app.switchView('#account-login', 'Stati.es');
+    app.switchView('#account-login', app.FEED_LABEL);
     $('#tasks-btn').removeClass('active');
     app.alert('You are logged out', 'info');
     $('#password-login').focus();
@@ -472,15 +472,31 @@ var app = {
         app.switchView('#scan-select', 'Verify ID Card');
       }
 
+      function resizeIdCard(canvas) {
+        var oldCanvas = canvas.toDataURL("image/png");
+        var img = new Image();
+        img.src = oldCanvas;
+        img.onload = function (){
+          canvas.height = 120;
+          canvas.width = 120;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+        }
+      }
+
       var outOfBandFingerprint = rawFingerprint;
       var outOfBandFingerprintArr =
         app.card.createFingerprintArr(outOfBandFingerprint);
       var colorArr = app.card.createColorArr(outOfBandFingerprintArr);
-      var outOfBandIdGrid = app.card.createIdentigrid(colorArr, 120, 120);
+      var outOfBandIdGrid = app.card.createIdentigrid(colorArr);
+      resizeIdCard(outOfBandIdGrid);
 
       var peerFingerprintArr = app.card.createFingerprintArr(peer.fingerprint);
       var peerColorArr = app.card.createColorArr(peerFingerprintArr);
-      var peerIdGrid = app.card.createIdentigrid(peerColorArr, 120, 120);
+      var peerIdGrid = app.card.createIdentigrid(peerColorArr);
+      resizeIdCard(peerIdGrid);
+
+      console.log(peerIdGrid);
 
       if (peer.fingerprint == outOfBandFingerprint) {
         $('#verify-user-success').show();
