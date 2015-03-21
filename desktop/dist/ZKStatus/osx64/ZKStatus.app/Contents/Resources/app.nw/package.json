@@ -1,0 +1,24 @@
+{
+    "main": "index.html",
+    "name": "ZKStatus",
+    "description": "Share status and location in a Zero Knowledge environment",
+    "version": "0.0.1",
+    "keywords": [ "ZKStatus", "status" ],
+    "chromium-args": "--ignore-certificate-errors",
+    "window": {
+	"title": "ZKStatus",
+	"icon": "link.png",
+	"toolbar": false,
+	"frame": true,
+	"width": 400,
+	"height": 500,
+	"position": "center",
+	"min_width": 400,
+	"min_height": 400,
+	"max_width": 450,
+	"max_height": 800
+    },
+    "webkit": {
+	"plugin": true
+    }
+}
