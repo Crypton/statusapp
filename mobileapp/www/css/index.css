@@ -342,6 +342,10 @@ input[type="password"]:focus {
   padding: 20px;
 }
 
+#scan-select-desktop {
+  padding: 20px;
+}
+
 #scan-select-buttons {
   margin-top: 20px;
   text-align: center;
@@ -433,3 +437,5 @@ h3 {
 strong {
     font-family: RobotoBold;
 }
+
+#capture-avatar { padding: 7em;}

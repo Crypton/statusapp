@@ -6,6 +6,7 @@ var app = {
   // Application Constructor
   initialize: function() {
     app.enableLoginButtons();
+    app.switchView('#account-login');
     $('#username-login').focus();
     crypton.host = 'nulltxt.se';
     this.card =  new crypton.Card();
@@ -43,6 +44,10 @@ var app = {
       app.getImage();
     });
 
+    $('#get-image-desktop').click(function () {
+      app.getImage();
+    });
+
     $('#logout').click(function () {
       app.logout();
     });
@@ -67,7 +72,11 @@ var app = {
 
     $('#verify-id-card').click(function () {
       app.hideMenu();
-      app.switchView('#scan-select', 'Verify ID Card');
+      if (app.isNodeWebKit) {
+        app.switchView('#scan-select-desktop', 'Verify ID Card');
+      } else {
+        app.switchView('#scan-select', 'Verify ID Card');
+      }
     });
 
     $('#my-fingerprint').click(function () {
@@ -90,7 +99,11 @@ var app = {
     });
 
     $('#add-contact-button').click(function () {
-      app.switchView('#scan-select', 'Verify ID Card');
+      if (app.isNodeWebKit) {
+        app.switchView('#scan-select-desktop', 'Verify ID Card');
+      } else {
+        app.switchView('#scan-select', 'Verify ID Card');
+      }
     });
 
     $('#contacts-detail-dismiss-btn').click(function () {
@@ -126,6 +139,11 @@ var app = {
     $('.view').removeClass('active');
     $('#page-title').text(name);
     $(id).addClass('active');
+    if (id == '#login-progress') { // XXXddahl: special case hack. sigh.
+      $('#login-progress').show();
+    } else {
+      $('#login-progress').hide();
+    }
   },
 
   // deviceready Event Handler
@@ -203,14 +221,75 @@ var app = {
     );
   },
 
-  getPhoto_desktop: function getPhoto_desktop () {
-    console.error('Get Photo desktop NOT IMPLEMENTED');
+  avatarStream: null,
+
+  getPhoto_desktop: function getPhoto_desktop (options, callback) {
+    // console.error('Get Photo desktop NOT IMPLEMENTED');
+    // getUserMedia
+    var width = 200, height = 200, quality = 50;
+    if (options) {
+      width = options.width || 200;
+      height = options.height || 200;
+      quality = options.quality || 50;
+    }
+
+    app.switchView('#capture-avatar', 'Take a photo');
+    navigator.webkitGetUserMedia({video: true}, function _success (stream) {
+      var video = document.getElementById("capture-video");
+      var canvas = document.getElementById("capture-canvas");
+      var button = document.getElementById("capture-picture");
+
+      app.avatarStream = stream;
+
+      video.src = URL.createObjectURL(stream);
+      button.disabled = false;
+      button.onclick = function() {
+        canvas.getContext("2d").drawImage(video, 0, 0, 200, 200, 0, 0, 200, 200);
+        var img = canvas.toDataURL("image/png");
+        // console.log(img);
+        // pass off the image data to callback
+        callback(null, img);
+      };
+    }, function _error (err) { alert("GUM: there was an error " + err)});
   },
 
-  getPhoto: function (callback) {
+  captureAvatar_desktop: function captureAvatar_desktop () {
+    console.log("captureAvatar_desktop()");
+    app.getPhoto_desktop({}, function callback (err, imageData) {
+      if (err) {
+        return app.alert(err, 'danger');
+      }
+      app.avatarStream.stop();
+      document.getElementById("capture-video").src = null;
+      app.switchView('#feed', 'ZK Feed');
+      // Save Avatar to Item via overloaded function
+      app.saveAvatar(imageData);
+
+    });
+  },
+
+  saveAvatar: function _saveAvatar (imageData) {
+    app.session.items.avatar.value.avatar = imageData;
+    app.session.items.avatar.value.updated =  Date.now();
+    app.session.items.avatar.save( function (err) {
+      if (err) {
+        return app.alert(err, 'danger');
+      }
+      console.log('avatar saved');
+    });
+  },
+
+  getPhoto: function (options, callback) {
     if (app.isNodeWebKit) {
-      return app.getPhoto_desktop();
+      return app.getPhoto_desktop(options, callback);
     }
+    var width, height, quality;
+    if (options) {
+      width = options.width || 200;
+      height = options.height || 200;
+      quality = options.quality || 50;
+    }
+
     // via the CAMERA
     function onSuccess (imageURI) {
       var img = "data:image/jpeg;base64," + imageURI;
@@ -224,19 +303,73 @@ var app = {
 
     // Specify the source to get the photos.
     navigator.camera.getPicture(onSuccess, onFail,
-                                { quality: 50,
+                                { quality: quality,
                                   destinationType:
                                   Camera.DestinationType.DATA_URL,
                                   sourceType:
                                   navigator.camera.PictureSourceType.CAMERA,
-                                  targetheight: 200,
-                                  targetHeight: 200
+                                  targetheight: height,
+                                  targetHeight: width
                                 });
 
   },
 
   getImage_desktop: function getImage_desktop () {
-    console.error('Get Image desktop NOT IMPLEMENTED');
+    function chooseFile(name) {
+      var chooser = document.querySelector(name);
+      chooser.addEventListener("change", function (evt) {
+        console.log(this.files);
+        console.log(this.value);
+        // get image data
+        app.getImageDataFromFile(this.files[0], function (err, dataURI) {
+          qrcode.callback = function (data) {
+            // error?
+            console.log('qrCodecallback() error??');
+            console.log(data);
+            if (data.indexOf('error') != -1) {
+              app.alert('Cannot decode QR code! May be corrupted.', 'danger');
+              return;
+            }
+            var userObj = JSON.parse(data);
+            app.verifyUser(userObj.username, userObj.fingerprint);
+          };
+
+          try {
+            qrcode.decode(dataURI);
+          } catch (e) {
+            app.alert('Cannot decode QR code', 'danger');
+            console.error(e);
+          }
+        });
+
+      }, false);
+      chooser.click();
+    }
+    chooseFile('#id-file-dialog');
+  },
+
+  idCardHeight: 420,
+  idCardWidth: 420,
+
+  getImageDataFromFile: function getImageDataFromFile (file, callback) {
+    var image = document.createElement("img");
+    image.src = window.URL.createObjectURL(file);
+    image.height = app.idCardHeight;
+    image.height = app.idCardWidth;
+    var canvas = document.createElement("canvas");
+    var canvasContext = canvas.getContext("2d");
+
+    image.onload = function () {
+      window.URL.revokeObjectURL(this.src);
+      //Set canvas size is same as the picture
+      canvas.width = image.width;
+      canvas.height = image.height;
+      // draw image into canvas element
+      canvasContext.drawImage(image, 0, 0, image.width, image.height);
+      // get canvas contents as a data URL (returns png format by default)
+      var dataURL = canvas.toDataURL();
+      callback(null, dataURL);
+    }
   },
 
   getImage: function () {
@@ -274,19 +407,22 @@ var app = {
   },
 
   createAccount: function () {
-    $('#login-progress').show();
+    app.switchView('#login-progress', '');
+    app.setLoginStatus('Creating Account...');
+    // $('#login-progress').show();
 
     var user = $('#username-login').val();
     var pass = $('#password-login').val();
 
-    $('#login-progress').show();
-    $('#login-buttons').hide();
-    $('#login-form').hide();
+    // $('#login-progress').show();
+    // $('#login-buttons').hide();
+    // $('#login-form').hide();
 
     function callback (err) {
-      $('#login-progress').hide();
-      $('#login-buttons').show();
-      $('#login-form').show();
+      // $('#login-progress').hide();
+      // $('#login-buttons').show();
+      // $('#login-form').show();
+      app.switchView('#account-login', '');
       app.clearLoginStatus();
 
       if (err) {
@@ -302,17 +438,17 @@ var app = {
 
   register: function (user, pass, callback) {
     app.setLoginStatus('Generating account...');
-
-    $('#login-progress').show();
-    $('#login-buttons').hide();
-    $('#login-form').hide();
+    app.switchView('#login-progress', '');
+    // $('#login-progress').show();
+    // $('#login-buttons').hide();
+    // $('#login-form').hide();
 
     crypton.generateAccount(user, pass, function (err) {
       if (err) {
-        $('#login-progress').hide();
-        $('#login-buttons').show();
-        $('#login-form').show();
-
+        // $('#login-progress').hide();
+        // $('#login-buttons').show();
+        // $('#login-form').show();
+        app.switchView('#account-login', 'Account');
         return callback(err);
       }
 
@@ -321,9 +457,10 @@ var app = {
   },
 
   login: function () {
-    $('#login-progress').show();
-    $('#login-buttons').hide();
-    $('#login-form').hide();
+    // $('#login-progress').show();
+    // $('#login-buttons').hide();
+    // $('#login-form').hide();
+    app.switchView('#login-progress', '');
     $('.alert').remove();
 
     app.setLoginStatus('Logging in...');
@@ -334,9 +471,10 @@ var app = {
     function callback (err, session) {
       if (err) {
         app.alert(err, 'danger');
-        $('#login-form').show();
-        $('#login-progress').hide();
-        $('#login-buttons').show();
+        // $('#login-form').show();
+        // $('#login-progress').hide();
+        // $('#login-buttons').show();
+        app.switchView('#account-login', 'Account');
         app.clearLoginStatus();
         return;
       }
@@ -349,13 +487,14 @@ var app = {
       app.session.getOrCreateItem('_prefs_', function(err, prefsItem) {
         console.log('getting _prefs_');
         app.customInitialization();
-        $('#login-progress').hide();
-        $('#login-buttons').show();
-        $('#login-form').show();
+        // $('#login-progress').hide();
+        // $('#login-buttons').hide();
+        // $('#login-form').show();
         app.clearLoginStatus();
 
         if (err) {
           console.error(err);
+          app.switchView('#account-login', 'Account');
           return;
         }
 
@@ -368,6 +507,8 @@ var app = {
           app.firstRun();
           return;
         }
+
+        app.switchView('#feed', 'Feed');
 
         $('#password-login').val('');
         // Override displayInitialView in app to trigger new
@@ -488,8 +629,11 @@ var app = {
         $('#verify-user-success-msg').children().remove();
         $('#verify-user-failure-msg').children().remove();
         // TODO: remove click events from buttons
-
-        app.switchView('#scan-select', 'Verify ID Card');
+        if (app.isNodeWebKit) {
+          app.switchView('#scan-select-desktop', 'Verify ID Card');
+        } else {
+          app.switchView('#scan-select', 'Verify ID Card');
+        }
       }
 
       function resizeIdCard(canvas) {
@@ -628,24 +772,16 @@ var app = {
   retakeIdPicture: function (firstRun, callback) {
     // remove ID card
     $('#my-fingerprint-id').children().remove();
-    // delete existing image
-    app.deleteIdPhoto(function (err) {
+    // Re-create the ID card
+    var canvas =
+      app.card.createIdCard(app.fingerprint, app.username,
+                            app.APPNAME, app.URL);
+    app.addPhotoToIdCard(canvas, true, function (err, idCard) {
       if (err) {
-        if (!firstRun) {
-          return app.alert('Cannot delete existing ID photo', 'danger');
-        }
+        return app.alert(err, 'danger');
       }
-      // Re-create the ID card
-      var canvas =
-        app.card.createIdCard(app.fingerprint, app.username,
-                              app.APPNAME, app.URL);
-      app.addPhotoToIdCard(canvas , function (err, idCard) {
-        if (err) {
-          return app.alert(err, 'danger');
-        }
-        app.displayIdCard(idCard, callback);
-      });
-    }, true);
+      app.displayIdCard(idCard, callback);
+    });
   },
 
   displayIdCard: function (idCard, callback) {
@@ -662,7 +798,11 @@ var app = {
     $('#my-fingerprint-id').append(html);
 
     $('#share-my-id-card').click(function () {
-      window.plugins.socialsharing.share(null, idCardTitle, base64Img, null);
+      if (app.isNodeWebKit) {
+        app.saveIdToDesktop_desktop(idCard);
+      } else {
+        window.plugins.socialsharing.share(null, idCardTitle, base64Img, null);
+      }
     });
 
     $('#retake-id-picture').click(function () {
@@ -671,6 +811,7 @@ var app = {
     if (callback) {
       callback();
     }
+    app.switchView('#my-fingerprint-id', 'My ID Card');
   },
 
   displayMyFingerprint: function (withPhoto) {
@@ -680,7 +821,8 @@ var app = {
       app.card.createIdCard(app.fingerprint, app.username,
                              app.APPNAME, app.URL);
     if (withPhoto) {
-      app.addPhotoToIdCard(canvas , function (err, idCard) {
+      // override = false here as sensible default?
+      app.addPhotoToIdCard(canvas, false, function (err, idCard) {
         console.log('addPhotoToIdCard callback');
         console.log(idCard);
         if (err) {
@@ -693,7 +835,9 @@ var app = {
 
   PHOTO_CONTAINER: '_id_photo',
 
-  addPhotoToIdCard: function (idCard, callback) {
+  PHOTO_ITEM: 'avatar',
+
+  addPhotoToIdCard_orig: function (idCard, callback) {
     // check for existing photo:
     app.loadOrCreateContainer(app.PHOTO_CONTAINER,
       function (err, rawContainer) {
@@ -717,7 +861,7 @@ var app = {
           return callback(null, idCard);
         }
 
-        app.getPhoto(function (err, imageSrc) {
+        app.getPhoto(null, function (err, imageSrc) {
           photo.keys['imgData'] = imageSrc;
 
           photo.save(function (err){
@@ -734,6 +878,57 @@ var app = {
             return callback(null, photoIdCard);
           });
         });
+    });
+  },
+
+
+ addPhotoToIdCard: function (idCard, override, callback) {
+    // check for existing photo:
+    app.session.getOrCreateItem(app.PHOTO_ITEM,
+      function (err, avatarItem) {
+        if (err) {
+          return callback(err);
+        }
+
+        // paste photo into ID:
+        function pastePhoto(imageData, idCard) {
+          var thumb = app.thumbnail(imageData, 100, 100);
+          var ctx = idCard.getContext('2d');
+          ctx.drawImage(thumb, 280, 10);
+          return idCard;
+        }
+
+        if (!override && avatarItem.value.avatar) {
+          // XXXddahl: try ??
+          var photoIdCard = pastePhoto(avatarItem.value.avatar, idCard);
+          return callback(null, idCard);
+        }
+
+        app.getPhoto(null, function (err, imageSrc) {
+          avatarItem.value.avatar = imageSrc;
+          avatarItem.value.updated = Date.now();
+
+          avatarItem.save(function (err) {
+            if (err) {
+              var _err = 'Cannot save avatar data to server';
+              console.error(_err + ' ' + err);
+              return app.alert(_err);
+            }
+
+            // photo is saved to the server
+            var photoIdCard =
+              pastePhoto(avatarItem.value.avatar, idCard);
+            // console.log(photoIdCard);
+            return callback(null, photoIdCard);
+          });
+        });
+    });
+  },
+
+  saveIdToDesktop_desktop: function saveIdToDesktop_desktop (canvasIdCard) {
+    canvasIdCard.toBlob(function(blob) {
+      var filename = app.APPNAME + '-' + app.username + '-ID.png';
+      saveAs(blob, filename);
     });
   },
 
@@ -773,27 +968,6 @@ var app = {
                   0, 0, canvas.width, canvas.height);
 
     return canvas;
-  },
-
-
-  deleteIdPhoto: function (callback, quietly) {
-    app.session.deleteContainer(app.PHOTO_CONTAINER,
-      function (err) {
-        if (err){
-          return app.alert(err, 'danger');
-        }
-        for (var i = 0; i < app.session.containers.length; i++) {
-          if (app.session.containers[i].name == app.PHOTO_CONTAINER) {
-            app.session.containers.splice(i, 1);
-          }
-        }
-        if (!quietly) {
-          app.alert('deleted', 'info');
-        }
-        if (callback) {
-          callback();
-        }
-      });
   },
 
   loadOrCreateContainer: function (containerName, callback) {
