@@ -56,7 +56,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: white;
+    background-color: whitesmoke;
 }
 
 /* Landscape layout (with min-width) */
@@ -81,7 +81,7 @@ h1 {
 .event {
     border-radius:4px;
     -webkit-border-radius:4px;
-    color:#FFFFFF;
+    color: black;
     font-size:12px;
     margin:0px 30px;
     padding:2px 0px;
@@ -129,7 +129,7 @@ h1 {
 }
 
 #top-menu {
-    background: #1a1a1a !important;
+    background: black !important;
     position: absolute;
     top: 0;
     left: 0;
@@ -170,7 +170,7 @@ input[type="text"],
 input[type="password"] {
     border: 0;
     border-radius: 0 !important;
-    border-bottom: 1px solid #e6e6e6;
+    border-bottom: 1px solid gray;
     outline: 0;
     box-shadow: none;
     display: block;
@@ -237,10 +237,11 @@ input[type="password"]:focus {
     left: 0px;
     height: 56px;
     line-height: 56px;
-    background-color: #3f51b5;
+    background-color: whitesmoke;
     box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.16), 0px 1px 2.5px 0px rgba(0, 0, 0, 0.26);
-    color: #FFF;
+    color: black;
     z-index: 10;
+	padding-top: 10px;
 }
 
 #first-run {
@@ -439,3 +440,4 @@ strong {
 }
 
 #capture-avatar { padding: 7em;}
+

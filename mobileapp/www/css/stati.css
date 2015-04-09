@@ -28,7 +28,7 @@
 .status-update {
     margin-bottom: 3px;
     padding-left: 1em;
-    border-bottom: 1px solid #5e6ec7;
+    border-bottom: 1px solid gray;
 }
 
 .status-update-username {
@@ -52,15 +52,15 @@
 #my-status {
     padding-top: 2em;
     padding-left: 1em;
-    background-color: #5e6ec7;
-    border-bottom: 3px solid #5e6ec7;
-    color: white;
+    background-color: white;
+    border-bottom: 3px solid rgba(67, 67, 67, 0.14);
+    color: black;
 }
 
 #my-feed-entries {
     padding-top: 1em;
-    color: white;
-    background-color: #8895dc;
+    color: black;
+    background-color: whitesmoke;
 }
 
 #my-handle {
@@ -76,3 +76,4 @@
     list-style-type: square;
     padding-left: 1em;
 }
+

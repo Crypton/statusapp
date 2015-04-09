@@ -49,13 +49,23 @@ crypton.versionCheck = function (skip, callback) {
     return callback(null);
   }
 
-  var url = crypton.url() + '/versioncheck?' + 'v=' + crypton.version;
+  var url = crypton.url() + '/versioncheck?' + 'v=' + crypton.version + '&sid=' + crypton.sessionId || '';
   superagent.get(url)
   .end(function (res) {
+    console.warn("Versioncheck Response headers!!!");
+    console.warn(res);
+
     if (res.body.success !== true && res.body.error !== undefined) {
       crypton.clientVersionMismatch = true;
       return callback(res.body.error);
     }
+    // sessionStorage setItem!
+    // console.warn('XSessionID: ', res.header['x-session-id']);
+    // console.warn('RES Headers:', res.header);
+    // if (!crypton.sessionId) {
+    //   sessionStorage.setItem('sessionId', res.header['x-session-id']);
+    //  crypton.sessionId = res.header['x-session-id'];
+    // }
     callback(null);
   });
 };
@@ -175,6 +185,8 @@ function constEqual (str1, str2) {
 }
 crypton.constEqual = constEqual;
 
+crypton.sessionId = null;
+    
 /**!
  * ### randomBits(nbits)
  * Generate `nbits` bits of random data
@@ -424,12 +436,21 @@ crypton.authorize = function (username, passphrase, callback, options) {
 
         superagent.post(crypton.url() + '/account/' + username)
         .withCredentials()
+        // .set('X-Session-ID', crypton.sessionId)
         .send(response)
         .end(function (res) {
+          console.warn('account creation response 1: ');
+          console.warn(res);
           if (!res.body || res.body.success !== true) {
             return callback(res.body.error);
           }
-
+	  // check for response session header:
+	  // console.log('sessionID header: ', res.header['x-session-id']);
+	  console.log('sessionID from body: ', res.body.sid);
+	  // XXX: Make sure we have a sid! 
+	  crypton.sessionId = res.body.sid;  
+	  sessionStorage.setItem('sessionId', res.body.sid);
+	    
           options.a = data.a;
           options.srpA = data.srpA;
           options.srpB = res.body.srpB;
@@ -438,13 +459,19 @@ crypton.authorize = function (username, passphrase, callback, options) {
           // calculateSrpM1
           crypton.work.calculateSrpM1(options, function (err, srpM1, ourSrpM2) {
             response = {
-              srpM1: srpM1
+		srpM1: srpM1
             };
 
-            superagent.post(crypton.url() + '/account/' + username + '/answer')
+	    var url = crypton.url() +
+		'/account/' + username + '/answer?sid=' + crypton.sessionId;
+	    console.log('url', url);
+            superagent.post(url)
             .withCredentials()
+            // .set('X-Session-ID', sessionStorage.getItem('sessionId'))
             .send(response)
             .end(function (res) {
+              console.warn('account creation response 2: ');
+              console.warn(res);
               if (!res.body || res.body.success !== true) {
                 callback(res.body.error);
                 return;
@@ -455,8 +482,8 @@ crypton.authorize = function (username, passphrase, callback, options) {
                 return;
               }
 
-              var sessionIdentifier = res.body.sessionIdentifier;
-              var session = new crypton.Session(sessionIdentifier);
+              // var sessionIdentifier = res.body.sessionIdentifier;
+              var session = new crypton.Session(crypton.sessionId);
               session.account = new crypton.Account();
               session.account.username = username;
               session.account.passphrase = passphrase;
@@ -473,18 +500,20 @@ crypton.authorize = function (username, passphrase, callback, options) {
               session.account.signKeyPrivateCiphertext = res.body.account.signKeyPrivateCiphertext;
               session.account.signKeyPrivateMacSalt = res.body.account.signKeyPrivateMacSalt;
               session.account.signKeyPrivateMac = res.body.account.signKeyPrivateMac;
+	      console.log('session', session);
               session.account.unravel(function (err) {
                 if (err) {
                   return callback(err);
                 }
 
+		console.log('session.load()');
                 // check for internal peer trust state container
                 session.load(crypton.trustStateContainer, function (err) {
                   // if it exists, callback with session
                   if (!err) {
                     return callback(null, session);
                   }
-
+		  
                   // if not, create it
                   session.create(crypton.trustStateContainer, function (err) {
                     if (err) {
@@ -547,6 +576,7 @@ var Account = crypton.Account = function Account () {};
 Account.prototype.save = function (callback) {
   superagent.post(crypton.url() + '/account')
     .withCredentials()
+    .set('X-Session-ID', crypton.sessionId)
     .send(this.serialize())
     .end(function (res) {
       if (res.body.success !== true) {
@@ -804,6 +834,7 @@ Account.prototype.changePassphrase =
 
     superagent.post(crypton.url() + '/account/' + that.username + '/keyring')
     .withCredentials()
+    .set('X-Session-ID', crypton.sessionId)
     .send(newKeyring)
     .end(function (res) {
       if (res.body.success !== true) {
@@ -985,10 +1016,14 @@ var Session = crypton.Session = function (id) {
   this.inbox = new crypton.Inbox(this);
 
   var that = this;
-  this.socket = io.connect(crypton.url(), {
+  var url = crypton.url() + '?sid=' + crypton.sessionId;
+  this.socket = io.connect(url, {
     secure: true
   });
 
+  this.socket.sid = crypton.sessionId;
+  console.log('socket: ', this.socket);
+  
   // watch for incoming Inbox messages
   this.socket.on('message', function (data) {
     that.inbox.get(data.messageId, function (err, message) {
@@ -1028,6 +1063,7 @@ var Session = crypton.Session = function (id) {
     // in the notification, sync the items and
     // call the listener if one has been set
     if (that.items[itemObj.itemNameHmac]) {
+
       that.items[itemObj.itemNameHmac].sync(function (err) {
         if (err) {
           return console.error(err);
@@ -1062,7 +1098,7 @@ var Session = crypton.Session = function (id) {
           }
           that.items[itemObj.itemNameHmac] = item;
           try {
-             that.events.onSharedItemSync(item);
+            that.events.onSharedItemSync(item);
           } catch (ex) {
             console.warn(ex);
           }
@@ -1778,9 +1814,11 @@ Container.prototype.getHistory = function (callback) {
   var containerNameHmac = this.getPublicName();
   var currentVersion = this.latestVersion();
 
-  var url = crypton.url() + '/container/' + containerNameHmac + '?after=' + (currentVersion + 1);
+  var url = crypton.url() + '/container/' + containerNameHmac + '?after=' + (currentVersion + 1) + '&sid=' + crypton.sessionId;
+  console.log('getHistory', url);
   superagent.get(url)
     .withCredentials()
+    // .set('X-Session-ID', crypton.sessionId)
     .end(function (res) {
       if (!res.body || res.body.success !== true) {
         callback(res.body.error);
@@ -1917,9 +1955,11 @@ Container.prototype.decryptKey = function (record) {
  *
  * @param {Function} callback
  */
-Container.prototype.sync = function (callback) {
+ Container.prototype.sync = function (callback) {
+  console.log('container.sync()'); 
   var that = this;
   this.getHistory(function (err, records) {
+    console.log(arguments);
     if (err) {
       callback(err);
       return;
@@ -2109,9 +2149,10 @@ var Transaction = crypton.Transaction = function (session, callback) {
  * @param {Function} callback
  */
 Transaction.prototype.create = function (callback) {
-  var url = crypton.url() + '/transaction/create';
+  var url = crypton.url() + '/transaction/create' + '?sid=' + crypton.sessionId;
   superagent.post(url)
     .withCredentials()
+    // .set('X-Session-ID', crypton.sessionId)
     .end(function (res) {
     if (!res.body || res.body.success !== true) {
       callback(res.body.error);
@@ -2171,10 +2212,11 @@ Transaction.prototype.save = function () {
 Transaction.prototype.saveChunk = function (chunk, callback) {
   this.verify();
   this.verifyChunk(chunk);
-  var url = crypton.url() + '/transaction/' + this.id;
+  var url = crypton.url() + '/transaction/' + this.id + '?sid=' + crypton.sessionId;
 
   superagent.post(url)
     .withCredentials()
+    // .set('X-Session-ID', crypton.sessionId)
     .send(chunk)
     .end(function (res) {
       if (!res.body || res.body.success !== true) {
@@ -2198,9 +2240,10 @@ Transaction.prototype.saveChunk = function (chunk, callback) {
  */
 Transaction.prototype.commit = function (callback) {
   this.verify();
-  var url = crypton.url() + '/transaction/' + this.id + '/commit';
+  var url = crypton.url() + '/transaction/' + this.id + '/commit?sid=' + crypton.sessionId;
   superagent.post(url)
     .withCredentials()
+    // .set('X-Session-ID', crypton.sessionId)
     .end(function (res) {
       if (!res.body || res.body.success !== true) {
         callback(res.body.error);
@@ -2223,9 +2266,10 @@ Transaction.prototype.commit = function (callback) {
  */
 Transaction.prototype.abort = function (callback) {
   this.verify();
-  var url = crypton.url() + '/transaction/' + this.id;
+  var url = crypton.url() + '/transaction/' + this.id + '?sid=' + crypton.sessionId;
   superagent.del(url)
     .withCredentials()
+    // .set('X-Session-ID', crypton.sessionId)
     .end(function (res) {
     if (!res.body || res.body.success !== true) {
       callback(res.body.error);
@@ -2263,7 +2307,6 @@ Transaction.prototype.verifyChunk = function (chunk) {
 };
 
 })();
-
 /* Crypton Client, Copyright 2013 SpiderOak, Inc.
  *
  * This file is part of Crypton Client.
@@ -2331,9 +2374,10 @@ Peer.prototype.fetch = function (callback) {
   }
 
   var that = this;
-  var url = crypton.url() + '/peer/' + this.username;
+  var url = crypton.url() + '/peer/' + this.username + '?sid=' + crypton.sessionId;
   superagent.get(url)
     .withCredentials()
+    // .set('X-Session-ID', crypton.sessionId)
     .end(function (res) {
     if (!res.body || res.body.success !== true) {
       callback(res.body.error);
@@ -2556,8 +2600,9 @@ Message.prototype.send = function (callback) {
     return callback('You must encrypt the message to a peer before sending!');
   }
 
-  var url = crypton.url() + '/peer';
+  var url = crypton.url() + '/peer?sid=' + crypton.sessionId;
   superagent.post(url)
+    // .set('X-Session-ID', crypton.sessionId)
     .send(this.encrypted)
     .withCredentials()
     .end(function (res) {
@@ -2603,11 +2648,12 @@ var Inbox = crypton.Inbox = function Inbox (session) {
 
 Inbox.prototype.poll = function (callback) {
   var that = this;
-  var url = crypton.url() + '/inbox';
+  var url = crypton.url() + '/inbox?sid=' + crypton.sessionId;
   callback = callback || function () {};
 
   superagent.get(url)
     .withCredentials()
+    // .set('X-Session-ID', crypton.sessionId)
     .end(function (res) {
     if (!res.body || res.body.success !== true) {
       callback(res.body.error);
@@ -2652,11 +2698,12 @@ Inbox.prototype.get = function (messageId, callback) {
   }
 
   var that = this;
-  var url = crypton.url() + '/inbox/' + messageId;
+  var url = crypton.url() + '/inbox/' + messageId + '?sid=' + crypton.sessionId;
   callback = callback || function () {};
 
   superagent.get(url)
     .withCredentials()
+    // .set('X-Session-ID', crypton.sessionId)
     .end(function (res) {
     if (!res.body || res.body.success !== true) {
       callback(res.body.error);
@@ -2693,11 +2740,12 @@ Inbox.prototype.delete = function (id, callback) {
 
 Inbox.prototype.getAllMetadata = function (callback) {
   var that = this;
-  var url = crypton.url() + '/inbox-metadata';
+  var url = crypton.url() + '/inbox-metadata?sid=' + crypton.sessionId;
   callback = callback || function () {};
 
   superagent.get(url)
     .withCredentials()
+    // .set('X-Session-ID', crypton.sessionId)
     .end(function (res) {
     if (!res.body || res.body.success !== true) {
       callback(res.body.error);
@@ -3452,16 +3500,17 @@ Item.prototype.sync = function (callback) {
 
 Item.prototype.syncWithHmac = function (itemNameHmac, callback) {
   var that = this;
-  var url = crypton.url() + '/item/' + itemNameHmac;
+  var url = crypton.url() + '/item/' + itemNameHmac + '?sid=' + crypton.sessionId;
 
   if (this.sharedItem) {
-    url = url + '?shared=1';
+    url = url + '&shared=1';
   }
 
   console.log('that.sharedItem', that.sharedItem);
 
   superagent.get(url)
     .withCredentials()
+    // .set('X-Session-ID', crypton.sessionId)
     .end(function (res) {
       var doesNotExist = 'Item does not exist';
       if ((!res.body || res.body.success !== true) && res.body.error != doesNotExist) {
@@ -3566,10 +3615,11 @@ Item.prototype.save = function (callback) {
   }
 
   var that = this;
-  var url = crypton.url() + '/item/' + this.getPublicName();
+  var url = crypton.url() + '/item/' + this.getPublicName() + '?sid=' + crypton.sessionId;
 
   superagent.post(url)
     .withCredentials()
+    // .set('X-Session-ID', crypton.sessionId)
     .send(payload)
     .end(function (res) {
       if (!res.body.success) {
@@ -3626,8 +3676,10 @@ Item.prototype.create = function (callback) {
 
   var that = this;
   // post create item
-  var url = crypton.url() + '/createitem';
-  superagent.post(url).withCredentials().send(payload).end(function (res) {
+  var url = crypton.url() + '/createitem?sid=' + crypton.sessionId;
+  superagent.post(url).withCredentials()
+    // .set('X-Session-ID', crypton.sessionId)
+    .send(payload).end(function (res) {
     if (!res.body.success) {
       return callback('Cannot create item');
     }
@@ -3704,7 +3756,7 @@ Item.prototype.remove = function (callback) {
 
   var that = this;
   // post remove item
-  var url = crypton.url() + '/removeitem';
+  var url = crypton.url() + '/removeitem?sid=' + crypton.sessionId;
 
   var payload = {
     itemNameHmac: this.getPublicName()
@@ -3712,6 +3764,7 @@ Item.prototype.remove = function (callback) {
 
   superagent.post(url)
     .withCredentials()
+    // .set('X-Session-ID', crypton.sessionId)
     .send(payload)
     .end(function (res) {
     if (!res.body.success) {
@@ -3744,7 +3797,7 @@ Item.prototype.share = function (peer, callback) {
   var toUsername = peer.username;
   var itemNameHmac = this.getPublicName();
 
-  var url = crypton.url() + '/shareitem/' + itemNameHmac;
+  var url = crypton.url() + '/shareitem/' + itemNameHmac + '?sid=' + crypton.sessionId;
 
   var payload = {
     toUsername: toUsername,
@@ -3754,6 +3807,7 @@ Item.prototype.share = function (peer, callback) {
 
   superagent.post(url)
     .withCredentials()
+    // .set('X-Session-ID', crypton.sessionId)
     .send(payload)
     .end(function (res) {
     if (!res.body.success) {
@@ -3813,7 +3867,7 @@ Item.prototype.unshare = function (peer, callback) {
   var shareeUsername = peer.username;
   var itemNameHmac = this.getPublicName();
 
-  var url = crypton.url() + '/unshareitem/' + itemNameHmac;
+  var url = crypton.url() + '/unshareitem/' + itemNameHmac + '?sid=' + crypton.sessionId;
 
   var payload = {
     shareeUsername: shareeUsername
@@ -3821,6 +3875,7 @@ Item.prototype.unshare = function (peer, callback) {
 
   superagent.post(url)
     .withCredentials()
+    // .set('X-Session-ID', crypton.sessionId)
     .send(payload)
     .end(function (res) {
     if (!res.body.success) {
@@ -4894,7 +4949,7 @@ crypton.errors = new Errors();
         'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
         'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8',
         '9'];
-
+    
     /**
      * @type {Array.<number>}
      * @const
@@ -4908,14 +4963,14 @@ crypton.errors = new Errors();
         21, 22, 23, 24, 25, 26, 27, -1, -1, -1, -1, -1, -1, 28, 29, 30, 31,
         32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
         49, 50, 51, 52, 53, -1, -1, -1, -1, -1];
-
+    
     /**
      * Length-delimited base64 encoder and decoder.
      * @type {Object.<string,function(string, number)>}
      * @private
      */
     var base64 = {};
-
+    
     /**
      * Encodes a byte array to base64 with up to len bytes of input.
      * @param {Array.<number>} b Byte array
@@ -4954,7 +5009,7 @@ crypton.errors = new Errors();
         }
         return rs.join('');
     };
-
+    
     /**
      * Decodes a base64 encoded string to up to len bytes of output.
      * @param {string} s String to decode
@@ -5006,7 +5061,7 @@ crypton.errors = new Errors();
             res.push(rs[off].charCodeAt(0));
         }
         return res;
-    };
+    };    
     /**
      * bcrypt namespace.
      * @type {Object.<string,*>}
@@ -5608,7 +5663,7 @@ crypton.errors = new Errors();
         if (typeof module !== 'undefined' && module.exports) {
             var crypto = require("crypto");
             return crypto.randomBytes(len);
-
+            
         // Browser, see: http://www.w3.org/TR/WebCryptoAPI/
         } else {
             var array = new Uint32Array(len);
@@ -5647,10 +5702,10 @@ crypton.errors = new Errors();
             throw(err);
         }
     }
-
+    
     // crypto.getRandomValues polyfill to use
     var _getRandomValues = null;
-
+    
     /**
      * Sets the polyfill that should be used if window.crypto.getRandomValues is not available.
      * @param {function(Uint32Array)} getRandomValues The actual implementation
@@ -5827,7 +5882,7 @@ crypton.errors = new Errors();
         }
         global["dcodeIO"]["bcrypt"] = bcrypt;
     }
-
+    
 })(this);
 
 /*
@@ -6973,7 +7028,7 @@ require.register("RedVentures-reduce/index.js", function(exports, require, modul
  * TODO: combatible error handling?
  */
 
-module.exports = function(arr, fn, initial){
+module.exports = function(arr, fn, initial){  
   var idx = 0;
   var len = arr.length;
   var curr = arguments.length == 3
@@ -6983,7 +7038,7 @@ module.exports = function(arr, fn, initial){
   while (idx < len) {
     curr = fn.call(null, curr, arr[idx], ++idx, arr);
   }
-
+  
   return curr;
 };
 });
@@ -8024,13 +8079,13 @@ var sjcl = {
 
   /** @namespace Key exchange functions.  Right now only SRP is implemented. */
   keyexchange: {},
-
+  
   /** @namespace Block cipher modes of operation. */
   mode: {},
 
   /** @namespace Miscellaneous.  HMAC and PBKDF2. */
   misc: {},
-
+  
   /**
    * @namespace Bit array encoders and decoders.
    *
@@ -8041,7 +8096,7 @@ var sjcl = {
    * the method names are "fromBits" and "toBits".
    */
   codec: {},
-
+  
   /** @namespace Exceptions. */
   exception: {
     /** @class Ciphertext is corrupt. */
@@ -8049,13 +8104,13 @@ var sjcl = {
       this.toString = function() { return "CORRUPT: "+this.message; };
       this.message = message;
     },
-
+    
     /** @class Invalid parameter. */
     invalid: function(message) {
       this.toString = function() { return "INVALID: "+this.message; };
       this.message = message;
     },
-
+    
     /** @class Bug or missing feature in SJCL. */
     bug: function(message) {
       this.toString = function() { return "BUG: "+this.message; };
@@ -8103,36 +8158,36 @@ sjcl.cipher.aes = function (key) {
   if (!this._tables[0][0][0]) {
     this._precompute();
   }
-
+  
   var i, j, tmp,
     encKey, decKey,
     sbox = this._tables[0][4], decTable = this._tables[1],
     keyLen = key.length, rcon = 1;
-
+  
   if (keyLen !== 4 && keyLen !== 6 && keyLen !== 8) {
     throw new sjcl.exception.invalid("invalid aes key size");
   }
-
+  
   this._key = [encKey = key.slice(0), decKey = []];
-
+  
   // schedule encryption keys
   for (i = keyLen; i < 4 * keyLen + 28; i++) {
     tmp = encKey[i-1];
-
+    
     // apply sbox
     if (i%keyLen === 0 || (keyLen === 8 && i%keyLen === 4)) {
       tmp = sbox[tmp>>>24]<<24 ^ sbox[tmp>>16&255]<<16 ^ sbox[tmp>>8&255]<<8 ^ sbox[tmp&255];
-
+      
       // shift rows and add rcon
       if (i%keyLen === 0) {
         tmp = tmp<<8 ^ tmp>>>24 ^ rcon<<24;
         rcon = rcon<<1 ^ (rcon>>7)*283;
       }
     }
-
+    
     encKey[i] = encKey[i-keyLen] ^ tmp;
   }
-
+  
   // schedule decryption keys
   for (j = 0; i; j++, i--) {
     tmp = encKey[j&3 ? i : i - 4];
@@ -8154,21 +8209,21 @@ sjcl.cipher.aes.prototype = {
   blockSize: 4,
   keySizes: [4,6,8],
   */
-
+  
   /**
    * Encrypt an array of 4 big-endian words.
    * @param {Array} data The plaintext.
    * @return {Array} The ciphertext.
    */
   encrypt:function (data) { return this._crypt(data,0); },
-
+  
   /**
    * Decrypt an array of 4 big-endian words.
    * @param {Array} data The ciphertext.
    * @return {Array} The plaintext.
    */
   decrypt:function (data) { return this._crypt(data,1); },
-
+  
   /**
    * The expanded S-box and inverse S-box tables.  These will be computed
    * on the client so that we don't have to send them down the wire.
@@ -8197,32 +8252,32 @@ sjcl.cipher.aes.prototype = {
    for (i = 0; i < 256; i++) {
      th[( d[i] = i<<1 ^ (i>>7)*283 )^i]=i;
    }
-
+   
    for (x = xInv = 0; !sbox[x]; x ^= x2 || 1, xInv = th[xInv] || 1) {
      // Compute sbox
      s = xInv ^ xInv<<1 ^ xInv<<2 ^ xInv<<3 ^ xInv<<4;
      s = s>>8 ^ s&255 ^ 99;
      sbox[x] = s;
      sboxInv[s] = x;
-
+     
      // Compute MixColumns
      x8 = d[x4 = d[x2 = d[x]]];
      tDec = x8*0x1010101 ^ x4*0x10001 ^ x2*0x101 ^ x*0x1010100;
      tEnc = d[s]*0x101 ^ s*0x1010100;
-
+     
      for (i = 0; i < 4; i++) {
        encTable[i][x] = tEnc = tEnc<<24 ^ tEnc>>>8;
        decTable[i][s] = tDec = tDec<<24 ^ tDec>>>8;
      }
    }
-
+   
    // Compactify.  Considerable speedup on Firefox.
    for (i = 0; i < 5; i++) {
      encTable[i] = encTable[i].slice(0);
      decTable[i] = decTable[i].slice(0);
    }
   },
-
+  
   /**
    * Encryption and decryption core.
    * @param {Array} input Four words to be encrypted or decrypted.
@@ -8234,7 +8289,7 @@ sjcl.cipher.aes.prototype = {
     if (input.length !== 4) {
       throw new sjcl.exception.invalid("invalid aes block size");
     }
-
+    
     var key = this._key[dir],
         // state variables a,b,c,d are loaded with pre-whitened data
         a = input[0]           ^ key[0],
@@ -8242,20 +8297,20 @@ sjcl.cipher.aes.prototype = {
         c = input[2]           ^ key[2],
         d = input[dir ? 1 : 3] ^ key[3],
         a2, b2, c2,
-
+        
         nInnerRounds = key.length/4 - 2,
         i,
         kIndex = 4,
         out = [0,0,0,0],
         table = this._tables[dir],
-
+        
         // load up the tables
         t0    = table[0],
         t1    = table[1],
         t2    = table[2],
         t3    = table[3],
         sbox  = table[4];
-
+ 
     // Inner rounds.  Cribbed from OpenSSL.
     for (i = 0; i < nInnerRounds; i++) {
       a2 = t0[a>>>24] ^ t1[b>>16 & 255] ^ t2[c>>8 & 255] ^ t3[d & 255] ^ key[kIndex];
@@ -8265,18 +8320,18 @@ sjcl.cipher.aes.prototype = {
       kIndex += 4;
       a=a2; b=b2; c=c2;
     }
-
+        
     // Last round.
     for (i = 0; i < 4; i++) {
       out[dir ? 3&-i : i] =
-        sbox[a>>>24      ]<<24 ^
+        sbox[a>>>24      ]<<24 ^ 
         sbox[b>>16  & 255]<<16 ^
         sbox[c>>8   & 255]<<8  ^
         sbox[d      & 255]     ^
         key[kIndex++];
       a2=a; a=b; b=c; c=d; d=a2;
     }
-
+    
     return out;
   }
 };
@@ -8356,7 +8411,7 @@ sjcl.bitArray = {
     if (a1.length === 0 || a2.length === 0) {
       return a1.concat(a2);
     }
-
+    
     var out, i, last = a1[a1.length-1], shift = sjcl.bitArray.getPartial(last);
     if (shift === 32) {
       return a1.concat(a2);
@@ -8442,7 +8497,7 @@ sjcl.bitArray = {
   _shiftRight: function (a, shift, carry, out) {
     var i, last2=0, shift2;
     if (out === undefined) { out = []; }
-
+    
     for (; shift >= 32; shift -= 32) {
       out.push(carry);
       carry = 0;
@@ -8450,7 +8505,7 @@ sjcl.bitArray = {
     if (shift === 0) {
       return out.concat(a);
     }
-
+    
     for (i=0; i<a.length; i++) {
       out.push(carry | a[i]>>>shift);
       carry = a[i] << (32-shift);
@@ -8460,7 +8515,7 @@ sjcl.bitArray = {
     out.push(sjcl.bitArray.partial(shift+shift2 & 31, (shift + shift2 > 32) ? carry : out.pop(),1));
     return out;
   },
-
+  
   /** xor a block of 4 words together.
    * @private
    */
@@ -8474,7 +8529,7 @@ sjcl.bitArray = {
  * @author Mike Hamburg
  * @author Dan Boneh
  */
-
+ 
 /** @namespace UTF-8 strings */
 sjcl.codec.utf8String = {
   /** Convert from a bitArray to a UTF-8 string. */
@@ -8489,7 +8544,7 @@ sjcl.codec.utf8String = {
     }
     return decodeURIComponent(escape(out));
   },
-
+  
   /** Convert from a UTF-8 string to a bitArray. */
   toBits: function (str) {
     str = unescape(encodeURIComponent(str));
@@ -8520,7 +8575,7 @@ sjcl.codec.base64 = {
    * @private
    */
   _chars: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
-
+  
   /** Convert from a bitArray to a base64 string. */
   fromBits: function (arr, _noEquals, _url) {
     var out = "", i, bits=0, c = sjcl.codec.base64._chars, ta=0, bl = sjcl.bitArray.bitLength(arr);
@@ -8539,7 +8594,7 @@ sjcl.codec.base64 = {
     while ((out.length & 3) && !_noEquals) { out += "="; }
     return out;
   },
-
+  
   /** Convert from a base64 string to a bitArray */
   toBits: function(str, _url) {
     str = str.replace(/\s|=/g,'');
@@ -8617,7 +8672,7 @@ sjcl.hash.sha256.prototype = {
    * @constant
    */
   blockSize: 512,
-
+   
   /**
    * Reset the hash state.
    * @return this
@@ -8628,7 +8683,7 @@ sjcl.hash.sha256.prototype = {
     this._length = 0;
     return this;
   },
-
+  
   /**
    * Input several words to the hash.
    * @param {bitArray|String} data the data to hash.
@@ -8646,7 +8701,7 @@ sjcl.hash.sha256.prototype = {
     }
     return this;
   },
-
+  
   /**
    * Complete hashing and output the hash value.
    * @return {bitArray} The hash value, an array of 16 big-endian words.
@@ -8656,12 +8711,12 @@ sjcl.hash.sha256.prototype = {
 
     // Round out and push the buffer
     b = sjcl.bitArray.concat(b, [sjcl.bitArray.partial(1,1)]);
-
+    
     // Round out the buffer to a multiple of 16 words, less the 2 length words.
     for (i = b.length + 2; i & 15; i++) {
       b.push(0);
     }
-
+    
     // append the length
     b.push(Math.floor(this._length / 0x100000000));
     b.push(this._length | 0);
@@ -8682,7 +8737,7 @@ sjcl.hash.sha256.prototype = {
   /*
   _init:[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19],
   */
-
+  
   /**
    * The SHA-256 hash key, to be precomputed.
    * @private
@@ -8717,7 +8772,7 @@ sjcl.hash.sha256.prototype = {
           continue outer;
         }
       }
-
+      
       if (i<8) {
         this._init[i] = frac(Math.pow(prime, 1/2));
       }
@@ -8725,13 +8780,13 @@ sjcl.hash.sha256.prototype = {
       i++;
     }
   },
-
+  
   /**
    * Perform one cycle of SHA-256.
    * @param {bitArray} words one block of words.
    * @private
    */
-  _block:function (words) {
+  _block:function (words) {  
     var i, tmp, a, b,
       w = words.slice(0),
       h = this._h,
@@ -8759,13 +8814,13 @@ sjcl.hash.sha256.prototype = {
       } else {
         a   = w[(i+1 ) & 15];
         b   = w[(i+14) & 15];
-        tmp = w[i&15] = ((a>>>7  ^ a>>>18 ^ a>>>3  ^ a<<25 ^ a<<14) +
+        tmp = w[i&15] = ((a>>>7  ^ a>>>18 ^ a>>>3  ^ a<<25 ^ a<<14) + 
                          (b>>>17 ^ b>>>19 ^ b>>>10 ^ b<<15 ^ b<<13) +
                          w[i&15] + w[(i+9) & 15]) | 0;
       }
-
+      
       tmp = (tmp + h7 + (h4>>>6 ^ h4>>>11 ^ h4>>>25 ^ h4<<26 ^ h4<<21 ^ h4<<7) +  (h6 ^ h4&(h5^h6)) + k[i]); // | 0;
-
+      
       // shift register
       h7 = h6; h6 = h5; h5 = h4;
       h4 = h3 + tmp | 0;
@@ -8796,7 +8851,7 @@ sjcl.mode.gcm = {
    * @constant
    */
   name: "gcm",
-
+  
   /** Encrypt in GCM mode.
    * @static
    * @param {Object} prf The pseudorandom function.  It must have a block size of 16 bytes.
@@ -8816,7 +8871,7 @@ sjcl.mode.gcm = {
 
     return w.concat(out.data, out.tag);
   },
-
+  
   /** Decrypt in GCM mode.
    * @static
    * @param {Object} prf The pseudorandom function.  It must have a block size of 16 bytes.
@@ -8990,12 +9045,12 @@ sjcl.misc.hmac = function (key, Hash) {
   if (key.length > bs) {
     key = Hash.hash(key);
   }
-
+  
   for (i=0; i<bs; i++) {
     exKey[0][i] = key[i]^0x36363636;
     exKey[1][i] = key[i]^0x5C5C5C5C;
   }
-
+  
   this._baseHash[0].update(exKey[0]);
   this._baseHash[1].update(exKey[1]);
 };
@@ -9032,30 +9087,30 @@ sjcl.misc.hmac.prototype.encrypt = sjcl.misc.hmac.prototype.mac = function (data
  */
 sjcl.misc.pbkdf2 = function (password, salt, count, length, Prff) {
   count = count || 1000;
-
+  
   if (length < 0 || count < 0) {
     throw sjcl.exception.invalid("invalid params to pbkdf2");
   }
-
+  
   if (typeof password === "string") {
     password = sjcl.codec.utf8String.toBits(password);
   }
-
+  
   Prff = Prff || sjcl.misc.hmac;
-
+  
   var prf = new Prff(password),
       u, ui, i, j, k, out = [], b = sjcl.bitArray;
 
   for (k = 1; 32 * out.length < (length || 1); k++) {
     u = ui = prf.encrypt(b.concat(salt,[k]));
-
+    
     for (i=1; i<count; i++) {
       ui = prf.encrypt(ui);
       for (j=0; j<ui.length; j++) {
         u[j] ^= ui[j];
       }
     }
-
+    
     out = out.concat(u);
   }
 
@@ -9110,30 +9165,30 @@ sjcl.random = {
    */
   randomWords: function (nwords, paranoia) {
     var out = [], i, readiness = this.isReady(paranoia), g;
-
+  
     if (readiness === this._NOT_READY) {
       throw new sjcl.exception.notReady("generator isn't seeded");
     } else if (readiness & this._REQUIRES_RESEED) {
       this._reseedFromPools(!(readiness & this._READY));
     }
-
+  
     for (i=0; i<nwords; i+= 4) {
       if ((i+1) % this._MAX_WORDS_PER_BURST === 0) {
         this._gate();
       }
-
+   
       g = this._gen4words();
       out.push(g[0],g[1],g[2],g[3]);
     }
     this._gate();
-
+  
     return out.slice(0,nwords);
   },
-
+  
   setDefaultParanoia: function (paranoia) {
     this._defaultParanoia = paranoia;
   },
-
+  
   /**
    * Add entropy to the pools.
    * @param data The entropic value.  Should be a 32-bit integer, array of 32-bit integers, or string
@@ -9142,28 +9197,28 @@ sjcl.random = {
    */
   addEntropy: function (data, estimatedEntropy, source) {
     source = source || "user";
-
+  
     var id,
       i, tmp,
       t = (new Date()).valueOf(),
       robin = this._robins[source],
       oldReady = this.isReady(), err = 0;
-
+      
     id = this._collectorIds[source];
     if (id === undefined) { id = this._collectorIds[source] = this._collectorIdNext ++; }
-
+      
     if (robin === undefined) { robin = this._robins[source] = 0; }
     this._robins[source] = ( this._robins[source] + 1 ) % this._pools.length;
-
+  
     switch(typeof(data)) {
-
+      
     case "number":
       if (estimatedEntropy === undefined) {
         estimatedEntropy = 1;
       }
       this._pools[robin].update([id,this._eventId++,1,estimatedEntropy,t,1,data|0]);
       break;
-
+      
     case "object":
       var objName = Object.prototype.toString.call(data);
       if (objName === "[object Uint32Array]") {
@@ -9197,7 +9252,7 @@ sjcl.random = {
         this._pools[robin].update([id,this._eventId++,2,estimatedEntropy,t,data.length].concat(data));
       }
       break;
-
+      
     case "string":
       if (estimatedEntropy === undefined) {
        /* English text has just over 1 bit per character of entropy.
@@ -9209,18 +9264,18 @@ sjcl.random = {
       this._pools[robin].update([id,this._eventId++,3,estimatedEntropy,t,data.length]);
       this._pools[robin].update(data);
       break;
-
+      
     default:
       err=1;
     }
     if (err) {
       throw new sjcl.exception.bug("random: addEntropy only supports number, array of numbers or string");
     }
-
+  
     /* record the new strength */
     this._poolEntropy[robin] += estimatedEntropy;
     this._poolStrength += estimatedEntropy;
-
+  
     /* fire off events */
     if (oldReady === this._NOT_READY) {
       if (this.isReady() !== this._NOT_READY) {
@@ -9229,11 +9284,11 @@ sjcl.random = {
       this._fireEvent("progress", this.getProgress());
     }
   },
-
+  
   /** Is the generator ready? */
   isReady: function (paranoia) {
     var entropyRequired = this._PARANOIA_LEVELS[ (paranoia !== undefined) ? paranoia : this._defaultParanoia ];
-
+  
     if (this._strength && this._strength >= entropyRequired) {
       return (this._poolEntropy[0] > this._BITS_PER_RESEED && (new Date()).valueOf() > this._nextReseed) ?
         this._REQUIRES_RESEED | this._READY :
@@ -9244,11 +9299,11 @@ sjcl.random = {
         this._NOT_READY;
     }
   },
-
+  
   /** Get the generator's progress toward readiness, as a fraction */
   getProgress: function (paranoia) {
     var entropyRequired = this._PARANOIA_LEVELS[ paranoia ? paranoia : this._defaultParanoia ];
-
+  
     if (this._strength >= entropyRequired) {
       return 1.0;
     } else {
@@ -9257,11 +9312,11 @@ sjcl.random = {
         this._poolStrength / entropyRequired;
     }
   },
-
+  
   /** start the built-in entropy collectors */
   startCollectors: function () {
     if (this._collectorsStarted) { return; }
-
+  
     if (window.addEventListener) {
       window.addEventListener("load", this._loadTimeCollector, false);
       window.addEventListener("mousemove", this._mouseCollector, false);
@@ -9272,14 +9327,14 @@ sjcl.random = {
     else {
       throw new sjcl.exception.bug("can't attach event");
     }
-
+  
     this._collectorsStarted = true;
   },
-
+  
   /** stop the built-in entropy collectors */
   stopCollectors: function () {
     if (!this._collectorsStarted) { return; }
-
+  
     if (window.removeEventListener) {
       window.removeEventListener("load", this._loadTimeCollector, false);
       window.removeEventListener("mousemove", this._mouseCollector, false);
@@ -9289,47 +9344,47 @@ sjcl.random = {
     }
     this._collectorsStarted = false;
   },
-
+  
   /* use a cookie to store entropy.
   useCookie: function (all_cookies) {
       throw new sjcl.exception.bug("random: useCookie is unimplemented");
   },*/
-
+  
   /** add an event listener for progress or seeded-ness. */
   addEventListener: function (name, callback) {
     this._callbacks[name][this._callbackI++] = callback;
   },
-
+  
   /** remove an event listener for progress or seeded-ness */
   removeEventListener: function (name, cb) {
     var i, j, cbs=this._callbacks[name], jsTemp=[];
-
+  
     /* I'm not sure if this is necessary; in C++, iterating over a
      * collection and modifying it at the same time is a no-no.
      */
-
+  
     for (j in cbs) {
 	if (cbs.hasOwnProperty(j) && cbs[j] === cb) {
         jsTemp.push(j);
       }
     }
-
+  
     for (i=0; i<jsTemp.length; i++) {
       j = jsTemp[i];
       delete cbs[j];
     }
   },
-
+  
   /* private */
   _pools                   : [new sjcl.hash.sha256()],
   _poolEntropy             : [0],
   _reseedCount             : 0,
   _robins                  : {},
   _eventId                 : 0,
-
+  
   _collectorIds            : {},
   _collectorIdNext         : 0,
-
+  
   _strength                : 0,
   _poolStrength            : 0,
   _nextReseed              : 0,
@@ -9337,12 +9392,12 @@ sjcl.random = {
   _counter                 : [0,0,0,0],
   _cipher                  : undefined,
   _defaultParanoia         : 6,
-
+  
   /* event listener stuff */
   _collectorsStarted       : false,
   _callbacks               : {progress: {}, seeded: {}},
   _callbackI               : 0,
-
+  
   /* constants */
   _NOT_READY               : 0,
   _READY                   : 1,
@@ -9352,7 +9407,7 @@ sjcl.random = {
   _PARANOIA_LEVELS         : [0,48,64,96,128,192,256,384,512,768,1024],
   _MILLISECONDS_PER_RESEED : 30000,
   _BITS_PER_RESEED         : 80,
-
+  
   /** Generate 4 random words, no reseed, no gate.
    * @private
    */
@@ -9363,7 +9418,7 @@ sjcl.random = {
     }
     return this._cipher.encrypt(this._counter);
   },
-
+  
   /* Rekey the AES instance with itself after a request, or every _MAX_WORDS_PER_BURST words.
    * @private
    */
@@ -9371,7 +9426,7 @@ sjcl.random = {
     this._key = this._gen4words().concat(this._gen4words());
     this._cipher = new sjcl.cipher.aes(this._key);
   },
-
+  
   /** Reseed the generator with the given words
    * @private
    */
@@ -9383,70 +9438,70 @@ sjcl.random = {
       if (this._counter[i]) { break; }
     }
   },
-
+  
   /** reseed the data from the entropy pools
    * @param full If set, use all the entropy pools in the reseed.
    */
   _reseedFromPools: function (full) {
     var reseedData = [], strength = 0, i;
-
+  
     this._nextReseed = reseedData[0] =
       (new Date()).valueOf() + this._MILLISECONDS_PER_RESEED;
-
+    
     for (i=0; i<16; i++) {
       /* On some browsers, this is cryptographically random.  So we might
        * as well toss it in the pot and stir...
        */
       reseedData.push(Math.random()*0x100000000|0);
     }
-
+    
     for (i=0; i<this._pools.length; i++) {
      reseedData = reseedData.concat(this._pools[i].finalize());
      strength += this._poolEntropy[i];
      this._poolEntropy[i] = 0;
-
+   
      if (!full && (this._reseedCount & (1<<i))) { break; }
     }
-
+  
     /* if we used the last pool, push a new one onto the stack */
     if (this._reseedCount >= 1 << this._pools.length) {
      this._pools.push(new sjcl.hash.sha256());
      this._poolEntropy.push(0);
     }
-
+  
     /* how strong was this reseed? */
     this._poolStrength -= strength;
     if (strength > this._strength) {
       this._strength = strength;
     }
-
+  
     this._reseedCount ++;
     this._reseed(reseedData);
   },
-
+  
   _mouseCollector: function (ev) {
     var x = ev.x || ev.clientX || ev.offsetX, y = ev.y || ev.clientY || ev.offsetY;
     sjcl.random.addEntropy([x,y], 2, "mouse");
   },
-
+  
   _loadTimeCollector: function (ev) {
     sjcl.random.addEntropy((new Date()).valueOf(), 2, "loadtime");
   },
-
+  
   _fireEvent: function (name, arg) {
     var j, cbs=sjcl.random._callbacks[name], cbsTemp=[];
-    /* TODO: there is a race condition between removing collectors and firing them */
+    /* TODO: there is a race condition between removing collectors and firing them */ 
 
     /* I'm not sure if this is necessary; in C++, iterating over a
      * collection and modifying it at the same time is a no-no.
      */
-
+  
     for (j in cbs) {
      if (cbs.hasOwnProperty(j)) {
         cbsTemp.push(cbs[j]);
      }
     }
-
+  
     for (j=0; j<cbsTemp.length; j++) {
      cbsTemp[j](arg);
     }
@@ -9469,7 +9524,7 @@ sjcl.random = {
  * @author Mike Hamburg
  * @author Dan Boneh
  */
-
+ 
  /** @namespace JSON encapsulation */
  sjcl.json = {
   /** Default values for encryption */
@@ -9486,7 +9541,7 @@ sjcl.random = {
   encrypt: function (password, plaintext, params, rp) {
     params = params || {};
     rp = rp || {};
-
+    
     var j = sjcl.json, p = j._add({ iv: sjcl.random.randomWords(4,0) },
                                   j.defaults), tmp, prp, adata;
     j._add(p, params);
@@ -9497,7 +9552,7 @@ sjcl.random = {
     if (typeof p.iv === "string") {
       p.iv = sjcl.codec.base64.toBits(p.iv);
     }
-
+    
     if (!sjcl.mode[p.mode] ||
         !sjcl.cipher[p.cipher] ||
         (typeof password === "string" && p.iter <= 100) ||
@@ -9506,7 +9561,7 @@ sjcl.random = {
         (p.iv.length < 2 || p.iv.length > 4)) {
       throw new sjcl.exception.invalid("json encrypt: invalid parameters");
     }
-
+    
     if (typeof password === "string") {
       tmp = sjcl.misc.cachedPbkdf2(password, p);
       password = tmp.key.slice(0,p.ks/32);
@@ -9523,18 +9578,18 @@ sjcl.random = {
       adata = sjcl.codec.utf8String.toBits(adata);
     }
     prp = new sjcl.cipher[p.cipher](password);
-
+    
     /* return the json data */
     j._add(rp, p);
     rp.key = password;
-
+    
     /* do the encryption */
     p.ct = sjcl.mode[p.mode].encrypt(prp, plaintext, p.iv, adata, p.ts);
-
+    
     //return j.encode(j._subtract(p, j.defaults));
     return j.encode(p);
   },
-
+  
   /** Simple decryption function.
    * @param {String|bitArray} password The password or key.
    * @param {String} ciphertext The ciphertext to decrypt.
@@ -9547,7 +9602,7 @@ sjcl.random = {
   decrypt: function (password, ciphertext, params, rp) {
     params = params || {};
     rp = rp || {};
-
+    
     var j = sjcl.json, p = j._add(j._add(j._add({},j.defaults),j.decode(ciphertext)), params, true), ct, tmp, prp, adata=p.adata;
     if (typeof p.salt === "string") {
       p.salt = sjcl.codec.base64.toBits(p.salt);
@@ -9555,7 +9610,7 @@ sjcl.random = {
     if (typeof p.iv === "string") {
       p.iv = sjcl.codec.base64.toBits(p.iv);
     }
-
+    
     if (!sjcl.mode[p.mode] ||
         !sjcl.cipher[p.cipher] ||
         (typeof password === "string" && p.iter <= 100) ||
@@ -9565,7 +9620,7 @@ sjcl.random = {
         (p.iv.length < 2 || p.iv.length > 4)) {
       throw new sjcl.exception.invalid("json decrypt: invalid parameters");
     }
-
+    
     if (typeof password === "string") {
       tmp = sjcl.misc.cachedPbkdf2(password, p);
       password = tmp.key.slice(0,p.ks/32);
@@ -9577,17 +9632,17 @@ sjcl.random = {
       adata = sjcl.codec.utf8String.toBits(adata);
     }
     prp = new sjcl.cipher[p.cipher](password);
-
+    
     /* do the decryption */
     ct = sjcl.mode[p.mode].decrypt(prp, p.ct, p.iv, adata, p.ts);
-
+    
     /* return the json data */
     j._add(rp, p);
     rp.key = password;
-
+    
     return sjcl.codec.utf8String.fromBits(ct);
   },
-
+  
   /** Encode a flat structure into a JSON string.
    * @param {Object} obj The structure to encode.
    * @return {String} A JSON string.
@@ -9603,21 +9658,21 @@ sjcl.random = {
         }
         out += comma + '"' + i + '":';
         comma = ',';
-
+        
         switch (typeof obj[i]) {
         case 'number':
         case 'boolean':
           out += obj[i];
           break;
-
+          
         case 'string':
           out += '"' + escape(obj[i]) + '"';
           break;
-
+        
         case 'object':
           out += '"' + sjcl.codec.base64.fromBits(obj[i],1) + '"';
           break;
-
+        
         default:
           throw new sjcl.exception.bug("json encode: unsupported type");
         }
@@ -9625,7 +9680,7 @@ sjcl.random = {
     }
     return out+'}';
   },
-
+  
   /** Decode a simple (flat) JSON string into a structure.  The ciphertext,
    * adata, salt and iv will be base64-decoded.
    * @param {String} str The string.
@@ -9634,7 +9689,7 @@ sjcl.random = {
    */
   decode: function (str) {
     str = str.replace(/\s/g,'');
-    if (!str.match(/^\{.*\}$/)) {
+    if (!str.match(/^\{.*\}$/)) { 
       throw new sjcl.exception.invalid("json decode: this isn't json!");
     }
     var a = str.replace(/^\{|\}$/g, '').split(/,/), out={}, i, m;
@@ -9672,22 +9727,22 @@ sjcl.random = {
     }
     return target;
   },
-
+  
   /** Remove all elements of minus from plus.  Does not modify plus.
    * @private
    */
   _subtract: function (plus, minus) {
     var out = {}, i;
-
+    
     for (i in plus) {
       if (plus.hasOwnProperty(i) && plus[i] !== minus[i]) {
         out[i] = plus[i];
       }
     }
-
+    
     return out;
   },
-
+  
   /** Return only the specified elements of src.
    * @private
    */
@@ -9726,23 +9781,23 @@ sjcl.decrypt = sjcl.json.decrypt;
 sjcl.misc._pbkdf2Cache = {};
 
 /** Cached PBKDF2 key derivation.
- * @param {String} The password.
+ * @param {String} The password.  
  * @param {Object} The derivation params (iteration count and optional salt).
  * @return {Object} The derived data in key, the salt in salt.
  */
 sjcl.misc.cachedPbkdf2 = function (password, obj) {
   var cache = sjcl.misc._pbkdf2Cache, c, cp, str, salt, iter;
-
+  
   obj = obj || {};
   iter = obj.iter || 1000;
-
+  
   /* open the cache for this password and iteration count */
   cp = cache[password] = cache[password] || {};
   c = cp[iter] = cp[iter] || { firstSalt: (obj.salt && obj.salt.length) ?
                      obj.salt.slice(0) : sjcl.random.randomWords(2,0) };
-
+          
   salt = (obj.salt === undefined) ? c.firstSalt : obj.salt;
-
+  
   c[salt] = c[salt] || sjcl.misc.pbkdf2(password, salt, obj.iter);
   return { key: c[salt].slice(0), salt:salt.slice(0) };
 };
@@ -9759,7 +9814,7 @@ sjcl.bn.prototype = {
   radix: 24,
   maxMul: 8,
   _class: sjcl.bn,
-
+  
   copy: function() {
     return new this._class(this);
   },
@@ -9773,12 +9828,12 @@ sjcl.bn.prototype = {
     case "object":
       this.limbs = it.limbs.slice(0);
       break;
-
+      
     case "number":
       this.limbs = [it];
       this.normalize();
       break;
-
+      
     case "string":
       it = it.replace(/^0x/, '');
       this.limbs = [];
@@ -9809,14 +9864,14 @@ sjcl.bn.prototype = {
     }
     return (difference === 0);
   },
-
+  
   /**
    * Get the i'th limb of this, zero if i is too large.
    */
   getLimb: function(i) {
     return (i >= this.limbs.length) ? 0 : this.limbs[i];
   },
-
+  
   /**
    * Constant time comparison function.
    * Returns 1 if this >= that, or zero otherwise.
@@ -9833,7 +9888,7 @@ sjcl.bn.prototype = {
     }
     return (greater | ~less) >>> 31;
   },
-
+  
   /**
    * Convert to a hex string.
    */
@@ -9849,7 +9904,7 @@ sjcl.bn.prototype = {
     }
     return "0x"+out;
   },
-
+  
   /** this += that.  Does not normalize. */
   addM: function(that) {
     if (typeof(that) !== "object") { that = new this._class(that); }
@@ -9862,7 +9917,7 @@ sjcl.bn.prototype = {
     }
     return this;
   },
-
+  
   /** this *= 2.  Requires normalized; ends up normalized. */
   doubleM: function() {
     var i, carry=0, tmp, r=this.radix, m=this.radixMask, l=this.limbs;
@@ -9877,7 +9932,7 @@ sjcl.bn.prototype = {
     }
     return this;
   },
-
+  
   /** this /= 2, rounded down.  Requires normalized; ends up normalized. */
   halveM: function() {
     var i, carry=0, tmp, r=this.radix, l=this.limbs;
@@ -9904,11 +9959,11 @@ sjcl.bn.prototype = {
     }
     return this;
   },
-
+  
   mod: function(that) {
     that = new sjcl.bn(that).normalize(); // copy before we begin
     var out = new sjcl.bn(this).normalize(), ci=0;
-
+    
     for (; out.greaterEquals(that); ci++) {
       that.doubleM();
     }
@@ -9920,15 +9975,15 @@ sjcl.bn.prototype = {
     }
     return out.trim();
   },
-
+  
   /** return inverse mod prime p.  p must be odd. Binary extended Euclidean algorithm mod p. */
   inverseMod: function(p) {
     var a = new sjcl.bn(1), b = new sjcl.bn(0), x = new sjcl.bn(this), y = new sjcl.bn(p), tmp, i, nz=1;
-
+    
     if (!(p.limbs[0] & 1)) {
       throw (new sjcl.exception.invalid("inverseMod: p must be odd"));
     }
-
+    
     // invariant: y is odd
     do {
       if (x.limbs[0] & 1) {
@@ -9939,13 +9994,13 @@ sjcl.bn.prototype = {
         }
         x.subM(y);
         x.normalize();
-
+        
         if (!a.greaterEquals(b)) {
           a.addM(p);
         }
         a.subM(b);
       }
-
+      
       // cut everything in half
       x.halveM();
       if (a.limbs[0] & 1) {
@@ -9953,20 +10008,20 @@ sjcl.bn.prototype = {
       }
       a.normalize();
       a.halveM();
-
+      
       // check for termination: x ?= 0
       for (i=nz=0; i<x.limbs.length; i++) {
         nz |= x.limbs[i];
       }
     } while(nz);
-
+    
     if (!y.equals(1)) {
       throw (new sjcl.exception.invalid("inverseMod: p and x must be relatively prime"));
     }
-
+    
     return b;
   },
-
+  
   /** this + that.  Does not normalize. */
   add: function(that) {
     return this.copy().addM(that);
@@ -9976,7 +10031,7 @@ sjcl.bn.prototype = {
   sub: function(that) {
     return this.copy().subM(that);
   },
-
+  
   /** this * that.  Normalizes and reduces. */
   mul: function(that) {
     if (typeof(that) === "number") { that = new this._class(that); }
@@ -9990,7 +10045,7 @@ sjcl.bn.prototype = {
       for (j=0; j<bl; j++) {
         c[i+j] += ai * b[j];
       }
-
+     
       if (!--ii) {
         ii = this.maxMul;
         out.cnormalize();
@@ -10021,7 +10076,7 @@ sjcl.bn.prototype = {
         pow = pow.square();
       }
     }
-
+    
     return out;
   },
 
@@ -10050,7 +10105,7 @@ sjcl.bn.prototype = {
     l.push(p);
     return this;
   },
-
+  
   /** Reduce mod a modulus.  Stubbed for subclassing. */
   reduce: function() {
     return this;
@@ -10060,7 +10115,7 @@ sjcl.bn.prototype = {
   fullReduce: function() {
     return this.normalize();
   },
-
+  
   /** Propagate carries. */
   normalize: function() {
     var carry=0, i, pv = this.placeVal, ipv = this.ipv, l, m, limbs = this.limbs, ll = limbs.length, mask = this.radixMask;
@@ -10086,7 +10141,7 @@ sjcl.bn.prototype = {
     limbs[i] += carry;
     return this;
   },
-
+  
   /** Serialize to a bit array */
   toBits: function(len) {
     this.fullReduce();
@@ -10098,7 +10153,7 @@ sjcl.bn.prototype = {
     }
     return out;
   },
-
+  
   /** Return the length in bits, rounded up to the nearest byte. */
   bitLength: function() {
     this.fullReduce();
@@ -10114,7 +10169,7 @@ sjcl.bn.prototype = {
 sjcl.bn.fromBits = function(bits) {
   var Class = this, out = new Class(), words=[], w=sjcl.bitArray, t = this.prototype,
       l = Math.min(this.bitLength || 0x100000000, w.bitLength(bits)), e = l % t.radix || t.radix;
-
+  
   words[0] = w.extract(bits, 0, e);
   for (; e < l; e += t.radix) {
     words.unshift(w.extract(bits, e, t.radix));
@@ -10151,7 +10206,7 @@ sjcl.bn.pseudoMersennePrime = function(exponent, coeff) {
   ppr.fullOffset = [];
   ppr.fullFactor = [];
   ppr.modulus = p.modulus = new sjcl.bn(Math.pow(2,exponent));
-
+  
   ppr.fullMask = 0|-Math.pow(2, exponent % ppr.radix);
 
   for (i=0; i<coeff.length; i++) {
@@ -10176,7 +10231,7 @@ sjcl.bn.pseudoMersennePrime = function(exponent, coeff) {
       for (k=0; k<ol; k++) {
         limbs[ll+off[k]] -= fac[k] * l;
       }
-
+      
       i--;
       if (!i) {
         limbs.push(0);
@@ -10188,7 +10243,7 @@ sjcl.bn.pseudoMersennePrime = function(exponent, coeff) {
 
     return this;
   };
-
+  
   ppr._strongReduce = (ppr.fullMask === -1) ? ppr.reduce : function() {
     var limbs = this.limbs, i = limbs.length - 1, k, l;
     this.reduce();
@@ -10206,7 +10261,7 @@ sjcl.bn.pseudoMersennePrime = function(exponent, coeff) {
   ppr.fullReduce = function() {
     var greater, i;
     // massively above the modulus, may be negative
-
+    
     this._strongReduce();
     // less than twice the modulus, may be negative
 
@@ -10214,7 +10269,7 @@ sjcl.bn.pseudoMersennePrime = function(exponent, coeff) {
     this.addM(this.modulus);
     this.normalize();
     // probably 2-3x the modulus
-
+    
     this._strongReduce();
     // less than the power of 2.  still may be more than
     // the modulus
@@ -10223,7 +10278,7 @@ sjcl.bn.pseudoMersennePrime = function(exponent, coeff) {
     for (i=this.limbs.length; i<this.modOffset; i++) {
       this.limbs[i] = 0;
     }
-
+    
     // constant-time subtract modulus
     greater = this.greaterEquals(this.modulus);
     for (i=0; i<this.limbs.length; i++) {
@@ -10312,7 +10367,7 @@ sjcl.ecc.point.prototype = {
   mult: function(k) {
     return this.toJac().mult(k, this).toAffine();
   },
-
+  
   /**
    * Multiply this point by k, added to affine2*k2, and return the answer in Jacobian coordinates.
    * @param {bigInt} k The coefficient to multiply this by.
@@ -10323,7 +10378,7 @@ sjcl.ecc.point.prototype = {
   mult2: function(k, k2, affine2) {
     return this.toJac().mult2(k, this, k2, affine2).toAffine();
   },
-
+  
   multiples: function() {
     var m, i, j;
     if (this._multiples === undefined) {
@@ -10373,7 +10428,7 @@ sjcl.ecc.pointJac.prototype = {
    * Adds S and T and returns the result in Jacobian coordinates. Note that S must be in Jacobian coordinates and T must be in affine coordinates.
    * @param {sjcl.ecc.pointJac} S One of the points to add, in Jacobian coordinates.
    * @param {sjcl.ecc.point} T The other point to add, in affine coordinates.
-   * @return {sjcl.ecc.pointJac} The sum of the two points, in Jacobian coordinates.
+   * @return {sjcl.ecc.pointJac} The sum of the two points, in Jacobian coordinates. 
    */
   add: function(T) {
     var S = this, sz2, c, d, c2, x1, x2, x, y1, y2, y, z;
@@ -10399,7 +10454,7 @@ sjcl.ecc.pointJac.prototype = {
         return new sjcl.ecc.pointJac(S.curve);
       }
     }
-
+    
     d = T.y.mul(sz2.mul(S.z)).subM(S.y);
     c2 = c.square();
 
@@ -10415,7 +10470,7 @@ sjcl.ecc.pointJac.prototype = {
 
     return new sjcl.ecc.pointJac(this.curve,x,y,z);
   },
-
+  
   /**
    * doubles this point.
    * @return {sjcl.ecc.pointJac} The doubled point.
@@ -10438,7 +10493,7 @@ sjcl.ecc.pointJac.prototype = {
   /**
    * Returns a copy of this point converted to affine coordinates.
    * @return {sjcl.ecc.point} The converted point.
-   */
+   */  
   toAffine: function() {
     if (this.isIdentity || this.z.equals(0)) {
       return new sjcl.ecc.point(this.curve);
@@ -10446,7 +10501,7 @@ sjcl.ecc.pointJac.prototype = {
     var zi = this.z.inverse(), zi2 = zi.square();
     return new sjcl.ecc.point(this.curve, this.x.mul(zi2).fullReduce(), this.y.mul(zi2.mul(zi)).fullReduce());
   },
-
+  
   /**
    * Multiply this point by k and return the answer in Jacobian coordinates.
    * @param {bigInt} k The coefficient to multiply by.
@@ -10459,7 +10514,7 @@ sjcl.ecc.pointJac.prototype = {
     } else if (k.limbs !== undefined) {
       k = k.normalize().limbs;
     }
-
+    
     var i, j, out = new sjcl.ecc.point(this.curve).toJac(), multiples = affine.multiples();
 
     for (i=k.length-1; i>=0; i--) {
@@ -10467,10 +10522,10 @@ sjcl.ecc.pointJac.prototype = {
         out = out.doubl().doubl().doubl().doubl().add(multiples[k[i]>>j & 0xF]);
       }
     }
-
+    
     return out;
   },
-
+  
   /**
    * Multiply this point by k, added to affine2*k2, and return the answer in Jacobian coordinates.
    * @param {bigInt} k The coefficient to multiply this by.
@@ -10485,13 +10540,13 @@ sjcl.ecc.pointJac.prototype = {
     } else if (k1.limbs !== undefined) {
       k1 = k1.normalize().limbs;
     }
-
+    
     if (typeof(k2) === "number") {
       k2 = [k2];
     } else if (k2.limbs !== undefined) {
       k2 = k2.normalize().limbs;
     }
-
+    
     var i, j, out = new sjcl.ecc.point(this.curve).toJac(), m1 = affine.multiples(),
         m2 = affine2.multiples(), l1, l2;
 
@@ -10502,7 +10557,7 @@ sjcl.ecc.pointJac.prototype = {
         out = out.doubl().doubl().doubl().doubl().add(m1[l1>>j & 0xF]).add(m2[l2>>j & 0xF]);
       }
     }
-
+    
     return out;
   },
 
@@ -10600,7 +10655,7 @@ sjcl.ecc._dh = function(cn) {
 	    }
 	},
 
-
+	
 	secretKey: function(curve_id, curve, exponent) {
 	    this._curve = curve;
 	    this._exponent = exponent;
@@ -10616,7 +10671,7 @@ sjcl.ecc._dh = function(cn) {
 	    }
 	},
 
-
+	
 	generateKeys: function(curve, paranoia) {
 	    var curve_id;
 	    if (curve === undefined) {
@@ -10636,7 +10691,7 @@ sjcl.ecc._dh = function(cn) {
 	        sec: new sjcl.ecc[cn].secretKey(curve_id, curve, sec)
 	    };
 	}
-    };
+    }; 
 };
 
 sjcl.ecc._dh("elGamal");
@@ -10683,7 +10738,7 @@ sjcl.ecc.ecdsa.publicKey.prototype = {
         hG = sjcl.bn.fromBits(hash).mul(s).mod(R),
         hA = r.mul(s).mod(R),
         r2 = this._curve.G.mult2(hG, hA, this._point).x;
-
+        
     if (r.equals(0) || s.equals(0) || r.greaterEquals(R) || s.greaterEquals(R) || !r2.equals(r)) {
       throw (new sjcl.exception.corrupt("signature didn't check out"));
     }
@@ -12374,7 +12429,7 @@ var io = ('undefined' === typeof module ? {} : module.exports);
           } else if (xhr.status == 403) {
             self.onError(xhr.responseText);
           } else {
-            self.connecting = false;
+            self.connecting = false;            
             !self.reconnecting && self.onError(xhr.responseText);
           }
         }
@@ -12418,7 +12473,7 @@ var io = ('undefined' === typeof module ? {} : module.exports);
 
     var self = this;
     self.connecting = true;
-
+    
     this.handshake(function (sid, heartbeat, close, transports) {
       self.sessionid = sid;
       self.closeTimeout = close * 1000;
@@ -12540,7 +12595,7 @@ var io = ('undefined' === typeof module ? {} : module.exports);
     this.transport.payload(this.buffer);
     this.buffer = [];
   };
-
+  
 
   /**
    * Disconnect the established connect.
@@ -12600,7 +12655,7 @@ var io = ('undefined' === typeof module ? {} : module.exports);
     var port = global.location.port ||
       ('https:' == global.location.protocol ? 443 : 80);
 
-    return this.options.host !== global.location.hostname
+    return this.options.host !== global.location.hostname 
       || this.options.port != port;
   };
 
@@ -12881,7 +12936,7 @@ var io = ('undefined' === typeof module ? {} : module.exports);
    *
    * @api public
    */
-
+  
   SocketNamespace.prototype.emit = function (name) {
     var args = Array.prototype.slice.call(arguments, 1)
       , lastArg = args[args.length - 1]
@@ -13119,8 +13174,8 @@ var io = ('undefined' === typeof module ? {} : module.exports);
    * @api public
    */
 
-  // Do to a bug in the current IDevices browser, we need to wrap the send in a
-  // setTimeout, when they resume from sleeping the browser will crash if
+  // Do to a bug in the current IDevices browser, we need to wrap the send in a 
+  // setTimeout, when they resume from sleeping the browser will crash if 
   // we don't allow the browser time to detect the socket has been closed
   if (io.util.ua.iDevice) {
     WS.prototype.send = function (data) {
@@ -13266,8 +13321,8 @@ var io = ('undefined' === typeof module ? {} : module.exports);
   Flashsocket.prototype.name = 'flashsocket';
 
   /**
-   * Disconnect the established `FlashSocket` connection. This is done by adding a
-   * new task to the FlashSocket. The rest will be handled off by the `WebSocket`
+   * Disconnect the established `FlashSocket` connection. This is done by adding a 
+   * new task to the FlashSocket. The rest will be handled off by the `WebSocket` 
    * transport.
    *
    * @returns {Transport}
@@ -13283,10 +13338,10 @@ var io = ('undefined' === typeof module ? {} : module.exports);
     });
     return this;
   };
-
+  
   /**
    * Sends a message to the Socket.IO server. This is done by adding a new
-   * task to the FlashSocket. The rest will be handled off by the `WebSocket`
+   * task to the FlashSocket. The rest will be handled off by the `WebSocket` 
    * transport.
    *
    * @returns {Transport}
@@ -13380,7 +13435,7 @@ var io = ('undefined' === typeof module ? {} : module.exports);
   };
 
   /**
-   * Check if the FlashSocket transport can be used as cross domain / cross origin
+   * Check if the FlashSocket transport can be used as cross domain / cross origin 
    * transport. Because we can't see which type (secure or insecure) of .swf is used
    * we will just return true.
    *
@@ -13411,8 +13466,8 @@ var io = ('undefined' === typeof module ? {} : module.exports);
     'undefined' != typeof io ? io.Transport : module.exports
   , 'undefined' != typeof io ? io : module.parent.exports
 );
-/*	SWFObject v2.2 <http://code.google.com/p/swfobject/>
-	is released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
+/*	SWFObject v2.2 <http://code.google.com/p/swfobject/> 
+	is released under the MIT License <http://www.opensource.org/licenses/mit-license.php> 
 */
 if ('undefined' != typeof window) {
 var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="ShockwaveFlash.ShockwaveFlash",q="application/x-shockwave-flash",R="SWFObjectExprInst",x="onreadystatechange",O=window,j=document,t=navigator,T=false,U=[h],o=[],N=[],I=[],l,Q,E,B,J=false,a=false,n,G,m=true,M=function(){var aa=typeof j.getElementById!=D&&typeof j.getElementsByTagName!=D&&typeof j.createElement!=D,ah=t.userAgent.toLowerCase(),Y=t.platform.toLowerCase(),ae=Y?/win/.test(Y):/win/.test(ah),ac=Y?/mac/.test(Y):/mac/.test(ah),af=/webkit/.test(ah)?parseFloat(ah.replace(/^.*webkit\/(\d+(\.\d+)?).*$/,"$1")):false,X=!+"\v1",ag=[0,0,0],ab=null;if(typeof t.plugins!=D&&typeof t.plugins[S]==r){ab=t.plugins[S].description;if(ab&&!(typeof t.mimeTypes!=D&&t.mimeTypes[q]&&!t.mimeTypes[q].enabledPlugin)){T=true;X=false;ab=ab.replace(/^.*\s+(\S+\s+\S+$)/,"$1");ag[0]=parseInt(ab.replace(/^(.*)\..*$/,"$1"),10);ag[1]=parseInt(ab.replace(/^.*\.(.*)\s.*$/,"$1"),10);ag[2]=/[a-zA-Z]/.test(ab)?parseInt(ab.replace(/^.*[a-zA-Z]+(.*)$/,"$1"),10):0}}else{if(typeof O[(['Active'].concat('Object').join('X'))]!=D){try{var ad=new window[(['Active'].concat('Object').join('X'))](W);if(ad){ab=ad.GetVariable("$version");if(ab){X=true;ab=ab.split(" ")[1].split(",");ag=[parseInt(ab[0],10),parseInt(ab[1],10),parseInt(ab[2],10)]}}}catch(Z){}}}return{w3:aa,pv:ag,wk:af,ie:X,win:ae,mac:ac}}(),k=function(){if(!M.w3){return}if((typeof j.readyState!=D&&j.readyState=="complete")||(typeof j.readyState==D&&(j.getElementsByTagName("body")[0]||j.body))){f()}if(!J){if(typeof j.addEventListener!=D){j.addEventListener("DOMContentLoaded",f,false)}if(M.ie&&M.win){j.attachEvent(x,function(){if(j.readyState=="complete"){j.detachEvent(x,arguments.callee);f()}});if(O==top){(function(){if(J){return}try{j.documentElement.doScroll("left")}catch(X){setTimeout(arguments.callee,0);return}f()})()}}if(M.wk){(function(){if(J){return}if(!/loaded|complete/.test(j.readyState)){setTimeout(arguments.callee,0);return}f()})()}s(f)}}();function f(){if(J){return}try{var Z=j.getElementsByTagName("body")[0].appendChild(C("span"));Z.parentNode.removeChild(Z)}catch(aa){return}J=true;var X=U.length;for(var Y=0;Y<X;Y++){U[Y]()}}function K(X){if(J){X()}else{U[U.length]=X}}function s(Y){if(typeof O.addEventListener!=D){O.addEventListener("load",Y,false)}else{if(typeof j.addEventListener!=D){j.addEventListener("load",Y,false)}else{if(typeof O.attachEvent!=D){i(O,"onload",Y)}else{if(typeof O.onload=="function"){var X=O.onload;O.onload=function(){X();Y()}}else{O.onload=Y}}}}}function h(){if(T){V()}else{H()}}function V(){var X=j.getElementsByTagName("body")[0];var aa=C(r);aa.setAttribute("type",q);var Z=X.appendChild(aa);if(Z){var Y=0;(function(){if(typeof Z.GetVariable!=D){var ab=Z.GetVariable("$version");if(ab){ab=ab.split(" ")[1].split(",");M.pv=[parseInt(ab[0],10),parseInt(ab[1],10),parseInt(ab[2],10)]}}else{if(Y<10){Y++;setTimeout(arguments.callee,10);return}}X.removeChild(aa);Z=null;H()})()}else{H()}}function H(){var ag=o.length;if(ag>0){for(var af=0;af<ag;af++){var Y=o[af].id;var ab=o[af].callbackFn;var aa={success:false,id:Y};if(M.pv[0]>0){var ae=c(Y);if(ae){if(F(o[af].swfVersion)&&!(M.wk&&M.wk<312)){w(Y,true);if(ab){aa.success=true;aa.ref=z(Y);ab(aa)}}else{if(o[af].expressInstall&&A()){var ai={};ai.data=o[af].expressInstall;ai.width=ae.getAttribute("width")||"0";ai.height=ae.getAttribute("height")||"0";if(ae.getAttribute("class")){ai.styleclass=ae.getAttribute("class")}if(ae.getAttribute("align")){ai.align=ae.getAttribute("align")}var ah={};var X=ae.getElementsByTagName("param");var ac=X.length;for(var ad=0;ad<ac;ad++){if(X[ad].getAttribute("name").toLowerCase()!="movie"){ah[X[ad].getAttribute("name")]=X[ad].getAttribute("value")}}P(ai,ah,Y,ab)}else{p(ae);if(ab){ab(aa)}}}}}else{w(Y,true);if(ab){var Z=z(Y);if(Z&&typeof Z.SetVariable!=D){aa.success=true;aa.ref=Z}ab(aa)}}}}}function z(aa){var X=null;var Y=c(aa);if(Y&&Y.nodeName=="OBJECT"){if(typeof Y.SetVariable!=D){X=Y}else{var Z=Y.getElementsByTagName(r)[0];if(Z){X=Z}}}return X}function A(){return !a&&F("6.0.65")&&(M.win||M.mac)&&!(M.wk&&M.wk<312)}function P(aa,ab,X,Z){a=true;E=Z||null;B={success:false,id:X};var ae=c(X);if(ae){if(ae.nodeName=="OBJECT"){l=g(ae);Q=null}else{l=ae;Q=X}aa.id=R;if(typeof aa.width==D||(!/%$/.test(aa.width)&&parseInt(aa.width,10)<310)){aa.width="310"}if(typeof aa.height==D||(!/%$/.test(aa.height)&&parseInt(aa.height,10)<137)){aa.height="137"}j.title=j.title.slice(0,47)+" - Flash Player Installation";var ad=M.ie&&M.win?(['Active'].concat('').join('X')):"PlugIn",ac="MMredirectURL="+O.location.toString().replace(/&/g,"%26")+"&MMplayerType="+ad+"&MMdoctitle="+j.title;if(typeof ab.flashvars!=D){ab.flashvars+="&"+ac}else{ab.flashvars=ac}if(M.ie&&M.win&&ae.readyState!=4){var Y=C("div");X+="SWFObjectNew";Y.setAttribute("id",X);ae.parentNode.insertBefore(Y,ae);ae.style.display="none";(function(){if(ae.readyState==4){ae.parentNode.removeChild(ae)}else{setTimeout(arguments.callee,10)}})()}u(aa,ab,X)}}function p(Y){if(M.ie&&M.win&&Y.readyState!=4){var X=C("div");Y.parentNode.insertBefore(X,Y);X.parentNode.replaceChild(g(Y),X);Y.style.display="none";(function(){if(Y.readyState==4){Y.parentNode.removeChild(Y)}else{setTimeout(arguments.callee,10)}})()}else{Y.parentNode.replaceChild(g(Y),Y)}}function g(ab){var aa=C("div");if(M.win&&M.ie){aa.innerHTML=ab.innerHTML}else{var Y=ab.getElementsByTagName(r)[0];if(Y){var ad=Y.childNodes;if(ad){var X=ad.length;for(var Z=0;Z<X;Z++){if(!(ad[Z].nodeType==1&&ad[Z].nodeName=="PARAM")&&!(ad[Z].nodeType==8)){aa.appendChild(ad[Z].cloneNode(true))}}}}}return aa}function u(ai,ag,Y){var X,aa=c(Y);if(M.wk&&M.wk<312){return X}if(aa){if(typeof ai.id==D){ai.id=Y}if(M.ie&&M.win){var ah="";for(var ae in ai){if(ai[ae]!=Object.prototype[ae]){if(ae.toLowerCase()=="data"){ag.movie=ai[ae]}else{if(ae.toLowerCase()=="styleclass"){ah+=' class="'+ai[ae]+'"'}else{if(ae.toLowerCase()!="classid"){ah+=" "+ae+'="'+ai[ae]+'"'}}}}}var af="";for(var ad in ag){if(ag[ad]!=Object.prototype[ad]){af+='<param name="'+ad+'" value="'+ag[ad]+'" />'}}aa.outerHTML='<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"'+ah+">"+af+"</object>";N[N.length]=ai.id;X=c(ai.id)}else{var Z=C(r);Z.setAttribute("type",q);for(var ac in ai){if(ai[ac]!=Object.prototype[ac]){if(ac.toLowerCase()=="styleclass"){Z.setAttribute("class",ai[ac])}else{if(ac.toLowerCase()!="classid"){Z.setAttribute(ac,ai[ac])}}}}for(var ab in ag){if(ag[ab]!=Object.prototype[ab]&&ab.toLowerCase()!="movie"){e(Z,ab,ag[ab])}}aa.parentNode.replaceChild(Z,aa);X=Z}}return X}function e(Z,X,Y){var aa=C("param");aa.setAttribute("name",X);aa.setAttribute("value",Y);Z.appendChild(aa)}function y(Y){var X=c(Y);if(X&&X.nodeName=="OBJECT"){if(M.ie&&M.win){X.style.display="none";(function(){if(X.readyState==4){b(Y)}else{setTimeout(arguments.callee,10)}})()}else{X.parentNode.removeChild(X)}}}function b(Z){var Y=c(Z);if(Y){for(var X in Y){if(typeof Y[X]=="function"){Y[X]=null}}Y.parentNode.removeChild(Y)}}function c(Z){var X=null;try{X=j.getElementById(Z)}catch(Y){}return X}function C(X){return j.createElement(X)}function i(Z,X,Y){Z.attachEvent(X,Y);I[I.length]=[Z,X,Y]}function F(Z){var Y=M.pv,X=Z.split(".");X[0]=parseInt(X[0],10);X[1]=parseInt(X[1],10)||0;X[2]=parseInt(X[2],10)||0;return(Y[0]>X[0]||(Y[0]==X[0]&&Y[1]>X[1])||(Y[0]==X[0]&&Y[1]==X[1]&&Y[2]>=X[2]))?true:false}function v(ac,Y,ad,ab){if(M.ie&&M.mac){return}var aa=j.getElementsByTagName("head")[0];if(!aa){return}var X=(ad&&typeof ad=="string")?ad:"screen";if(ab){n=null;G=null}if(!n||G!=X){var Z=C("style");Z.setAttribute("type","text/css");Z.setAttribute("media",X);n=aa.appendChild(Z);if(M.ie&&M.win&&typeof j.styleSheets!=D&&j.styleSheets.length>0){n=j.styleSheets[j.styleSheets.length-1]}G=X}if(M.ie&&M.win){if(n&&typeof n.addRule==r){n.addRule(ac,Y)}}else{if(n&&typeof j.createTextNode!=D){n.appendChild(j.createTextNode(ac+" {"+Y+"}"))}}}function w(Z,X){if(!m){return}var Y=X?"visible":"hidden";if(J&&c(Z)){c(Z).style.visibility=Y}else{v("#"+Z,"visibility:"+Y)}}function L(Y){var Z=/[\\\"<>\.;]/;var X=Z.exec(Y)!=null;return X&&typeof encodeURIComponent!=D?encodeURIComponent(Y):Y}var d=function(){if(M.ie&&M.win){window.attachEvent("onunload",function(){var ac=I.length;for(var ab=0;ab<ac;ab++){I[ab][0].detachEvent(I[ab][1],I[ab][2])}var Z=N.length;for(var aa=0;aa<Z;aa++){y(N[aa])}for(var Y in M){M[Y]=null}M=null;for(var X in swfobject){swfobject[X]=null}swfobject=null})}}();return{registerObject:function(ab,X,aa,Z){if(M.w3&&ab&&X){var Y={};Y.id=ab;Y.swfVersion=X;Y.expressInstall=aa;Y.callbackFn=Z;o[o.length]=Y;w(ab,false)}else{if(Z){Z({success:false,id:ab})}}},getObjectById:function(X){if(M.w3){return z(X)}},embedSWF:function(ab,ah,ae,ag,Y,aa,Z,ad,af,ac){var X={success:false,id:ah};if(M.w3&&!(M.wk&&M.wk<312)&&ab&&ah&&ae&&ag&&Y){w(ah,false);K(function(){ae+="";ag+="";var aj={};if(af&&typeof af===r){for(var al in af){aj[al]=af[al]}}aj.data=ab;aj.width=ae;aj.height=ag;var am={};if(ad&&typeof ad===r){for(var ak in ad){am[ak]=ad[ak]}}if(Z&&typeof Z===r){for(var ai in Z){if(typeof am.flashvars!=D){am.flashvars+="&"+ai+"="+Z[ai]}else{am.flashvars=ai+"="+Z[ai]}}}if(F(Y)){var an=u(aj,am,ah);if(aj.id==ah){w(ah,true)}X.success=true;X.ref=an}else{if(aa&&A()){aj.data=aa;P(aj,am,ah,ac);return}else{w(ah,true)}}if(ac){ac(X)}})}else{if(ac){ac(X)}}},switchOffAutoHideShow:function(){m=false},ua:M,getFlashPlayerVersion:function(){return{major:M.pv[0],minor:M.pv[1],release:M.pv[2]}},hasFlashPlayerVersion:F,createSWF:function(Z,Y,X){if(M.w3){return u(Z,Y,X)}else{return undefined}},showExpressInstall:function(Z,aa,X,Y){if(M.w3&&A()){P(Z,aa,X,Y)}},removeSWF:function(X){if(M.w3){y(X)}},createCSS:function(aa,Z,Y,X){if(M.w3){v(aa,Z,Y,X)}},addDomLoadEvent:K,addLoadEvent:s,getQueryParamValue:function(aa){var Z=j.location.search||j.location.hash;if(Z){if(/\?/.test(Z)){Z=Z.split("?")[1]}if(aa==null){return L(Z)}var Y=Z.split("&");for(var X=0;X<Y.length;X++){if(Y[X].substring(0,Y[X].indexOf("="))==aa){return L(Y[X].substring((Y[X].indexOf("=")+1)))}}}return""},expressInstallCallback:function(){if(a){var X=c(R);if(X&&l){X.parentNode.replaceChild(l,X);if(Q){w(Q,true);if(M.ie&&M.win){l.style.display="block"}}if(E){E(B)}}a=false}}}}();
@@ -13423,14 +13478,14 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
 // Reference: http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol
 
 (function() {
-
+  
   if ('undefined' == typeof window || window.WebSocket) return;
 
   var console = window.console;
   if (!console || !console.log || !console.error) {
     console = {log: function(){ }, error: function(){ }};
   }
-
+  
   if (!swfobject.hasFlashPlayerVersion("10.0.0")) {
     console.error("Flash Player >= 10.0.0 is required.");
     return;
@@ -13569,7 +13624,7 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
     if ("protocol" in flashEvent) {
       this.protocol = flashEvent.protocol;
     }
-
+    
     var jsEvent;
     if (flashEvent.type == "open" || flashEvent.type == "error") {
       jsEvent = this.__createSimpleEvent(flashEvent.type);
@@ -13582,10 +13637,10 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
     } else {
       throw "unknown event type: " + flashEvent.type;
     }
-
+    
     this.dispatchEvent(jsEvent);
   };
-
+  
   WebSocket.prototype.__createSimpleEvent = function(type) {
     if (document.createEvent && window.Event) {
       var event = document.createEvent("Event");
@@ -13595,7 +13650,7 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
       return {type: type, bubbles: false, cancelable: false};
     }
   };
-
+  
   WebSocket.prototype.__createMessageEvent = function(type, data) {
     if (document.createEvent && window.MessageEvent && !window.opera) {
       var event = document.createEvent("MessageEvent");
@@ -13606,7 +13661,7 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
       return {type: type, data: data, bubbles: false, cancelable: false};
     }
   };
-
+  
   /**
    * Define the WebSocket readyState enumeration.
    */
@@ -13619,7 +13674,7 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
   WebSocket.__instances = {};
   WebSocket.__tasks = [];
   WebSocket.__nextId = 0;
-
+  
   /**
    * Load a new flash security policy file.
    * @param {string} url
@@ -13635,7 +13690,7 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
    */
   WebSocket.__initialize = function() {
     if (WebSocket.__flash) return;
-
+    
     if (WebSocket.__swfLocation) {
       // For backword compatibility.
       window.WEB_SOCKET_SWF_LOCATION = WebSocket.__swfLocation;
@@ -13681,7 +13736,7 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
         }
       });
   };
-
+  
   /**
    * Called by Flash to notify JS that it's fully loaded and ready
    * for communication.
@@ -13699,7 +13754,7 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
       WebSocket.__tasks = [];
     }, 0);
   };
-
+  
   /**
    * Called by Flash to notify WebSockets events are fired.
    */
@@ -13719,17 +13774,17 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
     }, 0);
     return true;
   };
-
+  
   // Called by Flash.
   WebSocket.__log = function(message) {
     console.log(decodeURIComponent(message));
   };
-
+  
   // Called by Flash.
   WebSocket.__error = function(message) {
     console.error(decodeURIComponent(message));
   };
-
+  
   WebSocket.__addTask = function(task) {
     if (WebSocket.__flash) {
       task();
@@ -13737,7 +13792,7 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
       WebSocket.__tasks.push(task);
     }
   };
-
+  
   /**
    * Test if the browser is running flash lite.
    * @return {boolean} True if flash lite is running, false otherwise.
@@ -13752,7 +13807,7 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
     }
     return mimeType.enabledPlugin.filename.match(/flashlite/i) ? true : false;
   };
-
+  
   if (!window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION) {
     if (window.addEventListener) {
       window.addEventListener("load", function(){
@@ -13764,7 +13819,7 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
       });
     }
   }
-
+  
 })();
 
 /**
@@ -13999,7 +14054,7 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
 
   /**
    * The HTMLFile transport creates a `forever iframe` based transport
-   * for Internet Explorer. Regular forever iframe implementations will
+   * for Internet Explorer. Regular forever iframe implementations will 
    * continuously trigger the browsers buzy indicators. If the forever iframe
    * is created inside a `htmlfile` these indicators will not be trigged.
    *
@@ -14213,7 +14268,7 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
     return false;
   };
 
-  /**
+  /** 
    * Establish a connection, for iPhone and Android this will be done once the page
    * is loaded.
    *
@@ -14265,7 +14320,7 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
     function onerror () {
       self.retryCounter ++;
       if(!self.retryCounter || self.retryCounter > 3) {
-        self.onClose();
+        self.onClose();  
       } else {
         self.get();
       }
@@ -15874,7 +15929,7 @@ function ba2blks_SHA1(ba, off, len)
 }
 
 /*
- * Add integers, wrapping at 2^32. This uses 16-bit operations internally
+ * Add integers, wrapping at 2^32. This uses 16-bit operations internally 
  * to work around bugs in some JS interpreters.
  */
 function add(x, y)
@@ -15990,38 +16045,38 @@ function core_sha1(x, len) {
 
 /*
  * Construct an SRP object with a username,
- * password, and the bits identifying the
+ * password, and the bits identifying the 
  * group (1024 [default], 1536 or 2048 bits).
  */
 SRPClient = function (username, password, group, hashFn) {
-
+  
   // Verify presence of username.
   if (!username)
     throw 'Username cannot be empty.'
-
+    
   // Store username/password.
   this.username = username;
   this.password = password;
-
+  
   // Initialize hash function
   this.hashFn = hashFn || 'sha-1';
-
+  
   // Retrieve initialization values.
   var group = group || 1024;
   var initVal = this.initVals[group];
-
+  
   // Set N and g from initialization values.
   this.N = new BigInteger(initVal.N, 16);
   this.g = new BigInteger(initVal.g, 16);
   this.gBn = new BigInteger(initVal.g, 16);
-
+  
   // Pre-compute k from N and g.
   this.k = this.k();
-
+  
   // Convenience big integer objects for 1 and 2.
   this.one = new BigInteger("1", 16);
   this.two = new BigInteger("2", 16);
-
+  
 };
 
 var bcrypt = dcodeIO.bcrypt;
@@ -16037,126 +16092,126 @@ SRPClient.prototype = {
    * throughout various SRP calculations.
    */
   k: function() {
-
+    
     // Convert to hex values.
     var toHash = [
       this.N.toString(16),
       this.g.toString(16)
     ];
-
+    
     // Return hash as a BigInteger.
     return this.paddedHash(toHash);
 
   },
-
+  
   /*
    * Calculate x = SHA1(s | SHA1(I | ":" | P))
    */
   calculateX: function (saltHex) {
-
+    
     // Verify presence of parameters.
     if (!saltHex) throw 'Missing parameter.'
-
+    
     if (!this.username || !this.password)
       throw 'Username and password cannot be empty.';
-
+    
     // Hash the concatenated username and password.
     var usernamePassword = this.username + ":" + this.password;
     var usernamePasswordHash = bcrypt.hashSync(usernamePassword, saltHex);
 
     // Calculate the padding for the salt.
     var spad = (saltHex.length % 2 != 0) ? '0' : '';
-
+    
     // Calculate the hash of salt + hash(username:password).
     var X = this.hexHash(spad + saltHex + usernamePasswordHash);
-
+    
     // Return X as a BigInteger.
     return new BigInteger(X, 16);
-
+    
   },
-
+  
   /*
    * Calculate v = g^x % N
    */
   calculateV: function(salt) {
-
+    
     // Verify presence of parameters.
     if (!salt) throw 'Missing parameter.';
-
+    
     // Get X from the salt value.
     var x = this.calculateX(salt);
-
+    
     // Calculate and return the verifier.
     return this.g.modPow(x, this.N);
-
+    
   },
-
+  
   /*
    * Calculate u = SHA1(PAD(A) | PAD(B)), which serves
    * to prevent an attacker who learns a user's verifier
    * from being able to authenticate as that user.
    */
   calculateU: function(A, B) {
-
+    
     // Verify presence of parameters.
     if (!A || !B) throw 'Missing parameter(s).';
-
+    
     // Verify value of A and B.
     if (A.mod(this.N).toString() == '0' ||
         B.mod(this.N).toString() == '0')
       throw 'ABORT: illegal_parameter';
-
+    
     // Convert A and B to hexadecimal.
     var toHash = [A.toString(16), B.toString(16)];
-
+    
     // Return hash as a BigInteger.
     return this.paddedHash(toHash);
 
   },
-
+  
   /*
    * 2.5.4 Calculate the client's public value A = g^a % N,
    * where a is a random number at least 256 bits in length.
    */
   calculateA: function(a) {
-
+    
     // Verify presence of parameter.
     if (!a) throw 'Missing parameter.';
-
+    
     if (Math.ceil(a.bitLength() / 8) < 256/8)
       throw 'Client key length is less than 256 bits.'
-
+    
     // Return A as a BigInteger.
     var A = this.g.modPow(a, this.N);
-
+    
     if (A.mod(this.N).toString() == '0')
       throw 'ABORT: illegal_parameter';
-
+    
     return A;
-
+    
   },
-
+  
   /*
    * Calculate match M = H(A, B, K) or M = H(A, M, K)
    */
   calculateM: function (A, B_or_M, K) {
-
+    
     // Verify presence of parameters.
     if (!A || !B_or_M || !K)
       throw 'Missing parameter(s).';
-
+    
     // Verify value of A and B.
     if (A.mod(this.N).toString() == '0' ||
         B_or_M.mod(this.N).toString() == '0')
       throw 'ABORT: illegal_parameter';
-
+    
     var aHex = A.toString(16);
     var bHex = B_or_M.toString(16);
-
+    
     var array = [aHex, bHex, K];
 
     return this.paddedHash(array);
-
+    
   },
 
   /*
@@ -16214,53 +16269,53 @@ SRPClient.prototype = {
    * S = (B - (k * g^x)) ^ (a + (u * x)) % N
    */
   calculateS: function(B, salt, uu, aa) {
-
+    
     // Verify presence of parameters.
     if (!B || !salt || !uu || !aa)
       throw 'Missing parameters.';
-
+    
     // Verify value of B.
     if (B.mod(this.N).toString() == '0')
       throw 'ABORT: illegal_parameter';
-
+      
     // Calculate X from the salt.
     var x = this.calculateX(salt);
-
+    
     // Calculate bx = g^x % N
     var bx = this.g.modPow(x, this.N);
-
+    
     // Calculate ((B + N * k) - k * bx) % N
     var btmp = B.add(this.N.multiply(this.k))
     .subtract(bx.multiply(this.k)).mod(this.N);
-
+    
     // Finish calculation of the premaster secret.
     return btmp.modPow(x.multiply(uu).add(aa), this.N);
-
+  
   },
-
+  
   calculateK: function (S) {
     var sHex = S.toString(16);
     sHex = this.nZeros(512 - sHex.length) + sHex;
     return this.hexHash(sHex);
   },
-
+  
   /*
    * Helper functions for random number
    * generation and format conversion.
    */
-
+  
   /* Generate a random big integer */
   srpRandom: function() {
 
     var words = sjcl.random.randomWords(8,0);
     var hex = sjcl.codec.hex.fromBits(words);
-
+    
     // Verify random number large enough.
     if (hex.length != 64)
       throw 'Invalid random number size.'
 
     var r = new BigInteger(hex, 16);
-
+    
     if (r.compareTo(this.N) >= 0)
       r = a.mod(this.N.subtract(this.one));
 
@@ -16270,20 +16325,20 @@ SRPClient.prototype = {
     return r;
 
   },
-
+  
   /* Return a random hexadecimal salt */
   randomHexSalt: function() {
 
     return bcrypt.genSaltSync();
 
   },
-
+  
   /*
    * Helper functions for hasing/padding.
    */
 
   /*
-  * SHA1 hashing function with padding: input
+  * SHA1 hashing function with padding: input 
   * is prefixed with 0 to meet N hex width.
   */
   paddedHash: function (array) {
@@ -16291,42 +16346,42 @@ SRPClient.prototype = {
    var nlen = 2 * ((this.N.toString(16).length * 4 + 7) >> 3);
 
    var toHash = '';
-
+   
    for (var i = 0; i < array.length; i++) {
      toHash += this.nZeros(nlen - array[i].length) + array[i];
    }
-
+   
    var hash = new BigInteger(this.hexHash(toHash), 16);
-
+   
    return hash.mod(this.N);
 
   },
 
-  /*
+  /* 
    * Generic hashing function.
    */
   hash: function (str) {
 
     switch (this.hashFn.toLowerCase()) {
-
+      
       case 'sha-256':
         var s = sjcl.codec.hex.fromBits(
                 sjcl.hash.sha256.hash(str));
         return this.nZeros(64 - s.length) + s;
-
+      
       case 'sha-1':
       default:
         return calcSHA1(str);
-
+      
     }
   },
-
+  
   /*
    * Hexadecimal hashing function.
    */
   hexHash: function (str) {
     switch (this.hashFn.toLowerCase()) {
-
+      
       case 'sha-256':
         var s = sjcl.codec.hex.fromBits(
                 sjcl.hash.sha256.hash(
@@ -16336,18 +16391,18 @@ SRPClient.prototype = {
       case 'sha-1':
       default:
         return this.hash(this.pack(str));
-
+      
     }
   },
-
+  
   /*
    * Hex to string conversion.
    */
   pack: function(hex) {
-
+    
     // To prevent null byte termination bug
     if (hex.length % 2 != 0) hex = '0' + hex;
-
+    
     i = 0; ascii = '';
 
     while (i < hex.length/2) {
@@ -16359,25 +16414,25 @@ SRPClient.prototype = {
     return ascii;
 
   },
-
+  
   /* Return a string with N zeros. */
   nZeros: function(n) {
-
+    
     if(n < 1) return '';
     var t = this.nZeros(n >> 1);
-
+    
     return ((n & 1) == 0) ?
       t + t : t + t + '0';
-
+  
   },
-
+  
   /*
    * SRP group parameters, composed of N (hexadecimal
    * prime value) and g (decimal group generator).
    * See http://tools.ietf.org/html/rfc5054#appendix-A
    */
   initVals: {
-
+    
     1024: {
       N: 'EEAF0AB9ADB38DD69C33F80AFA8FC5E86072618775FF3C0B9EA2314C' +
          '9C256576D674DF7496EA81D3383B4813D692C6E0E0D5D8E250B98BE4' +
@@ -16387,7 +16442,7 @@ SRPClient.prototype = {
       g: '2'
 
     },
-
+    
     1536: {
       N: '9DEF3CAFB939277AB1F12A8617A47BBBDBA51DF499AC4C80BEEEA961' +
          '4B19CC4D5F4F5F556E27CBDE51C6A94BE4607A291558903BA0D0F843' +
@@ -16398,9 +16453,9 @@ SRPClient.prototype = {
          '8CE7A28C2442C6F315180F93499A234DCF76E3FED135F9BB',
       g: '2'
     },
-
+    
     2048: {
-      N: 'AC6BDB41324A9A9BF166DE5E1389582FAF72B6651987EE07FC319294' +
+      N: 'AC6BDB41324A9A9BF166DE5E1389582FAF72B6651987EE07FC319294' +              
          '3DB56050A37329CBB4A099ED8193E0757767A13DD52312AB4B03310D' +
          'CD7F48A9DA04FD50E8083969EDB767B0CF6095179A163AB3661A05FB' +
          'D5FAAAE82918A9962F0B93B855F97993EC975EEAA80D740ADBF4FF74' +
@@ -16412,7 +16467,7 @@ SRPClient.prototype = {
          '9E4AFF73',
       g: '2'
     },
-
+    
     3072: {
       N: 'FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E08' +
          '8A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B' +
@@ -16430,7 +16485,7 @@ SRPClient.prototype = {
          'E0FD108E4B82D120A93AD2CAFFFFFFFFFFFFFFFF',
       g: '5'
     },
-
+    
     4096: {
       N: 'FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E08' +
          '8A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B' +
@@ -16453,7 +16508,7 @@ SRPClient.prototype = {
          'FFFFFFFFFFFFFFFF',
       g: '5'
     },
-
+    
     6144: {
       N: 'FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E08' +
          '8A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B' +
@@ -16485,7 +16540,7 @@ SRPClient.prototype = {
          '6DCC4024FFFFFFFFFFFFFFFF',
       g: '5'
     },
-
+    
     8192: {
       N:'FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E08' +
         '8A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B' +
@@ -16526,43 +16581,43 @@ SRPClient.prototype = {
         '60C980DD98EDD3DFFFFFFFFFFFFFFFFF',
       g: '19'
     }
-
+    
   },
-
+  
   /*
    * Server-side SRP functions. These should not
    * be used on the client except for debugging.
    */
-
+  
   /* Calculate the server's public value B. */
   calculateB: function(b, v) {
-
+    
     // Verify presence of parameters.
     if (!b || !v) throw 'Missing parameters.';
-
+    
     var bb = this.g.modPow(b, this.N);
     var B = bb.add(v.multiply(this.k)).mod(this.N);
-
+    
     return B;
-
+    
   },
 
   /* Calculate the server's premaster secret */
   calculateServerS: function(A, v, u, B) {
-
+    
     // Verify presence of parameters.
     if (!A || !v || !u || !B)
       throw 'Missing parameters.';
-
+    
     // Verify value of A and B.
     if (A.mod(this.N).toString() == '0' ||
         B.mod(this.N).toString() == '0')
       throw 'ABORT: illegal_parameter';
-
+    
     return v.modPow(u, this.N).multiply(A)
            .mod(this.N).modPow(B, this.N);
   }
-
+  
 };
 
 return SRPClient;
