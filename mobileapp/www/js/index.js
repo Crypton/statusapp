@@ -193,6 +193,10 @@ var app = {
 
   logout: function () {
     app.session = null;
+    // cleanup function:
+    if (typeof app.logoutCleanup == 'function') {
+      app.logoutCleanup();
+    }
     app.hideMenu();
     app.switchView('#account-login', app.FEED_LABEL);
     $('#tasks-btn').removeClass('active');
@@ -414,14 +418,7 @@ var app = {
     var user = $('#username-login').val();
     var pass = $('#password-login').val();
 
-    // $('#login-progress').show();
-    // $('#login-buttons').hide();
-    // $('#login-form').hide();
-
     function callback (err) {
-      // $('#login-progress').hide();
-      // $('#login-buttons').show();
-      // $('#login-form').show();
       app.switchView('#account-login', '');
       app.clearLoginStatus();
 
@@ -439,15 +436,9 @@ var app = {
   register: function (user, pass, callback) {
     app.setLoginStatus('Generating account...');
     app.switchView('#login-progress', '');
-    // $('#login-progress').show();
-    // $('#login-buttons').hide();
-    // $('#login-form').hide();
 
     crypton.generateAccount(user, pass, function (err) {
       if (err) {
-        // $('#login-progress').hide();
-        // $('#login-buttons').show();
-        // $('#login-form').show();
         app.switchView('#account-login', 'Account');
         return callback(err);
       }
@@ -457,9 +448,6 @@ var app = {
   },
 
   login: function () {
-    // $('#login-progress').show();
-    // $('#login-buttons').hide();
-    // $('#login-form').hide();
     app.switchView('#login-progress', '');
     $('.alert').remove();
 
@@ -471,9 +459,6 @@ var app = {
     function callback (err, session) {
       if (err) {
         app.alert(err, 'danger');
-        // $('#login-form').show();
-        // $('#login-progress').hide();
-        // $('#login-buttons').show();
         app.switchView('#account-login', 'Account');
         app.clearLoginStatus();
         return;
@@ -481,16 +466,13 @@ var app = {
 
       app.username = user;
       app.session = session;
-      app.setLoginStatus('Loading data...');
+      app.setLoginStatus('Loading prefs and feed...');
 
       // Check for first run
       app.session.getOrCreateItem('_prefs_', function(err, prefsItem) {
         console.log('getting _prefs_');
         app.customInitialization();
-        // $('#login-progress').hide();
-        // $('#login-buttons').hide();
-        // $('#login-form').show();
-        app.clearLoginStatus();
+        // app.clearLoginStatus();
 
         if (err) {
           console.error(err);
@@ -507,10 +489,10 @@ var app = {
           app.firstRun();
           return;
         }
-
-        app.switchView('#feed', 'Feed');
-
+	
         $('#password-login').val('');
+        // app.switchView('#feed', 'Feed');
+
         // Override displayInitialView in app to trigger new
         // view after auth
         // app.displayInitialView();

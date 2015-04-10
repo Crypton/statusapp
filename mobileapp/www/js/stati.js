@@ -29,7 +29,7 @@ app.setCustomEvents = function setCustomEvents () {
   $('#my-stati').click(function () {
     app.hideMenu();
     // XXXddahl:  reset status UI
-    app.switchView('#stati', 'Set Status');
+    app.switchView('#stati', 'Update Status');
     $('#set-my-status-textarea').focus();
   });
 
@@ -243,7 +243,7 @@ app.loadAndViewMyStatus = function loadAndViewMyStatus () {
                    };
 
   app.displayMyStatus(statusData);
-
+  app.clearLoginStatus();
   app.switchView('#feed', app.FEED_LABEL);
 };
 
@@ -447,6 +447,12 @@ app.setMyLocation = function setMyLocation(highAccuracy) {
   };
 
   navigator.geolocation.getCurrentPosition(success, error, options);
+};
+
+app.logoutCleanup = function logoutCleanup() {
+  // remove all status updates and my status
+  $('.my-status-node').text('');
+  $('#my-feed-entries').children().remove();
 };
 
 // XXXddahl: TODO
