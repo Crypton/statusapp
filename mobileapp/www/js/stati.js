@@ -9,7 +9,7 @@ app.ITEMS = {
   avatar: 'avatar'
 };
 
-app.FEED_LABEL = 'ZK StatusApp';
+app.FEED_LABEL = 'ZK';
 
 app.INITIAL_STATUS_MESSAGE = 'Current Status: null';
 
@@ -408,9 +408,9 @@ app.createStatusUpdateNode = function (username, statusItem) {
   var statusUpdate = '<div class="status-update '
                    + klass
                    + '">'
-                   + '<h5 class="status-update-username">'
+                   + '<h4 class="status-update-username">'
                    + username
-                   + '</h5>'
+                   + '</h4>'
                    + '<div class="status-update-data">'
                    + '<span class="status-text">'
                    + statusItem.status

@@ -956,8 +956,8 @@ var app = {
       ratio = maxHeight / img.height;
 
     // Draw original image in second canvas
-    canvasCopy.width = img.width;
-    canvasCopy.height = img.height;
+    canvasCopy.width = 120; //img.width;
+    canvasCopy.height = 120; //img.height;
     copyContext.drawImage(img, 0, 0);
 
     // Copy and resize second canvas to first canvas

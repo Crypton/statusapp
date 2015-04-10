@@ -129,7 +129,7 @@ h1 {
 }
 
 #top-menu {
-    background: black !important;
+    background: #1a1a1a !important;
     position: absolute;
     top: 0;
     left: 0;
@@ -175,6 +175,7 @@ input[type="password"] {
     box-shadow: none;
     display: block;
     margin: 10px 0;
+    background-color: whitesmoke;
 }
 
 input[type="text"]:focus,
@@ -184,6 +185,7 @@ input[type="password"]:focus {
     outline: 0;
     /*border-bottom: 1px solid #787878;*/
     border-bottom-width: 2px;
+    background-color: whitesmoke;
 }
 
 ::-webkit-input-placeholder {
@@ -237,9 +239,9 @@ input[type="password"]:focus {
     left: 0px;
     height: 56px;
     line-height: 56px;
-    background-color: whitesmoke;
+    background-color: #3f51b5;
     box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.16), 0px 1px 2.5px 0px rgba(0, 0, 0, 0.26);
-    color: black;
+    color: white;
     z-index: 10;
 	padding-top: 10px;
 }
