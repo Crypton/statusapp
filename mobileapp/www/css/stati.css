@@ -36,13 +36,13 @@
 }
 
 .status-text {
-    font-size: 90%;
+    font-size: 1.3em;
 }
 
 .status-metadata {
-    font-size: 70%;
+    font-size: 90%;
     list-style-type: square;
-    padding-left: 1em;
+    padding-left: 2em;
 }
 
 #feed {
@@ -65,15 +65,22 @@
 
 #my-handle {
     font-weight: bold;
+    font-size: 1.3em;
+    color: #a1a1a1;
 }
 
 #my-status-text {
-    font-size: 100%;
+    font-size: 1.4em;
 }
 
 #my-status-metadata {
-    font-size: 80%;
+    font-size: 90%;
     list-style-type: square;
-    padding-left: 1em;
+    padding-left: 2em;
 }
 
+.my-avatar {
+    padding-right: 0em;
+    height: 75px;
+    width: 75px;
+}

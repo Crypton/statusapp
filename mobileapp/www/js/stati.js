@@ -2,6 +2,24 @@ app.STATUS_CONTAINER = '_my_status_';
 
 app.FEED_CONTAINER = '_my_feed_';
 
+app.localAvatarsPath = 'img/avatars/';
+
+app.localAvatars = ['franklin-1.png', 'franklin-2.png', 'franklin-3.png',
+		    'franklin-4.png', 'franklin-5.png', 'franklin-6.png'];
+
+app.randomAvatar = function randomAvatar() {
+  var randomnumber = Math.floor(Math.random()*5);
+  var avatarPath = app.localAvatarsPath + app.localAvatars[randomnumber];
+  return avatarPath;
+};
+
+app.setInitialAvatar = function setInitialAvatar () {
+  var avatar = app.randomAvatar();
+  app.avatarPath = avatar;
+  localStorage.setItem('avatarPath', avatar);
+  return avatar;
+};
+
 app.ITEMS = {
   firstRun: 'firstRun',
   feed: 'feed',
@@ -49,6 +67,12 @@ app.setCustomEvents = function setCustomEvents () {
 
 app.customInitialization = function customInitialization() {
   console.log('customInitialization()');
+  // check for existing avatar
+  if (!localStorage.getItem('avatarPath')) {
+    app.setInitialAvatar();
+  } else {
+    app.avatarPath = localStorage.getItem('avatarPath'); 
+  }
   // XXXddahl: need a indeterminate progress indicator
   app.createInitialItems(function (err) {
     if (err) {
@@ -239,7 +263,8 @@ app.loadAndViewMyStatus = function loadAndViewMyStatus () {
   var statusData = { username: app.username,
                      myStatus: app.session.items.status.value.status,
                      location: location,
-                     timestamp: new Date(app.session.items.status.value.timestamp)
+                     timestamp: new Date(app.session.items.status.value.timestamp),
+		     avatar: app.avatarPath
                    };
 
   app.displayMyStatus(statusData);
@@ -249,7 +274,11 @@ app.loadAndViewMyStatus = function loadAndViewMyStatus () {
 
 app.displayMyStatus = function displayMyStatus (statusData) {
   console.log('displayMyStatus()', arguments);
-  $('#my-handle').text(statusData.username);
+  // XXXddahl: check for avatar & name before replacing it!!! 
+  var html = '<img class="my-avatar" src="' + statusData.avatar  + '" /> '
+              + '<span id="my-username">' + statusData.username + '</span>';
+  var avatar = $(html);
+  $('#my-handle').prepend(avatar);
   $('#my-status-text').text(statusData.myStatus);
   $('#my-status-location').text(statusData.location || 'undisclosed location');
   $('#my-status-updated').text(statusData.timestamp);
