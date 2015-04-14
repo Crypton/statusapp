@@ -1,28 +1,41 @@
 #set-my-status-textarea {
-    width: 90%;
-    margin: 1em;
-    font-size: 1.6em;
-    height: 100px;
+    width: 260px;
+    margin: 0.5em;
+    font-size: 1.3em;
+    height: 150px;
     font-style: normal;
-    padding: 0.5em;
+    padding: 0.3em;
     border-radius: 4px;
     box-shadow: 1px 2px 2px #ddd;
+    float: right;
 }
 
 #set-my-status-btn {
-    margin-top: .25em;
-    margin-left: 2em;
-    box-shadow: 1px 2px 2px #ddd;
+    font-size: 4em;
+}
+
+#take-a-photo-btn {
+    color: #000;
+}
+
+#pick-an-image-btn {
+    color: #000;
+}
+
+#include-gps-btn {
+    color: #000;
 }
 
 #set-my-geoloc-btn {
     margin-bottom: .25em;
-    margin-left: 2em;
 }
 
 #my-geoloc {
     margin-left: 2em;
     font-size: 1.25em;
+    float: right;
+    margin-right: 34%;
+    padding: 1em;
 }
 
 .status-update {
@@ -143,4 +156,32 @@
 
 #my-status-wrapper {
     margin-top: 20px;
+    
+}
+
+.post-button {
+    font-size: 3em;
+    color: #000;
+    margin-right: 0.4em;
+}
+
+#button-row {
+    float: right;
+}
+
+#status-update-wrapper {
+    float: right; margin-top: -105px; margin-right: 5px;
+}
+
+#my-avatar {
+    width: 80px; height: 80px; margin-top: 20px; margin-left: 10px;
+}
+
+#my-image-to-post {
+    padding-top: 1em;
+    text-align: center;
+}
+
+#stati {
+    padding-top: 1em;
 }

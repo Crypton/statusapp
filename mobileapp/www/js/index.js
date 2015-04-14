@@ -287,11 +287,21 @@ var app = {
     if (app.isNodeWebKit) {
       return app.getPhoto_desktop(options, callback);
     }
-    var width, height, quality;
+
+    var cameraDirectionOptions = { FRONT: 1, BACK: 0 };
+    
+    var width = 120;
+    var height = 160;
+    var quality = 50;
+    var cameraDirection = cameraDirectionOptions.FRONT;
+    var pictureSourceType = navigator.camera.PictureSourceType.CAMERA;
+    // navigator.camera.PictureSourceType.SAVEDPHOTOALBUM
     if (options) {
-      width = options.width || 200;
-      height = options.height || 200;
+      width = options.width || 320;
+      height = options.height || 240;
       quality = options.quality || 50;
+      cameraDirection = options.cameraDirection || cameraDirectionOptions.FRONT;
+      pictureSourceType = options.pictureSourceType || navigator.camera.PictureSourceType.CAMERA;
     }
 
     // via the CAMERA
@@ -310,11 +320,10 @@ var app = {
                                 { quality: quality,
                                   destinationType:
                                   Camera.DestinationType.DATA_URL,
-                                  sourceType:
-                                  navigator.camera.PictureSourceType.CAMERA,
+                                  sourceType: pictureSourceType,
                                   targetWidth: width,
                                   targetHeight: height,
-				  cameraDirection: Camera.Direction.FRONT
+				  cameraDirection: cameraDirection
                                 });
 
   },
@@ -357,6 +366,7 @@ var app = {
   idCardWidth: 420,
 
   getImageDataFromFile: function getImageDataFromFile (file, callback) {
+    // For Desktop
     var image = document.createElement("img");
     image.src = window.URL.createObjectURL(file);
     image.height = app.idCardHeight;
@@ -378,6 +388,7 @@ var app = {
   },
 
   getImage: function () {
+    // Specific getImage function for QR parsing
     if (app.isNodeWebKit) {
       return app.getImage_desktop();
     }

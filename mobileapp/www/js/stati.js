@@ -56,12 +56,48 @@ app.setCustomEvents = function setCustomEvents () {
     app.loadAndViewMyStatus();
   });
 
-  $('#set-my-status-btn').click(function (){
+  $('#set-my-status-btn').click(function () {
     app.setMyStatus();
   });
 
-  $('#set-my-geoloc-btn').click(function (){
+  $('#include-gps-btn').click(function () {
     app.setMyLocation();
+  });
+
+  $('#take-a-photo-btn').click(function () {
+    app.takeAPhoto();
+  });
+  
+  $('#pick-an-image-btn').click(function () {
+    app.pickAnImage();
+  });
+};
+
+app.takeAPhoto = function takeAPhoto () {
+  // get photo
+  var directionBack = 0;
+  app.getPhoto({ width: 320, height: 240, cameraDirection: directionBack },
+  function (err, imgData) {
+    if (err) {
+      console.error(err);
+      app.alert('Cannot take picture: ' + err);
+      return;
+    }
+    var html = '<img id="image-payload" src="' + imgData  + '" />';
+    $('#my-image-to-post').append(html);
+  });
+};
+
+app.pickAnImage = function pickAnImage () {
+  app.getPhoto({ width: 320, height: 240, pictureSourceType: navigator.camera.PictureSourceType.SAVEDPHOTOALBUM },
+  function (err, imgData) {
+    if (err) {
+      console.error(err);
+      app.alert('Cannot get picture from album: ' + err);
+      return;
+    }
+    var html = '<img id="image-payload" src="' + imgData  + '" />';
+    $('#my-image-to-post').append(html);
   });
 };
 
@@ -195,6 +231,7 @@ app.setMyStatus = function setMyStatus() {
   };
 
   $('#set-my-status-textarea').val('');
+  $('#my-image-to-post').children().remove();
   app.loadAndViewMyStatus();
 };
 
@@ -271,7 +308,8 @@ app.obfuscateLocation = function obfuscateLocation (location, decimalPlaces) {
 app.createMediaElement = function createMediaElement(data) {
   var gps;
   if (data.location && data.location != 'undisclosed location') {
-    gps = app.obfuscateLocation(data.location);
+    // gps = app.obfuscateLocation(data.location);
+    gps = data.location;
   } else {
     gps = 'undisclosed location';
   }
@@ -527,7 +565,8 @@ app.setMyLocation = function setMyLocation(highAccuracy) {
 
   function success(pos) {
     var crd = pos.coords;
-    $('#my-geoloc').text(crd.latitude + ' ' + crd.longitude);
+    var gps = crd.latitude + ' ' + crd.longitude;
+    $('#my-geoloc').text(app.obfuscateLocation(gps));
   };
 
   function error(err) {
