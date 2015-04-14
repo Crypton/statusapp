@@ -15,7 +15,7 @@ var app = {
 
   MESSAGE_TYPE: 'messengerMessage',
 
-  APPNAME: 'ZK Status',
+  APPNAME: 'ZK',
 
   URL: 'https://nulltxt.se',
 
@@ -312,8 +312,9 @@ var app = {
                                   Camera.DestinationType.DATA_URL,
                                   sourceType:
                                   navigator.camera.PictureSourceType.CAMERA,
-                                  targetheight: height,
-                                  targetHeight: width
+                                  targetWidth: width,
+                                  targetHeight: height,
+				  cameraDirection: Camera.Direction.FRONT
                                 });
 
   },
@@ -381,7 +382,10 @@ var app = {
       return app.getImage_desktop();
     }
 
-    function onSuccess (imageURI) {
+    function onSuccess (dataURL) {
+      var dataUrlPrefix = 'data:image/png;base64,';
+      dataURL = dataUrlPrefix + dataURL;
+      console.log(dataURL);
       qrcode.callback = function (data) {
         // alert(data);
         var userObj = JSON.parse(data);
@@ -389,7 +393,7 @@ var app = {
       };
 
       try {
-        qrcode.decode(imageURI);
+        qrcode.decode(dataURL);
       } catch (e) {
         app.alert('Cannot decode QR code', 'danger');
         console.error(e);
@@ -402,9 +406,9 @@ var app = {
 
     //Specify the source to get the photos.
     navigator.camera.getPicture(onSuccess, onFail,
-                                { quality: 100,
+                                { quality: 50,
                                   destinationType:
-                                  Camera.DestinationType.FILE_URI,
+                                  Camera.DestinationType.DATA_URL,
                                   sourceType:
                                   navigator.camera.PictureSourceType.SAVEDPHOTOALBUM
                                 });
@@ -819,52 +823,7 @@ var app = {
 
   PHOTO_ITEM: 'avatar',
 
-  addPhotoToIdCard_orig: function (idCard, callback) {
-    // check for existing photo:
-    app.loadOrCreateContainer(app.PHOTO_CONTAINER,
-      function (err, rawContainer) {
-        if (err) {
-          return callback(err);
-        }
-
-        // paste photo into ID:
-        function pastePhoto(imageData, idCard) {
-          var thumb = app.thumbnail(imageData, 100, 100);
-          var ctx = idCard.getContext('2d');
-          ctx.drawImage(thumb, 280, 10);
-          return idCard;
-        }
-
-        var photo = rawContainer;
-
-        if (photo.keys['imgData']) {
-          // XXXddahl: try ??
-          var photoIdCard = pastePhoto(photo.keys['imgData'], idCard);
-          return callback(null, idCard);
-        }
-
-        app.getPhoto(null, function (err, imageSrc) {
-          photo.keys['imgData'] = imageSrc;
-
-          photo.save(function (err){
-            if (err) {
-              var _err = 'Cannot save photo data to server';
-              console.error(_err + ' ' + err);
-              return app.alert(_err);
-            }
-
-            // photo is saved to the server
-            var photoIdCard =
-              pastePhoto(photo.keys['imgData'], idCard);
-            // console.log(photoIdCard);
-            return callback(null, photoIdCard);
-          });
-        });
-    });
-  },
-
-
- addPhotoToIdCard: function (idCard, override, callback) {
+  addPhotoToIdCard: function (idCard, override, callback) {
     // check for existing photo:
     app.session.getOrCreateItem(app.PHOTO_ITEM,
       function (err, avatarItem) {
@@ -874,9 +833,16 @@ var app = {
 
         // paste photo into ID:
         function pastePhoto(imageData, idCard) {
-          var thumb = app.thumbnail(imageData, 100, 100);
+          // var thumb = app.thumbnail(imageData, 100, 100);
           var ctx = idCard.getContext('2d');
-          ctx.drawImage(thumb, 280, 10);
+	  var img = new Image();
+	  img.setAttribute('width', 120);
+	  img.setAttribute('height', 160);
+	  img.onload = function() {
+            ctx.drawImage(img, 280, 10);
+	  };
+	  img.src = imageData;
+          // ctx.drawImage(img, 280, 10);
           return idCard;
         }
 
@@ -886,7 +852,7 @@ var app = {
           return callback(null, idCard);
         }
 
-        app.getPhoto(null, function (err, imageSrc) {
+        app.getPhoto({ width: 120, height: 160 }, function (err, imageSrc) {
           avatarItem.value.avatar = imageSrc;
           avatarItem.value.updated = Date.now();
 

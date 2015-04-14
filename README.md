@@ -1,8 +1,10 @@
 statusapp
 =========
 
-A status application for small groups to keep each other in the loop
+A status application for groups to keep each other in the loop
 
+Mobile Notes:
+-------------
 Cordova plugins needed:
 
 com.phonegap.plugins.barcodescanner
@@ -12,3 +14,4 @@ nl.x-services.plugins.socialsharing
 org.apache.cordova.statusbar
 org.apache.cordova.camera
 org.devgeeks.privacyscreen
+

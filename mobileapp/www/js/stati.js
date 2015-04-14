@@ -256,14 +256,59 @@ app.saveItemToFeed = function saveItemToFeed (item, callback) {
   });
 };
 
+app.obfuscateLocation = function obfuscateLocation (location, decimalPlaces) {
+  if (!decimalPlaces) {
+    decimalPlaces = 2;
+  }
+
+  var gps = location.split(' ');
+  var loc1 = new Number(gps[0]).toFixed(decimalPlaces);
+  var loc2 = new Number(gps[1]).toFixed(decimalPlaces);
+
+  return loc1 + ' ' + loc2;  
+};
+
+app.createMediaElement = function createMediaElement(data) {
+  var gps;
+  if (data.location && data.location != 'undisclosed location') {
+    gps = app.obfuscateLocation(data.location);
+  } else {
+    gps = 'undisclosed location';
+  }
+  var avatarMarkup;
+  if (!data.avatar) {
+    // Make a stand-in avatar
+    avatarMarkup = '<span class="media-generic-avatar">'
+      + data.username[0].toUpperCase()
+      + '</span>';
+  } else {
+    avatarMarkup = '<img class="media-avatar" src="' + data.avatar + '" alt="" />';
+  }
+  
+  var html = '<div class="media attribution">'
+	+ '<a class="img">'
+        + avatarMarkup
+  	+ '  </a>'
+	+ '  <div class="bd media-metadata">'
+	+ '    <span class="media-username">' + data.username + '</span>'
+	+ '    <span class="media-status">' + data.statusText + '</span>'
+        + '    <br />'
+	+ '    <span class="media-timestamp">' + data.timestamp + '</span>'
+        + '    <span class="media-location"> from: ' + gps + '</span>'
+	+ '  </div>'
+        + '</div>';
+  
+  return $(html);
+};
+
 app.loadAndViewMyStatus = function loadAndViewMyStatus () {
-  console.log('loadAndViewMyStatus()', arguments);
+  console.log('loadAndViewMyStatus()');
   var location = app.session.items.status.value.location
     || 'undisclosed location';
   var statusData = { username: app.username,
-                     myStatus: app.session.items.status.value.status,
+                     statusText: app.session.items.status.value.status,
                      location: location,
-                     timestamp: new Date(app.session.items.status.value.timestamp),
+                     timestamp: humaneDate(new Date(app.session.items.status.value.timestamp)),
 		     avatar: app.avatarPath
                    };
 
@@ -272,7 +317,7 @@ app.loadAndViewMyStatus = function loadAndViewMyStatus () {
   app.switchView('#feed', app.FEED_LABEL);
 };
 
-app.displayMyStatus = function displayMyStatus (statusData) {
+app.ORIGdisplayMyStatus = function ORIGdisplayMyStatus (statusData) {
   console.log('displayMyStatus()', arguments);
   // XXXddahl: check for avatar & name before replacing it!!! 
   var html = '<img class="my-avatar" src="' + statusData.avatar  + '" /> '
@@ -283,6 +328,16 @@ app.displayMyStatus = function displayMyStatus (statusData) {
   $('#my-status-location').text(statusData.location || 'undisclosed location');
   $('#my-status-updated').text(statusData.timestamp);
 };
+
+app.displayMyStatus = function displayMyStatus (statusData) {
+  console.log('displayMyStatus()', arguments);
+  $('#my-status-wrapper').children().remove();
+  console.log(statusData);
+  var mediaElement = app.createMediaElement(statusData);
+  console.log(mediaElement);
+  $('#my-status-wrapper').append(mediaElement);
+};
+
 
 app.shareStatus = function shareStatus (peerObj) {
   console.log('shareStatus()', arguments);
@@ -425,7 +480,11 @@ app.updatePeerStatus = function updatePeerStatus(username, statusItem) {
     // Lets not prepend a duplicate status update:)
     return;
   }
-  var statusNode = app.createStatusUpdateNode(username, statusItem);
+  // var statusNode = app.createStatusUpdateNode(username, statusItem);
+  statusItem.username = username;
+  statusItem.statusText = statusItem.status;
+  statusItem.timestamp = humaneDate(new Date(statusItem.timestamp));
+  var statusNode = app.createMediaElement(statusItem);
   $('#my-feed-entries').prepend(statusNode);
 };
 
@@ -486,14 +545,7 @@ app.logoutCleanup = function logoutCleanup() {
 
 // XXXddahl: TODO
 
-// on login: *load latest status*, switch to feed screen
-  // iterate feed container, setInterval on each
-
-// style feed page
-
 // makePictureAvatar(base64PngData)
-
-// makeAsciiAvatar()
 
 // Check for the user's current TZ and use it to display all dates
 

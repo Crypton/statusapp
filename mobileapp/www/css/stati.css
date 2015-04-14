@@ -58,7 +58,6 @@
 }
 
 #my-feed-entries {
-    padding-top: 1em;
     color: black;
     background-color: whitesmoke;
 }
@@ -80,7 +79,68 @@
 }
 
 .my-avatar {
-    padding-right: 0em;
+    float:left;
+    margin-right: 10px;
     height: 75px;
     width: 75px;
+    display:block;
+}
+
+/* ====== media ====== */
+
+.media {
+    margin: 15px 10px 10px 10px;
+}
+
+.media, .bd {
+    overflow:hidden;
+    _overflow:visible; zoom:1;
+}
+
+.media .img {
+    float:left;
+    margin-right: 10px;
+}
+
+.media .img img { display:block; }
+
+.media .imgExt {
+    float:right;
+    margin-left: 10px;
+}
+
+.media-avatar {
+    width: 50px;
+    height: 50px; 
+}
+
+.media-metadata {
+    border-bottom: 1px solid #d5d5d5;
+    padding-bottom: 0.5em;
+}
+
+.media-username {
+    font-weight: bold;
+    color: #3f51b5;
+}
+
+.media-status {
+    margin-left: 0.5em;
+    font-size: 1.2em;
+}
+
+.media-timestamp .media-location {
+    font-size: 70%;
+}
+
+.media-generic-avatar {
+    width: 50px;
+    height: 50px;
+    font-size: 44px;
+    font-weight: bold;
+    margin: 10px;
+}
+
+#my-status-wrapper {
+    margin-top: 20px;
 }
