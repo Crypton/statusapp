@@ -185,3 +185,13 @@
 #stati {
     padding-top: 1em;
 }
+
+#post-button-cog {
+    display: none;
+    font-size: 4em;
+}
+
+.feed-image {
+    border: 2 px solid #5d5d5d;
+    margin: 0.7em;
+}

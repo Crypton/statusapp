@@ -1,7 +1,3 @@
-app.STATUS_CONTAINER = '_my_status_';
-
-app.FEED_CONTAINER = '_my_feed_';
-
 app.localAvatarsPath = 'img/avatars/';
 
 app.localAvatars = ['franklin-1.png', 'franklin-2.png', 'franklin-3.png',
@@ -46,7 +42,7 @@ app.postPeerTrustCallback = function postPeerTrustCallback(peer) {
 app.setCustomEvents = function setCustomEvents () {
   $('#my-stati').click(function () {
     app.hideMenu();
-    // XXXddahl:  reset status UI
+    // XXXddahl: reset status UI
     app.switchView('#stati', 'Update Status');
     $('#set-my-status-textarea').focus();
   });
@@ -74,6 +70,9 @@ app.setCustomEvents = function setCustomEvents () {
 };
 
 app.takeAPhoto = function takeAPhoto () {
+  // remove any photos in the DOM:
+  $('#my-image-to-post').children().remove();
+  
   // get photo
   var directionBack = 0;
   app.getPhoto({ width: 320, height: 240, cameraDirection: directionBack },
@@ -89,6 +88,9 @@ app.takeAPhoto = function takeAPhoto () {
 };
 
 app.pickAnImage = function pickAnImage () {
+  // remove any photos in the DOM:
+  $('#my-image-to-post').children().remove();
+  
   app.getPhoto({ width: 320, height: 240, pictureSourceType: navigator.camera.PictureSourceType.SAVEDPHOTOALBUM },
   function (err, imgData) {
     if (err) {
@@ -218,20 +220,42 @@ app.getContainerByName = function getContainerByName(container) {
   }
 };
 
+app.toggleSetStatusButton = function toggleSetStatusButton() {
+  if ($('#set-my-status-btn').is(':visible')) {
+    $('#set-my-status-btn').hide();
+    $('#post-button-cog').show();
+  } else {
+    $('#post-button-cog').hide();
+    $('#set-my-status-btn').show();
+  }
+};
+
 app.setMyStatus = function setMyStatus() {
+  app.toggleSetStatusButton();
   // validate length of data to be sent
   var status = $('#set-my-status-textarea').val();
 
   // update the item
   // XXXddahl: archive status into a day's history item
-  app.session.items.status.value = {
+  var imageData;
+  if ($('#my-image-to-post').children().length) {
+    imageData = $('#my-image-to-post').children()[0].src;
+  }
+   var updateObj= {
     status: status,
     location: $('#my-geoloc').text(),
-    timestamp: Date.now()
-  };
+     timestamp: Date.now(),
+     imageData: null
+   };
+  if (imageData) {
+    updateObj.imageData = imageData;
+  }
+
+  app.session.items.status.value = updateObj;
 
   $('#set-my-status-textarea').val('');
   $('#my-image-to-post').children().remove();
+  app.toggleSetStatusButton();
   app.loadAndViewMyStatus();
 };
 
@@ -322,7 +346,13 @@ app.createMediaElement = function createMediaElement(data) {
   } else {
     avatarMarkup = '<img class="media-avatar" src="' + data.avatar + '" alt="" />';
   }
-  
+
+  var imageHtml;
+  if (data.imageData) {
+    imageHtml = '<div><img class="feed-image" src="'
+      + data.imageData  + '"/></div>';
+  }
+
   var html = '<div class="media attribution">'
 	+ '<a class="img">'
         + avatarMarkup
@@ -332,9 +362,13 @@ app.createMediaElement = function createMediaElement(data) {
 	+ '    <span class="media-status">' + data.statusText + '</span>'
         + '    <br />'
 	+ '    <span class="media-timestamp">' + data.timestamp + '</span>'
-        + '    <span class="media-location"> from: ' + gps + '</span>'
-	+ '  </div>'
-        + '</div>';
+        + '    <span class="media-location"> from: ' + gps + '</span>';
+  if (imageHtml) {
+    html = html + imageHtml;
+  }
+  html = html + 
+    + '  </div>'
+    + '</div>';
   
   return $(html);
 };
@@ -347,24 +381,13 @@ app.loadAndViewMyStatus = function loadAndViewMyStatus () {
                      statusText: app.session.items.status.value.status,
                      location: location,
                      timestamp: humaneDate(new Date(app.session.items.status.value.timestamp)),
+		     imageData: app.session.items.status.value.imageData || '',
 		     avatar: app.avatarPath
                    };
 
   app.displayMyStatus(statusData);
   app.clearLoginStatus();
   app.switchView('#feed', app.FEED_LABEL);
-};
-
-app.ORIGdisplayMyStatus = function ORIGdisplayMyStatus (statusData) {
-  console.log('displayMyStatus()', arguments);
-  // XXXddahl: check for avatar & name before replacing it!!! 
-  var html = '<img class="my-avatar" src="' + statusData.avatar  + '" /> '
-              + '<span id="my-username">' + statusData.username + '</span>';
-  var avatar = $(html);
-  $('#my-handle').prepend(avatar);
-  $('#my-status-text').text(statusData.myStatus);
-  $('#my-status-location').text(statusData.location || 'undisclosed location');
-  $('#my-status-updated').text(statusData.timestamp);
 };
 
 app.displayMyStatus = function displayMyStatus (statusData) {
