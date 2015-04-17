@@ -15,3 +15,18 @@ org.apache.cordova.statusbar
 org.apache.cordova.camera
 org.devgeeks.privacyscreen
 
+Extra NPM packages needed:
+--------------------------
+npm install -g cordova-icon
+npm install -g cordova-splash  
+
+Before building you need to run:
+
+$ > cordova-icon
+
+and
+
+$ > cordova-splash  
+
+
+
