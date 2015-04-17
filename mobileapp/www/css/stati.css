@@ -60,6 +60,8 @@
 
 #feed {
     /* margin-top: -20px; */
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 #my-status {

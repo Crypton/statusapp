@@ -119,6 +119,8 @@ var app = {
       app.firstRunCreateIdCard( function () {
         $('#tasks-btn').addClass('active');
         app.switchView('#my-fingerprint-id', 'ID Card');
+	// need to set this here in order to call the firstRunComplete function properly
+	app.firstRunIsNow = false;
         app.firstRunComplete();
       });
     });;
@@ -487,7 +489,6 @@ var app = {
       app.session.getOrCreateItem('_prefs_', function(err, prefsItem) {
         console.log('getting _prefs_');
         app.customInitialization();
-        // app.clearLoginStatus();
 
         if (err) {
           console.error(err);
@@ -501,17 +502,12 @@ var app = {
 
         if (!prefsItem.value.firstRun) {
           prefsItem.value = { firstRun: Date.now() };
+	  app.firstRunIsNow = true;
           app.firstRun();
           return;
         }
 	
         $('#password-login').val('');
-        // app.switchView('#feed', 'Feed');
-
-        // Override displayInitialView in app to trigger new
-        // view after auth
-        // app.displayInitialView();
-        // sdisplayapp.displayMyFingerprint(true);
       });
     }
 
@@ -539,6 +535,9 @@ var app = {
       if (!prefsItem.value['first-run']) {
         prefsItem.value = { 'first-run': Date.now() };
       }
+      // Load and display all feed data:
+      app.displayInitialView();
+      
     });
   },
 

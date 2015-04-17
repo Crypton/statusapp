@@ -112,15 +112,16 @@ h1 {
 
 #top-menu {
     background: #1a1a1a !important;
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
-    width: 250px;
+    width: 220px;
     bottom: 0;
     z-index: 20;
     padding-top: 5px;
     -webkit-transform: translate3d(-100%, 0, 0);
     -webkit-transition: all 0.1s ease;
+    margin-top: 56px;
 }
 
 #top-menu.active {
@@ -215,7 +216,7 @@ input[type="password"]:focus {
 }
 
 #header {
-    position: absolute;
+    position: fixed;
     top: 0px;
     right: 0px;
     left: 0px;
@@ -276,6 +277,10 @@ input[type="password"]:focus {
     font-size: 1.1em;
     padding-left: 7px;
     opacity: 0.9;
+}
+
+#main-menu-btn {
+    font-size: 1.2em;
 }
 
 #find-user-form {

@@ -39,10 +39,30 @@ app.postPeerTrustCallback = function postPeerTrustCallback(peer) {
   app.shareStatus(peer);
 };
 
+app.setAvatar = function setAvatar() {
+  var avatarData = app.session.items.avatar.value.avatar;
+  if ($('#my-avatar')[0].src.indexOf('avatars') == -1) {
+    if (avatarData) {
+      $('#my-avatar')[0].src = avatarData;
+      $('#my-avatar').style({ width: '64px', height: '48px' });
+    }
+  }
+
+  if ($("#my-status-wrapper img")[0].src.indexOf('avatars') == -1) {
+    if (avatarData) {
+      $("#my-status-wrapper img")[0].src = avatarData;
+      // $('#my-avatar').style({ width: '64px', height: '48px' });
+    }
+  }
+  
+};
+
 app.setCustomEvents = function setCustomEvents () {
   $('#my-stati').click(function () {
     app.hideMenu();
     // XXXddahl: reset status UI
+    // Get avatar if not present
+
     app.switchView('#stati', 'Update Status');
     $('#set-my-status-textarea').focus();
   });
@@ -234,7 +254,9 @@ app.setMyStatus = function setMyStatus() {
   app.toggleSetStatusButton();
   // validate length of data to be sent
   var status = $('#set-my-status-textarea').val();
-
+  if (!status.length) {
+    app.alert('Please enter a status update', 'info');
+  }
   // update the item
   // XXXddahl: archive status into a day's history item
   var imageData;
@@ -260,24 +282,27 @@ app.setMyStatus = function setMyStatus() {
 };
 
 app.displayInitialView = function displayInitialView() {
-  app.loadAndViewMyStatus();
-  app.loadRecentFeed();
+  // Check for first run
+  if (!app.firstRunIsNow) {
+    app.loadAndViewMyStatus();
+    app.loadRecentFeed();
 
-  app.session.on('message', function (message) {
-    console.log('session.on("message") event called', message);
-    app.handleMessage(message);
-  });
-
-  // onSharedItemSync
-  app.session.events.onSharedItemSync = function (item) {
-    console.log('onSharedItemSync()', item);
-    app.saveItemToFeed(item, function (err) {
-      if (err) {
-        return console.error(err);
-      }
-      app.updatePeerStatus(item.creator.username, item.value);
+    app.session.on('message', function (message) {
+      console.log('session.on("message") event called', message);
+      app.handleMessage(message);
     });
-  };
+    
+    // onSharedItemSync
+    app.session.events.onSharedItemSync = function (item) {
+      console.log('onSharedItemSync()', item);
+      app.saveItemToFeed(item, function (err) {
+	if (err) {
+          return console.error(err);
+	}
+	app.updatePeerStatus(item.creator.username, item.value);
+      });
+    };
+  }
 };
 
 app.saveItemToFeed = function saveItemToFeed (item, callback) {
