@@ -2,6 +2,24 @@ app.STATUS_CONTAINER = '_my_status_';
 
 app.FEED_CONTAINER = '_my_feed_';
 
+app.localAvatarsPath = 'img/avatars/';
+
+app.localAvatars = ['franklin-1.png', 'franklin-2.png', 'franklin-3.png',
+		    'franklin-4.png', 'franklin-5.png', 'franklin-6.png'];
+
+app.randomAvatar = function randomAvatar() {
+  var randomnumber = Math.floor(Math.random()*5);
+  var avatarPath = app.localAvatarsPath + app.localAvatars[randomnumber];
+  return avatarPath;
+};
+
+app.setInitialAvatar = function setInitialAvatar () {
+  var avatar = app.randomAvatar();
+  app.avatarPath = avatar;
+  localStorage.setItem('avatarPath', avatar);
+  return avatar;
+};
+
 app.ITEMS = {
   firstRun: 'firstRun',
   feed: 'feed',
@@ -9,7 +27,7 @@ app.ITEMS = {
   avatar: 'avatar'
 };
 
-app.FEED_LABEL = 'ZK StatusApp';
+app.FEED_LABEL = 'ZK';
 
 app.INITIAL_STATUS_MESSAGE = 'Current Status: null';
 
@@ -29,7 +47,7 @@ app.setCustomEvents = function setCustomEvents () {
   $('#my-stati').click(function () {
     app.hideMenu();
     // XXXddahl:  reset status UI
-    app.switchView('#stati', 'Set Status');
+    app.switchView('#stati', 'Update Status');
     $('#set-my-status-textarea').focus();
   });
 
@@ -38,17 +56,59 @@ app.setCustomEvents = function setCustomEvents () {
     app.loadAndViewMyStatus();
   });
 
-  $('#set-my-status-btn').click(function (){
+  $('#set-my-status-btn').click(function () {
     app.setMyStatus();
   });
 
-  $('#set-my-geoloc-btn').click(function (){
+  $('#include-gps-btn').click(function () {
     app.setMyLocation();
+  });
+
+  $('#take-a-photo-btn').click(function () {
+    app.takeAPhoto();
+  });
+  
+  $('#pick-an-image-btn').click(function () {
+    app.pickAnImage();
+  });
+};
+
+app.takeAPhoto = function takeAPhoto () {
+  // get photo
+  var directionBack = 0;
+  app.getPhoto({ width: 320, height: 240, cameraDirection: directionBack },
+  function (err, imgData) {
+    if (err) {
+      console.error(err);
+      app.alert('Cannot take picture: ' + err);
+      return;
+    }
+    var html = '<img id="image-payload" src="' + imgData  + '" />';
+    $('#my-image-to-post').append(html);
+  });
+};
+
+app.pickAnImage = function pickAnImage () {
+  app.getPhoto({ width: 320, height: 240, pictureSourceType: navigator.camera.PictureSourceType.SAVEDPHOTOALBUM },
+  function (err, imgData) {
+    if (err) {
+      console.error(err);
+      app.alert('Cannot get picture from album: ' + err);
+      return;
+    }
+    var html = '<img id="image-payload" src="' + imgData  + '" />';
+    $('#my-image-to-post').append(html);
   });
 };
 
 app.customInitialization = function customInitialization() {
   console.log('customInitialization()');
+  // check for existing avatar
+  if (!localStorage.getItem('avatarPath')) {
+    app.setInitialAvatar();
+  } else {
+    app.avatarPath = localStorage.getItem('avatarPath'); 
+  }
   // XXXddahl: need a indeterminate progress indicator
   app.createInitialItems(function (err) {
     if (err) {
@@ -171,6 +231,7 @@ app.setMyStatus = function setMyStatus() {
   };
 
   $('#set-my-status-textarea').val('');
+  $('#my-image-to-post').children().remove();
   app.loadAndViewMyStatus();
 };
 
@@ -232,28 +293,89 @@ app.saveItemToFeed = function saveItemToFeed (item, callback) {
   });
 };
 
+app.obfuscateLocation = function obfuscateLocation (location, decimalPlaces) {
+  if (!decimalPlaces) {
+    decimalPlaces = 2;
+  }
+
+  var gps = location.split(' ');
+  var loc1 = new Number(gps[0]).toFixed(decimalPlaces);
+  var loc2 = new Number(gps[1]).toFixed(decimalPlaces);
+
+  return loc1 + ' ' + loc2;  
+};
+
+app.createMediaElement = function createMediaElement(data) {
+  var gps;
+  if (data.location && data.location != 'undisclosed location') {
+    // gps = app.obfuscateLocation(data.location);
+    gps = data.location;
+  } else {
+    gps = 'undisclosed location';
+  }
+  var avatarMarkup;
+  if (!data.avatar) {
+    // Make a stand-in avatar
+    avatarMarkup = '<span class="media-generic-avatar">'
+      + data.username[0].toUpperCase()
+      + '</span>';
+  } else {
+    avatarMarkup = '<img class="media-avatar" src="' + data.avatar + '" alt="" />';
+  }
+  
+  var html = '<div class="media attribution">'
+	+ '<a class="img">'
+        + avatarMarkup
+  	+ '  </a>'
+	+ '  <div class="bd media-metadata">'
+	+ '    <span class="media-username">' + data.username + '</span>'
+	+ '    <span class="media-status">' + data.statusText + '</span>'
+        + '    <br />'
+	+ '    <span class="media-timestamp">' + data.timestamp + '</span>'
+        + '    <span class="media-location"> from: ' + gps + '</span>'
+	+ '  </div>'
+        + '</div>';
+  
+  return $(html);
+};
+
 app.loadAndViewMyStatus = function loadAndViewMyStatus () {
-  console.log('loadAndViewMyStatus()', arguments);
+  console.log('loadAndViewMyStatus()');
   var location = app.session.items.status.value.location
     || 'undisclosed location';
   var statusData = { username: app.username,
-                     myStatus: app.session.items.status.value.status,
+                     statusText: app.session.items.status.value.status,
                      location: location,
-                     timestamp: new Date(app.session.items.status.value.timestamp)
+                     timestamp: humaneDate(new Date(app.session.items.status.value.timestamp)),
+		     avatar: app.avatarPath
                    };
 
   app.displayMyStatus(statusData);
-
+  app.clearLoginStatus();
   app.switchView('#feed', app.FEED_LABEL);
 };
 
-app.displayMyStatus = function displayMyStatus (statusData) {
+app.ORIGdisplayMyStatus = function ORIGdisplayMyStatus (statusData) {
   console.log('displayMyStatus()', arguments);
-  $('#my-handle').text(statusData.username);
+  // XXXddahl: check for avatar & name before replacing it!!! 
+  var html = '<img class="my-avatar" src="' + statusData.avatar  + '" /> '
+              + '<span id="my-username">' + statusData.username + '</span>';
+  var avatar = $(html);
+  $('#my-handle').prepend(avatar);
   $('#my-status-text').text(statusData.myStatus);
   $('#my-status-location').text(statusData.location || 'undisclosed location');
   $('#my-status-updated').text(statusData.timestamp);
 };
+
+app.displayMyStatus = function displayMyStatus (statusData) {
+  console.log('displayMyStatus()', arguments);
+  $('#my-status-wrapper').children().remove();
+  console.log(statusData);
+  var mediaElement = app.createMediaElement(statusData);
+  console.log(mediaElement);
+  $('#my-status-wrapper').append(mediaElement);
+};
+
 
 app.shareStatus = function shareStatus (peerObj) {
   console.log('shareStatus()', arguments);
@@ -396,7 +518,11 @@ app.updatePeerStatus = function updatePeerStatus(username, statusItem) {
     // Lets not prepend a duplicate status update:)
     return;
   }
-  var statusNode = app.createStatusUpdateNode(username, statusItem);
+  // var statusNode = app.createStatusUpdateNode(username, statusItem);
+  statusItem.username = username;
+  statusItem.statusText = statusItem.status;
+  statusItem.timestamp = humaneDate(new Date(statusItem.timestamp));
+  var statusNode = app.createMediaElement(statusItem);
   $('#my-feed-entries').prepend(statusNode);
 };
 
@@ -408,9 +534,9 @@ app.createStatusUpdateNode = function (username, statusItem) {
   var statusUpdate = '<div class="status-update '
                    + klass
                    + '">'
-                   + '<h5 class="status-update-username">'
+                   + '<h4 class="status-update-username">'
                    + username
-                   + '</h5>'
+                   + '</h4>'
                    + '<div class="status-update-data">'
                    + '<span class="status-text">'
                    + statusItem.status
@@ -439,7 +565,8 @@ app.setMyLocation = function setMyLocation(highAccuracy) {
 
   function success(pos) {
     var crd = pos.coords;
-    $('#my-geoloc').text(crd.latitude + ' ' + crd.longitude);
+    var gps = crd.latitude + ' ' + crd.longitude;
+    $('#my-geoloc').text(app.obfuscateLocation(gps));
   };
 
   function error(err) {
@@ -449,16 +576,15 @@ app.setMyLocation = function setMyLocation(highAccuracy) {
   navigator.geolocation.getCurrentPosition(success, error, options);
 };
 
+app.logoutCleanup = function logoutCleanup() {
+  // remove all status updates and my status
+  $('.my-status-node').text('');
+  $('#my-feed-entries').children().remove();
+};
+
 // XXXddahl: TODO
 
-// on login: *load latest status*, switch to feed screen
-  // iterate feed container, setInterval on each
-
-// style feed page
-
 // makePictureAvatar(base64PngData)
-
-// makeAsciiAvatar()
 
 // Check for the user's current TZ and use it to display all dates
 

@@ -15,7 +15,7 @@ var app = {
 
   MESSAGE_TYPE: 'messengerMessage',
 
-  APPNAME: 'ZK Status',
+  APPNAME: 'ZK',
 
   URL: 'https://nulltxt.se',
 
@@ -193,6 +193,10 @@ var app = {
 
   logout: function () {
     app.session = null;
+    // cleanup function:
+    if (typeof app.logoutCleanup == 'function') {
+      app.logoutCleanup();
+    }
     app.hideMenu();
     app.switchView('#account-login', app.FEED_LABEL);
     $('#tasks-btn').removeClass('active');
@@ -283,11 +287,21 @@ var app = {
     if (app.isNodeWebKit) {
       return app.getPhoto_desktop(options, callback);
     }
-    var width, height, quality;
+
+    var cameraDirectionOptions = { FRONT: 1, BACK: 0 };
+    
+    var width = 120;
+    var height = 160;
+    var quality = 50;
+    var cameraDirection = cameraDirectionOptions.FRONT;
+    var pictureSourceType = navigator.camera.PictureSourceType.CAMERA;
+    // navigator.camera.PictureSourceType.SAVEDPHOTOALBUM
     if (options) {
-      width = options.width || 200;
-      height = options.height || 200;
+      width = options.width || 320;
+      height = options.height || 240;
       quality = options.quality || 50;
+      cameraDirection = options.cameraDirection || cameraDirectionOptions.FRONT;
+      pictureSourceType = options.pictureSourceType || navigator.camera.PictureSourceType.CAMERA;
     }
 
     // via the CAMERA
@@ -306,10 +320,10 @@ var app = {
                                 { quality: quality,
                                   destinationType:
                                   Camera.DestinationType.DATA_URL,
-                                  sourceType:
-                                  navigator.camera.PictureSourceType.CAMERA,
-                                  targetheight: height,
-                                  targetHeight: width
+                                  sourceType: pictureSourceType,
+                                  targetWidth: width,
+                                  targetHeight: height,
+				  cameraDirection: cameraDirection
                                 });
 
   },
@@ -352,6 +366,7 @@ var app = {
   idCardWidth: 420,
 
   getImageDataFromFile: function getImageDataFromFile (file, callback) {
+    // For Desktop
     var image = document.createElement("img");
     image.src = window.URL.createObjectURL(file);
     image.height = app.idCardHeight;
@@ -373,11 +388,15 @@ var app = {
   },
 
   getImage: function () {
+    // Specific getImage function for QR parsing
     if (app.isNodeWebKit) {
       return app.getImage_desktop();
     }
 
-    function onSuccess (imageURI) {
+    function onSuccess (dataURL) {
+      var dataUrlPrefix = 'data:image/png;base64,';
+      dataURL = dataUrlPrefix + dataURL;
+      console.log(dataURL);
       qrcode.callback = function (data) {
         // alert(data);
         var userObj = JSON.parse(data);
@@ -385,7 +404,7 @@ var app = {
       };
 
       try {
-        qrcode.decode(imageURI);
+        qrcode.decode(dataURL);
       } catch (e) {
         app.alert('Cannot decode QR code', 'danger');
         console.error(e);
@@ -398,9 +417,9 @@ var app = {
 
     //Specify the source to get the photos.
     navigator.camera.getPicture(onSuccess, onFail,
-                                { quality: 100,
+                                { quality: 50,
                                   destinationType:
-                                  Camera.DestinationType.FILE_URI,
+                                  Camera.DestinationType.DATA_URL,
                                   sourceType:
                                   navigator.camera.PictureSourceType.SAVEDPHOTOALBUM
                                 });
@@ -414,14 +433,7 @@ var app = {
     var user = $('#username-login').val();
     var pass = $('#password-login').val();
 
-    // $('#login-progress').show();
-    // $('#login-buttons').hide();
-    // $('#login-form').hide();
-
     function callback (err) {
-      // $('#login-progress').hide();
-      // $('#login-buttons').show();
-      // $('#login-form').show();
       app.switchView('#account-login', '');
       app.clearLoginStatus();
 
@@ -439,15 +451,9 @@ var app = {
   register: function (user, pass, callback) {
     app.setLoginStatus('Generating account...');
     app.switchView('#login-progress', '');
-    // $('#login-progress').show();
-    // $('#login-buttons').hide();
-    // $('#login-form').hide();
 
     crypton.generateAccount(user, pass, function (err) {
       if (err) {
-        // $('#login-progress').hide();
-        // $('#login-buttons').show();
-        // $('#login-form').show();
         app.switchView('#account-login', 'Account');
         return callback(err);
       }
@@ -457,9 +463,6 @@ var app = {
   },
 
   login: function () {
-    // $('#login-progress').show();
-    // $('#login-buttons').hide();
-    // $('#login-form').hide();
     app.switchView('#login-progress', '');
     $('.alert').remove();
 
@@ -471,9 +474,6 @@ var app = {
     function callback (err, session) {
       if (err) {
         app.alert(err, 'danger');
-        // $('#login-form').show();
-        // $('#login-progress').hide();
-        // $('#login-buttons').show();
         app.switchView('#account-login', 'Account');
         app.clearLoginStatus();
         return;
@@ -481,16 +481,13 @@ var app = {
 
       app.username = user;
       app.session = session;
-      app.setLoginStatus('Loading data...');
+      app.setLoginStatus('Loading prefs and feed...');
 
       // Check for first run
       app.session.getOrCreateItem('_prefs_', function(err, prefsItem) {
         console.log('getting _prefs_');
         app.customInitialization();
-        // $('#login-progress').hide();
-        // $('#login-buttons').hide();
-        // $('#login-form').show();
-        app.clearLoginStatus();
+        // app.clearLoginStatus();
 
         if (err) {
           console.error(err);
@@ -507,10 +504,10 @@ var app = {
           app.firstRun();
           return;
         }
-
-        app.switchView('#feed', 'Feed');
-
+	
         $('#password-login').val('');
+        // app.switchView('#feed', 'Feed');
+
         // Override displayInitialView in app to trigger new
         // view after auth
         // app.displayInitialView();
@@ -837,52 +834,7 @@ var app = {
 
   PHOTO_ITEM: 'avatar',
 
-  addPhotoToIdCard_orig: function (idCard, callback) {
-    // check for existing photo:
-    app.loadOrCreateContainer(app.PHOTO_CONTAINER,
-      function (err, rawContainer) {
-        if (err) {
-          return callback(err);
-        }
-
-        // paste photo into ID:
-        function pastePhoto(imageData, idCard) {
-          var thumb = app.thumbnail(imageData, 100, 100);
-          var ctx = idCard.getContext('2d');
-          ctx.drawImage(thumb, 280, 10);
-          return idCard;
-        }
-
-        var photo = rawContainer;
-
-        if (photo.keys['imgData']) {
-          // XXXddahl: try ??
-          var photoIdCard = pastePhoto(photo.keys['imgData'], idCard);
-          return callback(null, idCard);
-        }
-
-        app.getPhoto(null, function (err, imageSrc) {
-          photo.keys['imgData'] = imageSrc;
-
-          photo.save(function (err){
-            if (err) {
-              var _err = 'Cannot save photo data to server';
-              console.error(_err + ' ' + err);
-              return app.alert(_err);
-            }
-
-            // photo is saved to the server
-            var photoIdCard =
-              pastePhoto(photo.keys['imgData'], idCard);
-            // console.log(photoIdCard);
-            return callback(null, photoIdCard);
-          });
-        });
-    });
-  },
-
-
- addPhotoToIdCard: function (idCard, override, callback) {
+  addPhotoToIdCard: function (idCard, override, callback) {
     // check for existing photo:
     app.session.getOrCreateItem(app.PHOTO_ITEM,
       function (err, avatarItem) {
@@ -892,9 +844,16 @@ var app = {
 
         // paste photo into ID:
         function pastePhoto(imageData, idCard) {
-          var thumb = app.thumbnail(imageData, 100, 100);
+          // var thumb = app.thumbnail(imageData, 100, 100);
           var ctx = idCard.getContext('2d');
-          ctx.drawImage(thumb, 280, 10);
+	  var img = new Image();
+	  img.setAttribute('width', 120);
+	  img.setAttribute('height', 160);
+	  img.onload = function() {
+            ctx.drawImage(img, 280, 10);
+	  };
+	  img.src = imageData;
+          // ctx.drawImage(img, 280, 10);
           return idCard;
         }
 
@@ -904,7 +863,7 @@ var app = {
           return callback(null, idCard);
         }
 
-        app.getPhoto(null, function (err, imageSrc) {
+        app.getPhoto({ width: 120, height: 160 }, function (err, imageSrc) {
           avatarItem.value.avatar = imageSrc;
           avatarItem.value.updated = Date.now();
 
@@ -956,8 +915,8 @@ var app = {
       ratio = maxHeight / img.height;
 
     // Draw original image in second canvas
-    canvasCopy.width = img.width;
-    canvasCopy.height = img.height;
+    canvasCopy.width = 120; //img.width;
+    canvasCopy.height = 120; //img.height;
     copyContext.drawImage(img, 0, 0);
 
     // Copy and resize second canvas to first canvas
