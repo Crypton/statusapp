@@ -232,14 +232,6 @@ app.loadRecentFeed = function loadRecentFeed() {
   }, 5000);
 };
 
-app.getContainerByName = function getContainerByName(container) {
-  for (var i = 0; i < app.session.containers.length; i++) {
-    if (app.session.containers[i].name == container) {
-      return app.session.containers[i];
-    }
-  }
-};
-
 app.toggleSetStatusButton = function toggleSetStatusButton() {
   if ($('#set-my-status-btn').is(':visible')) {
     $('#set-my-status-btn').hide();

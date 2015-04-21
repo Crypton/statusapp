@@ -928,21 +928,6 @@ var app = {
     return canvas;
   },
 
-  loadOrCreateContainer: function (containerName, callback) {
-    console.log('loadOrCreateContainer()', arguments);
-    app.session.load(containerName, function (err, container) {
-      if (err) {
-        return app.session.create(containerName, function (err) {
-          if (err) {
-            return callback(err);
-          }
-          app.loadOrCreateContainer(containerName, callback);
-        });
-      }
-      callback(err, container);
-    });
-  },
-
   displayContacts: function () {
     app.switchView('#contacts', 'Contacts');
     console.log("displayContacts()");
@@ -954,12 +939,14 @@ var app = {
       }
       app._contacts = contacts;
       $('#contacts-list').children().remove();
-      for (var name in contacts) {
+      var contactNames = Object.keys(contacts).sort();
+      
+      for (var i = 0; i < contactNames.length; i++) {
         var html = '<li class="contact-record" id="contact-'
-                   + name
-                   + '">'
-                   + name
-                   + '</li>';
+              + contactNames[i]
+              + '">'
+              + contactNames[i]
+              + '</li>';
         $('#contacts-list').append($(html));
       }
 
@@ -967,10 +954,6 @@ var app = {
         var contact = $(this).text();
         console.log(contact);
         app.contactDetails(contact);
-        // set the message button event handler inside this one...
-        $('#contacts-detail-message-btn').click(function () {
-          app.showComposeUI(contact);
-        });
       });
 
     });
@@ -991,14 +974,13 @@ var app = {
   },
 
   getContactsFromServer: function (callback) {
-    app.session.load(crypton.trustStateContainer,
-    function (err, rawContainer) {
+    app.session.getOrCreateItem(crypton.trustedPeers,
+    function (err, trustedPeers) {
       if (err) {
-        console.error(err);
-        return callback(err);
+	console.error(err);
+	return callback(err);
       }
-      app.contactsContainer = rawContainer;
-      return callback(null, app.contactsContainer.keys);
+      return callback(null, trustedPeers.value);
     });
   }
 };

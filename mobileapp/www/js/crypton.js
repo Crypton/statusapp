@@ -90,10 +90,10 @@ crypton.cipherOptions = {
 crypton.paranoia = 6;
 
 /**!
- * ### trustStateContainer
- * Internal name for trust state container
+ * ### trustedPeers
+ * Internal name for trusted peer (contacts list)
  */
-crypton.trustStateContainer = '_trust_state';
+crypton.trustedPeers = '_trusted_peers';
 
 /**!
  * ### collectorsStarted
@@ -497,21 +497,16 @@ crypton.authorize = function (username, passphrase, callback, options) {
                   return callback(err);
                 }
 
-                // check for internal peer trust state container
-                session.load(crypton.trustStateContainer, function (err) {
-                  // if it exists, callback with session
-                  if (!err) {
-                    return callback(null, session);
+                // check for internal 'trusted peers' Item
+                session.getOrCreateItem(crypton.trustedPeers,
+                function (err, item) {
+                  if (err) {
+                    var _err = 'Cannot get "trusted peers" Item';
+                    console.error(_err, err);
+                    // still need to return the sesison
+                    return callback(_err, session);
                   }
-
-                  // if not, create it
-                  session.create(crypton.trustStateContainer, function (err) {
-                    if (err) {
-                      return callback(err);
-                    }
-
-                    callback(null, session);
-                  });
+                  return callback(null, session);
                 });
               });
             });
@@ -1514,7 +1509,7 @@ Session.prototype.getPeer = function (username, callback) {
       return callback(err);
     }
 
-    that.load(crypton.trustStateContainer, function (err, container) {
+    that.getOrCreateItem(crypton.trustedPeers, function (err, trustedPeers) {
       if (err) {
         return callback(err);
       }
@@ -1522,15 +1517,15 @@ Session.prototype.getPeer = function (username, callback) {
       // if the peer has previously been trusted,
       // we should check the saved fingerprint against
       // what the server has given us
-      if (!container.keys[username]) {
+      var peers = trustedPeers.value;
+
+      if (!peers[username]) {
         peer.trusted = false;
       } else {
-        var savedFingerprint = container.keys[username].fingerprint;
-
+        var savedFingerprint = peers[username].fingerprint;
         if (!crypton.constEqual(savedFingerprint, peer.fingerprint)) {
           return callback('Server has provided malformed peer', peer);
         }
-
         peer.trusted = true;
       }
 
@@ -2469,7 +2464,7 @@ Peer.prototype.sendMessage = function (headers, payload, callback) {
 
 /**!
  * ### trust(callback)
- * Add peer's fingerprint to internal trust state container
+ * Add peer's fingerprint to internal trusted peers Item
  *
  * Calls back without error if successful
  *
@@ -2480,21 +2475,24 @@ Peer.prototype.sendMessage = function (headers, payload, callback) {
 Peer.prototype.trust = function (callback) {
   var that = this;
 
-  that.session.load(crypton.trustStateContainer, function (err, container) {
+  that.session.getOrCreateItem(crypton.trustedPeers,
+  function (err, trustedPeers) {
     if (err) {
       return callback(err);
     }
 
-    if (container.keys[that.username]) {
+    var peers = trustedPeers.value;
+    if (peers[that.username]) {
       return callback('Peer is already trusted');
     }
 
-    container.keys[that.username] = {
+    peers[that.username] = {
       trustedAt: +new Date(),
       fingerprint: that.fingerprint
     };
-
-    container.save(function (err) {
+    // TODO: When this item becomes very large we might consider
+    // creating items the letter of each peer's handle
+    peers.save(function (err) {
       if (err) {
         return callback(err);
       }
