@@ -31,7 +31,8 @@ var app = {
   // Bind any events that are required on startup. Common events are:
   // 'load', 'deviceready', 'offline', and 'online'.
   bindEvents: function() {
-    document.addEventListener('deviceready', this.onDeviceReady, false);
+    document.addEventListener('deviceready', app.onDeviceReady, false);
+    
     $('.view').click(function () {
       app.hideMenu();
     });
@@ -137,7 +138,7 @@ var app = {
     });
   },
 
-  switchView: function (id, name) {
+  switchView: function switchView (id, name) {
     $('.view').removeClass('active');
     $('#page-title').text(name);
     $(id).addClass('active');
@@ -152,9 +153,23 @@ var app = {
   //
   // The scope of 'this' is the event. In order to call the 'receivedEvent'
   // function, we must explicity call 'app.receivedEvent(...);'
-  onDeviceReady: function() {
+  onDeviceReady: function onDeviceReady () {
     app.enableLoginButtons();
+    
+    console.log('Device Ready Event!');
+    
     app.receivedEvent('deviceready');
+    
+    document.addEventListener('resume', function() {
+      setTimeout(function(){
+        console.log('Application Resume Event!');
+	if (app.resumeEventHandler &&
+	    (typeof app.resumeEventHandler == 'function')) {
+	  app.resumeEventHandler();
+	}
+	
+      }, 0);
+    }, false);
   },
   // Update DOM on a Received Event
   receivedEvent: function(id) {
@@ -532,8 +547,8 @@ var app = {
         return;
       }
 
-      if (!prefsItem.value['first-run']) {
-        prefsItem.value = { 'first-run': Date.now() };
+      if (!prefsItem.value['firstRun']) {
+        prefsItem.value = { 'firstRun': Date.now() };
       }
       // Load and display all feed data:
       app.displayInitialView();
@@ -982,5 +997,70 @@ var app = {
       }
       return callback(null, trustedPeers.value);
     });
+  },
+
+  setPassphraseInKeychain: function (passphrase) {
+    // if we set the username + password into the keychain, we then:
+    // * create a keychain object in localStorage like: { username: Date.now()}
+    // * when we render the login screen, we can check this value and
+    //   try to get the passphrase automatically and login with just a click
+    // * Perhaps the login screen is dynamic, if a username is not in
+    //   the keychain property, we render the password field
+    // * Provide a manual override checkbox? 
+  },
+  
+  keyChain: {
+
+    init: function init_keyChain (prefix) {
+      this.ss = new cordova.plugins.SecureStorage(
+	function () { console.log('KeyChain initialized'); },
+	function (error) { console.log('KeyChain Error ' + error); },
+	app.APPNAME);
+      this.passphraseKeyPrefix(prefix);
+    },
+    
+    _prefix: undefined,
+    
+    set passphraseKeyPrefix(prefix) {
+      this.prefix = prefix;
+    },
+
+    get prefix() {
+      if (!this.prefix) {
+	console.error('Prefix required to get keychain data');
+      }
+      return this.prefix;
+    },
+    
+    getPassphrase: function _getPassphrase (callback) {
+      var passphraseKey = this.prefix + '-' + app.APPNAME;
+      this.ss.get(
+	function (value) {
+	  console.log('Success, got ' + value);
+	  callback(null, value);
+        },
+	function (error) {
+	  console.log('Error ' + error);
+	  callback(error);
+	},
+	passphraseKey);
+    },
+
+    setPassphrase: function _setPassphrase (passphraseValue) {
+      var _passphraseKey = this.prefix + '-' + app.APPNAME;
+      this.ss.set(
+	function (key) { console.log('Set ' + key); },
+	function (error) { console.log('Error ' + error); },
+	_passphraseKey, passphraseValue);
+    },
+    
+    removePassphrase: function _removePassphrase () {
+      var _passphraseKey = this.prefix + '-' + app.APPNAME;
+      this.ss.remove(
+	function (key) { console.log('Removed ' + key); },
+	function (error) { console.log('Error, ' + error); },
+	_passphraseKey);
+    }
   }
 };
+

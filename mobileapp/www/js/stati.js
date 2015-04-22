@@ -39,6 +39,14 @@ app.postPeerTrustCallback = function postPeerTrustCallback(peer) {
   app.shareStatus(peer);
 };
 
+app.resumeEventHandler = function resumeEventHandler () {
+  if ((app.lastInterval - Date.now()) < (60 * 5 * 1000)) {
+    // More than 5 minutes have elapsed since last interval
+    // fetch from the server
+    app.loadRecentFeed();
+  }
+};
+
 app.setAvatar = function setAvatar() {
   var avatarData = app.session.items.avatar.value.avatar;
   if ($('#my-avatar')[0].src.indexOf('avatars') == -1) {
@@ -181,16 +189,13 @@ app.createInitialItems = function createInitialItems (callback) {
   });
 };
 
-app.loadingFeed = false;
-
-app.loadRecentFeed = function loadRecentFeed() {
+app.loadRecentFeed = function loadRecentFeed () {
   // for now this is all feed hmacs we have in
   // items.feed.feedHmacs
-  if (app.loadingFeed == true) {
+  if (app.loadingInterval) {
     return;
   }
   var that = this;
-  this.loadingFeed = true;
   var hmacs = [];
   var feedHmacs = Object.keys(app.session.items.feed.value.feedHmacs);
   var feedLength = feedHmacs.length;
@@ -198,14 +203,12 @@ app.loadRecentFeed = function loadRecentFeed() {
     return;
   }
   var idx = 0;
-  // XXXddahl: Need a way to cancel this timeout
+  
   app.loadingInterval = window.setInterval(function () {
     console.log('interval started...');
     if (idx == feedHmacs.length) {
       // Reached the end of the feed
-      window.clearInterval(that.loadingInterval);
-      that.loadingFeed = true;
-      that.loadingInterval = null;
+      app.clearLoadingInterval();
       return;
     }
     var itemNameHmac = feedHmacs[idx];
@@ -220,17 +223,25 @@ app.loadRecentFeed = function loadRecentFeed() {
           return console.error(err);
         }
         // display the shared item!
+	// XXXddahl: this function should just update a status object per
+	// Peer that we attach an observer to in order to uopdate the DOM
+	// We probably should not update the DOM from this interval and inside
+	// a nested callback
         app.updatePeerStatus(peerName, item.value);
         if ((idx - 1) == feedLength) {
-          that.loadingFeed = false;
-          window.clearInterval(that.loadingInterval);
-          that.loadingInterval = null;
+	  app.clearLoadingInterval();
         }
         idx++;
       });
     });
-  }, 5000);
+  }, 3000); // Every 3 seconds 
 };
+
+app.clearLoadingInterval = function clearLoadingInterval() {
+  window.clearInterval(app.loadingInterval);
+  app.loadingInterval = null;
+  app.lastInterval = Date.now();
+},
 
 app.toggleSetStatusButton = function toggleSetStatusButton() {
   if ($('#set-my-status-btn').is(':visible')) {
@@ -370,7 +381,8 @@ app.createMediaElement = function createMediaElement(data) {
       + data.imageData  + '"/></div>';
   }
 
-  var html = '<div class="media attribution">'
+  var classId = data.username + '-' + data.timestamp;
+  var html = '<div class="media attribution ' + classId  + '">'
 	+ '<a class="img">'
         + avatarMarkup
   	+ '  </a>'
@@ -378,12 +390,12 @@ app.createMediaElement = function createMediaElement(data) {
 	+ '    <span class="media-username">' + data.username + '</span>'
 	+ '    <span class="media-status">' + data.statusText + '</span>'
         + '    <br />'
-	+ '    <span class="media-timestamp">' + data.timestamp + '</span>'
+	+ '    <span class="media-timestamp">' + data.humaneTimestamp + '</span>'
         + '    <span class="media-location"> from: ' + gps + '</span>';
   if (imageHtml) {
     html = html + imageHtml;
   }
-  html = html + 
+  html = html
     + '  </div>'
     + '</div>';
   
@@ -397,7 +409,8 @@ app.loadAndViewMyStatus = function loadAndViewMyStatus () {
   var statusData = { username: app.username,
                      statusText: app.session.items.status.value.status,
                      location: location,
-                     timestamp: humaneDate(new Date(app.session.items.status.value.timestamp)),
+                     humaneTimestamp: humaneDate(new Date(app.session.items.status.value.timestamp)),
+		     timestamp: app.session.items.status.value.timestamp,
 		     imageData: app.session.items.status.value.imageData || '',
 		     avatar: app.avatarPath
                    };
@@ -553,6 +566,7 @@ app.purgeInboxMessage = function purgeInboxMessage (id) {
 app.updatePeerStatus = function updatePeerStatus(username, statusItem) {
   console.log('updatePeerStatus()', arguments);
   var klass = '.' + username + '-' + statusItem.timestamp;
+  console.log('klass: ', klass);
   var checkDupes = $(klass);
   if (checkDupes.length > 0) {
     // Lets not prepend a duplicate status update:)
@@ -561,7 +575,7 @@ app.updatePeerStatus = function updatePeerStatus(username, statusItem) {
   // var statusNode = app.createStatusUpdateNode(username, statusItem);
   statusItem.username = username;
   statusItem.statusText = statusItem.status;
-  statusItem.timestamp = humaneDate(new Date(statusItem.timestamp));
+  statusItem.humaneTimestamp = humaneDate(new Date(statusItem.timestamp));
   var statusNode = app.createMediaElement(statusItem);
   $('#my-feed-entries').prepend(statusNode);
 };
@@ -620,6 +634,8 @@ app.logoutCleanup = function logoutCleanup() {
   // remove all status updates and my status
   $('.my-status-node').text('');
   $('#my-feed-entries').children().remove();
+  // Set loadingInterval to null
+  app.clearLoadingInterval();
 };
 
 // XXXddahl: TODO

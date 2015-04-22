@@ -2492,7 +2492,7 @@ Peer.prototype.trust = function (callback) {
     };
     // TODO: When this item becomes very large we might consider
     // creating items the letter of each peer's handle
-    peers.save(function (err) {
+    trustedPeers.save(function (err) {
       if (err) {
         return callback(err);
       }

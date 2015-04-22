@@ -7,7 +7,7 @@
     <author email="ddahl@nulltxt.se" href="http://nulltxt.se">
     David Dahl
   </author>
-    <content src="http://localhost:0" />
+    <content src="index.html" />
     <access origin="https://nulltxt.se/" />
     <preference name="target-device" value="universal" />
     <preference name="BackupWebStorage" value="none" />
