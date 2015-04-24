@@ -19,13 +19,13 @@ var app = {
 
   URL: 'https://nulltxt.se',
 
-  VERSION: "0.1",
+  VERSION: "0.0.1",
 
   get isNodeWebKit() { return (typeof process == "object"); },
 
-  get username() { return app.session.account.username },
+  get username() { return app.session.account.username; },
 
-  get fingerprint() { return app.session.account.fingerprint },
+  get fingerprint() { return app.session.account.fingerprint; },
   // Bind Event Listeners
   //
   // Bind any events that are required on startup. Common events are:
@@ -799,20 +799,19 @@ var app = {
     $(idCard).css({ width: '300px', 'margin-top': '1em'});
     $('#my-fingerprint-id').append(idCard);
     var idCardTitle = app.username + ' ' + app.APPNAME + ' ID Card';
-    var base64Img = idCard.toDataURL("image/png");
     var html = '<button id="retake-id-picture" '
              + 'class="btn btn-primary">Retake ID Picture</button>'
              + '<button id="share-my-id-card" '
              + 'class="btn btn-success">Share</button>';
     // XXXddahl: add a 'remove ID picture' button
-
     $('#my-fingerprint-id').append(html);
-
+    $('#my-avatar')[0].src = app.session.items.avatar.value.avatar;
     $('#share-my-id-card').click(function () {
       if (app.isNodeWebKit) {
         app.saveIdToDesktop_desktop(idCard);
       } else {
-        window.plugins.socialsharing.share(null, idCardTitle, base64Img, null);
+	var _base64Img = idCard.toDataURL("image/png");
+        window.plugins.socialsharing.share(null, idCardTitle, _base64Img, null);
       }
     });
 
@@ -844,8 +843,6 @@ var app = {
     }
   },
 
-  PHOTO_CONTAINER: '_id_photo',
-
   PHOTO_ITEM: 'avatar',
 
   addPhotoToIdCard: function (idCard, override, callback) {
@@ -858,7 +855,6 @@ var app = {
 
         // paste photo into ID:
         function pastePhoto(imageData, idCard) {
-          // var thumb = app.thumbnail(imageData, 100, 100);
           var ctx = idCard.getContext('2d');
 	  var img = new Image();
 	  img.setAttribute('width', 120);
@@ -867,7 +863,6 @@ var app = {
             ctx.drawImage(img, 280, 10);
 	  };
 	  img.src = imageData;
-          // ctx.drawImage(img, 280, 10);
           return idCard;
         }
 

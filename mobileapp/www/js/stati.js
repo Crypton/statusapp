@@ -70,7 +70,7 @@ app.setCustomEvents = function setCustomEvents () {
     app.hideMenu();
     // XXXddahl: reset status UI
     // Get avatar if not present
-
+    
     app.switchView('#stati', 'Update Status');
     $('#set-my-status-textarea').focus();
   });
@@ -287,6 +287,7 @@ app.setMyStatus = function setMyStatus() {
 app.displayInitialView = function displayInitialView() {
   // Check for first run
   if (!app.firstRunIsNow) {
+    $('#my-avatar')[0].src = app.session.items.avatar.value.avatar;
     app.loadAndViewMyStatus();
     app.loadRecentFeed();
 
@@ -298,6 +299,13 @@ app.displayInitialView = function displayInitialView() {
     // onSharedItemSync
     app.session.events.onSharedItemSync = function (item) {
       console.log('onSharedItemSync()', item);
+
+      if (item.value.avatar) {
+	// this is an avatar update
+	app.updateContactAvatar(item.creator.username, item.value);
+	return;
+      }
+      
       app.saveItemToFeed(item, function (err) {
 	if (err) {
           return console.error(err);
@@ -306,6 +314,18 @@ app.displayInitialView = function displayInitialView() {
       });
     };
   }
+};
+
+app.updateContactAvatar = function updateContactAvatar (username, value) {
+  if (!username || !value) {
+    return console.error('Incorrect arguments, cannot update contact avatar');
+  }
+  app.session.items._trusted_peers.value[username].avatar = value.avatar;
+  app.session.items._trusted_peers.save(function (err) {
+    if (err) {
+      console.error(err, 'Cannot update avatar for ' + username);
+    }
+  });
 };
 
 app.saveItemToFeed = function saveItemToFeed (item, callback) {
@@ -357,7 +377,7 @@ app.obfuscateLocation = function obfuscateLocation (location, decimalPlaces) {
   return loc1 + ' ' + loc2;  
 };
 
-app.createMediaElement = function createMediaElement(data) {
+app.createMediaElement = function createMediaElement(data, localUser) {
   var gps;
   if (data.location && data.location != 'undisclosed location') {
     // gps = app.obfuscateLocation(data.location);
@@ -372,7 +392,13 @@ app.createMediaElement = function createMediaElement(data) {
       + data.username[0].toUpperCase()
       + '</span>';
   } else {
-    avatarMarkup = '<img class="media-avatar" src="' + data.avatar + '" alt="" />';
+    var avatarData;
+    if (localUser) {
+      avatarData = app.session.items.avatar.value.avatar;
+    } else {
+      avatarData  = data.avatar;
+    }
+    avatarMarkup = '<img class="media-avatar" src="' + avatarData + '" alt="" />';
   }
 
   var imageHtml;
@@ -424,7 +450,7 @@ app.displayMyStatus = function displayMyStatus (statusData) {
   console.log('displayMyStatus()', arguments);
   $('#my-status-wrapper').children().remove();
   console.log(statusData);
-  var mediaElement = app.createMediaElement(statusData);
+  var mediaElement = app.createMediaElement(statusData, true);
   console.log(mediaElement);
   $('#my-status-wrapper').append(mediaElement);
 };
@@ -432,6 +458,18 @@ app.displayMyStatus = function displayMyStatus (statusData) {
 
 app.shareStatus = function shareStatus (peerObj) {
   console.log('shareStatus()', arguments);
+
+  function shareAvatar(peer) {
+    if (app.session.items.avatar.value.avatar) {
+      app.session.items.avatar.share(peer, function (err) {
+	if (err) {
+	  console.error(err);
+	  console.error('cannot share avatar with ' + peer.username);
+	}
+      });
+    }
+  }
+  
   if (typeof peerObj == 'string') {
     // share status container with peer
     app.session.getPeer(peerObj, function (err, peer) {
@@ -444,6 +482,7 @@ app.shareStatus = function shareStatus (peerObj) {
           console.log(err);
           return;
         }
+	shareAvatar(peer);
       });
     });
   } else if (typeof peerObj == 'object') {
@@ -452,6 +491,7 @@ app.shareStatus = function shareStatus (peerObj) {
         console.error(err, 'Cannot shareStatus!');
         return;
       }
+      shareAvatar(peerObj);
     });
   } else {
     console.error('peerObject is wrong type!');
@@ -468,8 +508,7 @@ app.handleMessage = function handleMessage (message) {
   if (message.headers.notification != 'sharedItem') {
     return;
   }
-
-  var username = message.payload.from;
+    
   var itemNameHmac = message.payload.itemNameHmac;
   // cache the hmac sent to us!
   var newFeedHmac = {
@@ -492,9 +531,14 @@ app.handleMessage = function handleMessage (message) {
         }
         // delete this inbox message
         app.deleteInboxMessage(message.messageId);
-        // check for existing status, remove from DOM,
-        // re-create status, prepend to the top of the list
-        app.updatePeerStatus(username, statusItem.value);
+	// If this is an avatar, save to contacts
+	if (statusItem.value.avatar) {
+	  app.updateContactAvatar(username, statusItem.value);
+	  // XXXddahl: Update timeline with a "new avatar message??"
+	} else {
+          // create status item, prepend to the top of the list
+          app.updatePeerStatus(username, statusItem.value);
+        }
       });
     });
   } else {
@@ -572,10 +616,12 @@ app.updatePeerStatus = function updatePeerStatus(username, statusItem) {
     // Lets not prepend a duplicate status update:)
     return;
   }
-  // var statusNode = app.createStatusUpdateNode(username, statusItem);
+
   statusItem.username = username;
   statusItem.statusText = statusItem.status;
   statusItem.humaneTimestamp = humaneDate(new Date(statusItem.timestamp));
+  statusItem.avatar = app.session.items._trusted_peers.value[username].avatar;
+
   var statusNode = app.createMediaElement(statusItem);
   $('#my-feed-entries').prepend(statusNode);
 };

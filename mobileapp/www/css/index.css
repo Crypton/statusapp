@@ -115,13 +115,14 @@ h1 {
     position: fixed;
     top: 0;
     left: 0;
-    width: 220px;
+    width: 260px;
     bottom: 0;
     z-index: 20;
     padding-top: 5px;
     -webkit-transform: translate3d(-100%, 0, 0);
     -webkit-transition: all 0.1s ease;
     margin-top: 56px;
+    opacity: 0.9;
 }
 
 #top-menu.active {

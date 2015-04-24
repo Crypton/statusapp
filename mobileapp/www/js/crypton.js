@@ -52,8 +52,6 @@ crypton.versionCheck = function (skip, callback) {
   var url = crypton.url() + '/versioncheck?' + 'v=' + crypton.version + '&sid=' + crypton.sessionId || '';
   superagent.get(url)
   .end(function (res) {
-    console.warn("Versioncheck Response headers!!!");
-    console.warn(res);
 
     if (res.body.success !== true && res.body.error !== undefined) {
       crypton.clientVersionMismatch = true;
@@ -429,16 +427,12 @@ crypton.authorize = function (username, passphrase, callback, options) {
 
         superagent.post(crypton.url() + '/account/' + username)
         .withCredentials()
-        // .set('X-Session-ID', crypton.sessionId)
         .send(response)
         .end(function (res) {
-          console.warn('account creation response 1: ');
-          console.warn(res);
           if (!res.body || res.body.success !== true) {
             return callback(res.body.error);
           }
 	  // check for response session header:
-	  console.log('sessionID from body: ', res.body.sid);
 	  // XXX: Make sure we have a sid!
 	  crypton.sessionId = res.body.sid;
 	  window.sessionStorage.setItem('sessionId', res.body.sid);
@@ -456,14 +450,10 @@ crypton.authorize = function (username, passphrase, callback, options) {
 
 	    var url = crypton.url() +
 		'/account/' + username + '/answer?sid=' + crypton.sessionId;
-	    console.log('url', url);
             superagent.post(url)
             .withCredentials()
-            // .set('X-Session-ID', sessionStorage.getItem('sessionId'))
             .send(response)
             .end(function (res) {
-              console.warn('account creation response 2: ');
-              console.warn(res);
               if (!res.body || res.body.success !== true) {
                 callback(res.body.error);
                 return;
@@ -474,7 +464,6 @@ crypton.authorize = function (username, passphrase, callback, options) {
                 return;
               }
 
-              // var sessionIdentifier = res.body.sessionIdentifier;
               var session = new crypton.Session(crypton.sessionId);
               session.account = new crypton.Account();
               session.account.username = username;
@@ -559,9 +548,8 @@ var Account = crypton.Account = function Account () {};
  * @param {Function} callback
  */
 Account.prototype.save = function (callback) {
-  superagent.post(crypton.url() + '/account')
+  superagent.post(crypton.url() + '/account?sid=' + crypton.sessionId)
     .withCredentials()
-    .set('X-Session-ID', crypton.sessionId)
     .send(this.serialize())
     .end(function (res) {
       if (res.body.success !== true) {
@@ -816,10 +804,13 @@ Account.prototype.changePassphrase =
     newKeyring.signKeyPrivateMacSalt = JSON.stringify(signKeyPrivateMacSalt);
     newKeyring.srpVerifier = srpVerifier;
     newKeyring.srpSalt = srpSalt;
-
-    superagent.post(crypton.url() + '/account/' + that.username + '/keyring')
+    var url = crypton.url()
+	  + '/account/'
+	  + that.username
+	  + '/keyring?sid='
+	  + crypton.sessionId;
+    superagent.post(url)
     .withCredentials()
-    .set('X-Session-ID', crypton.sessionId)
     .send(newKeyring)
     .end(function (res) {
       if (res.body.success !== true) {
@@ -1942,10 +1933,8 @@ Container.prototype.decryptKey = function (record) {
  * @param {Function} callback
  */
  Container.prototype.sync = function (callback) {
-  console.log('container.sync()'); 
   var that = this;
   this.getHistory(function (err, records) {
-    console.log(arguments);
     if (err) {
       callback(err);
       return;
@@ -2138,7 +2127,6 @@ Transaction.prototype.create = function (callback) {
   var url = crypton.url() + '/transaction/create' + '?sid=' + crypton.sessionId;
   superagent.post(url)
     .withCredentials()
-    // .set('X-Session-ID', crypton.sessionId)
     .end(function (res) {
     if (!res.body || res.body.success !== true) {
       callback(res.body.error);
@@ -2202,7 +2190,6 @@ Transaction.prototype.saveChunk = function (chunk, callback) {
 
   superagent.post(url)
     .withCredentials()
-    // .set('X-Session-ID', crypton.sessionId)
     .send(chunk)
     .end(function (res) {
       if (!res.body || res.body.success !== true) {
@@ -2229,7 +2216,6 @@ Transaction.prototype.commit = function (callback) {
   var url = crypton.url() + '/transaction/' + this.id + '/commit?sid=' + crypton.sessionId;
   superagent.post(url)
     .withCredentials()
-    // .set('X-Session-ID', crypton.sessionId)
     .end(function (res) {
       if (!res.body || res.body.success !== true) {
         callback(res.body.error);
@@ -2255,7 +2241,6 @@ Transaction.prototype.abort = function (callback) {
   var url = crypton.url() + '/transaction/' + this.id + '?sid=' + crypton.sessionId;
   superagent.del(url)
     .withCredentials()
-    // .set('X-Session-ID', crypton.sessionId)
     .end(function (res) {
     if (!res.body || res.body.success !== true) {
       callback(res.body.error);
@@ -2363,7 +2348,6 @@ Peer.prototype.fetch = function (callback) {
   var url = crypton.url() + '/peer/' + this.username + '?sid=' + crypton.sessionId;
   superagent.get(url)
     .withCredentials()
-    // .set('X-Session-ID', crypton.sessionId)
     .end(function (res) {
     if (!res.body || res.body.success !== true) {
       callback(res.body.error);
@@ -2429,8 +2413,8 @@ Peer.prototype.encryptAndSign = function (payload) {
     var signature = this.session.account.signKeyPrivate.sign(hash, crypton.paranoia);
     return { ciphertext: JSON.parse(ciphertext), signature: signature, error: null };
   } catch (ex) {
-    console.log(ex);
-    console.log(ex.stack);
+    console.error(ex);
+    console.error(ex.stack);
     var err = "Error: Could not complete encryptAndSign: " + ex;
     return { ciphertext: null, signature: null, error: err };
   }
@@ -2591,7 +2575,6 @@ Message.prototype.send = function (callback) {
 
   var url = crypton.url() + '/peer?sid=' + crypton.sessionId;
   superagent.post(url)
-    // .set('X-Session-ID', crypton.sessionId)
     .send(this.encrypted)
     .withCredentials()
     .end(function (res) {
@@ -2642,7 +2625,6 @@ Inbox.prototype.poll = function (callback) {
 
   superagent.get(url)
     .withCredentials()
-    // .set('X-Session-ID', crypton.sessionId)
     .end(function (res) {
     if (!res.body || res.body.success !== true) {
       callback(res.body.error);
@@ -2692,7 +2674,6 @@ Inbox.prototype.get = function (messageId, callback) {
 
   superagent.get(url)
     .withCredentials()
-    // .set('X-Session-ID', crypton.sessionId)
     .end(function (res) {
     if (!res.body || res.body.success !== true) {
       callback(res.body.error);
@@ -3495,11 +3476,8 @@ Item.prototype.syncWithHmac = function (itemNameHmac, callback) {
     url = url + '&shared=1';
   }
 
-  console.log('that.sharedItem', that.sharedItem);
-
   superagent.get(url)
     .withCredentials()
-    // .set('X-Session-ID', crypton.sessionId)
     .end(function (res) {
       var doesNotExist = 'Item does not exist';
       if ((!res.body || res.body.success !== true) && res.body.error != doesNotExist) {
