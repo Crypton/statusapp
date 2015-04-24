@@ -8,7 +8,7 @@ var app = {
     app.enableLoginButtons();
     app.switchView('#account-login');
     $('#username-login').focus();
-    crypton.host = 'nulltxt.se';
+    crypton.host = 'zk.gs';
     this.card =  new crypton.Card();
     this.bindEvents();
   },
@@ -17,7 +17,7 @@ var app = {
 
   APPNAME: 'ZK',
 
-  URL: 'https://nulltxt.se',
+  URL: 'https://zk.gs',
 
   VERSION: "0.0.1",
 
@@ -32,7 +32,7 @@ var app = {
   // 'load', 'deviceready', 'offline', and 'online'.
   bindEvents: function() {
     document.addEventListener('deviceready', app.onDeviceReady, false);
-    
+
     $('.view').click(function () {
       app.hideMenu();
     });
@@ -155,11 +155,11 @@ var app = {
   // function, we must explicity call 'app.receivedEvent(...);'
   onDeviceReady: function onDeviceReady () {
     app.enableLoginButtons();
-    
+
     console.log('Device Ready Event!');
-    
+
     app.receivedEvent('deviceready');
-    
+
     document.addEventListener('resume', function() {
       setTimeout(function(){
         console.log('Application Resume Event!');
@@ -167,7 +167,7 @@ var app = {
 	    (typeof app.resumeEventHandler == 'function')) {
 	  app.resumeEventHandler();
 	}
-	
+
       }, 0);
     }, false);
   },
@@ -306,7 +306,7 @@ var app = {
     }
 
     var cameraDirectionOptions = { FRONT: 1, BACK: 0 };
-    
+
     var width = 120;
     var height = 160;
     var quality = 50;
@@ -521,7 +521,7 @@ var app = {
           app.firstRun();
           return;
         }
-	
+
         $('#password-login').val('');
       });
     }
@@ -552,7 +552,7 @@ var app = {
       }
       // Load and display all feed data:
       app.displayInitialView();
-      
+
     });
   },
 
@@ -950,7 +950,7 @@ var app = {
       app._contacts = contacts;
       $('#contacts-list').children().remove();
       var contactNames = Object.keys(contacts).sort();
-      
+
       for (var i = 0; i < contactNames.length; i++) {
         var html = '<li class="contact-record" id="contact-'
               + contactNames[i]
@@ -1001,9 +1001,9 @@ var app = {
     //   try to get the passphrase automatically and login with just a click
     // * Perhaps the login screen is dynamic, if a username is not in
     //   the keychain property, we render the password field
-    // * Provide a manual override checkbox? 
+    // * Provide a manual override checkbox?
   },
-  
+
   keyChain: {
 
     init: function init_keyChain (prefix) {
@@ -1013,9 +1013,9 @@ var app = {
 	app.APPNAME);
       this.passphraseKeyPrefix(prefix);
     },
-    
+
     _prefix: undefined,
-    
+
     set passphraseKeyPrefix(prefix) {
       this.prefix = prefix;
     },
@@ -1026,7 +1026,7 @@ var app = {
       }
       return this.prefix;
     },
-    
+
     getPassphrase: function _getPassphrase (callback) {
       var passphraseKey = this.prefix + '-' + app.APPNAME;
       this.ss.get(
@@ -1048,7 +1048,7 @@ var app = {
 	function (error) { console.log('Error ' + error); },
 	_passphraseKey, passphraseValue);
     },
-    
+
     removePassphrase: function _removePassphrase () {
       var _passphraseKey = this.prefix + '-' + app.APPNAME;
       this.ss.remove(
@@ -1058,4 +1058,3 @@ var app = {
     }
   }
 };
-
