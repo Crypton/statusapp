@@ -211,13 +211,19 @@ app.loadRecentFeed = function loadRecentFeed () {
       app.clearLoadingInterval();
       return;
     }
+    
     var itemNameHmac = feedHmacs[idx];
     var peerName =
       app.session.items.feed.value.feedHmacs[itemNameHmac].fromUser;
+    if (peerName == app.username) { // XXXddahl: this is a hack, server should not be handing this item to us!
+      idx++;
+      return;
+    }
     app.session.getPeer(peerName, function (err, peer) {
       if (err) {
         return console.error(err);
       }
+      console.log(peer.username, itemNameHmac);
       app.session.getSharedItem(itemNameHmac, peer, function (err, item) {
         if (err) {
           return console.error(err);
@@ -302,10 +308,11 @@ app.displayInitialView = function displayInitialView() {
 
       if (item.value.avatar) {
 	// this is an avatar update
+	console.log('we were handed an avatat Item!', item.value);
 	app.updateContactAvatar(item.creator.username, item.value);
 	return;
       }
-      
+      console.log('saving item to feed', item);
       app.saveItemToFeed(item, function (err) {
 	if (err) {
           return console.error(err);
@@ -329,6 +336,7 @@ app.updateContactAvatar = function updateContactAvatar (username, value) {
 };
 
 app.saveItemToFeed = function saveItemToFeed (item, callback) {
+  console.log('saving item to Feed...');
   var itemNameHmac = item.getPublicName();
   var username = item.creator.username;
 
