@@ -111,7 +111,7 @@ h1 {
 }
 
 #top-menu {
-    background: #1a1a1a !important;
+    background: #ffffff !important;
     position: fixed;
     top: 0;
     left: 0;
@@ -122,7 +122,10 @@ h1 {
     -webkit-transform: translate3d(-100%, 0, 0);
     -webkit-transition: all 0.1s ease;
     margin-top: 56px;
-    opacity: 0.9;
+    opacity: 0.91;
+    margin-bottom: 15em;
+    border: 1px solid #D1D1D1;
+    box-shadow: 5px 5px 15px #d1d1d1;
 }
 
 #top-menu.active {
@@ -241,7 +244,7 @@ input[type="password"]:focus {
 
 #tasks-btn {
     display: none;
-    color: inherit;
+    color: #ffffff !important;
     padding: 0 1em;
     font-size: 1.5em;
     text-decoration: none;
@@ -263,14 +266,14 @@ input[type="password"]:focus {
 }
 
 .main-btn a {
-    color: #d1d1d1;
-    font-size: 1.1em;
+    color: #black;
+    font-size: 1.4em;
     padding: 13px 15px !important;
 }
 
 .main-btn a:hover {
     background: none !important;
-    color: #34a5dd !important;
+    color: #000000 !important;
 }
 
 .main-btn i {
@@ -431,3 +434,18 @@ strong {
 
 #capture-avatar { padding: 7em;}
 
+.overlay {
+    display: none;
+    position:fixed;
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
+    background-color:#000;
+    opacity:0.8;
+    z-index:15;
+}
+
+a { 
+    color: #000000 !important; 
+}

@@ -561,7 +561,9 @@ var app = {
 
     if ($menu.hasClass('active')) {
       $menu.removeClass('active');
+      // $('.overlay').hide();
     } else {
+      // $('.overlay').show();
       $menu.addClass('active');
     }
   },
