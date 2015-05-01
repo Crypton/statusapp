@@ -31,10 +31,9 @@
 }
 
 #my-geoloc {
-    margin-left: 2em;
-    font-size: 1.25em;
+    font-size: 1em;
     float: right;
-    margin-right: 34%;
+    margin-right: 2em;
     padding: 1em;
 }
 
@@ -196,4 +195,34 @@
 .feed-image {
     border: 2 px solid #5d5d5d;
     margin: 0.7em;
+}
+
+.ired {
+    color: red;
+}
+
+#password-generate {
+    color: red;
+    font-size: 14px;
+}
+
+#generate-account-verbage {
+    margin: 10px;
+}
+
+#username-generate {
+    margin-bottom: 1em;
+}
+
+#generate-form {
+    margin-bottom: 1em;
+    padding: 0px 37px;
+}
+
+#generate-buttons {
+    margin-bottom: 1em;
+}
+
+#register-generate-btn {
+    margin-top: 1em;
 }

@@ -54,9 +54,28 @@ var app = {
     });
 
     $("#register-btn").click(function () {
-      app.createAccount();
+      // app.createAccount();
+      app.beginRegistration();
     });
 
+    $("#register-generate-btn").click(function (e) {
+      e.preventDefault();
+      app.createAccount();
+    });
+    
+    $('#password-login').keyup(function (event) {
+      if ((event.keyCode == 13) && $('#password-login').val()) {
+	event.preventDefault();
+	app.login();
+      }
+    });
+
+    $('#get-new-passphrase').click(function (e) {
+      e.preventDefault();
+      var pass = generatePassphrase();
+      $('#password-generate').val(pass);
+    });
+    
     $("#login-btn").click(function () {
       app.login();
     });
@@ -443,21 +462,26 @@ var app = {
   },
 
   createAccount: function () {
+    var user = $('#username-generate').val();
+    var pass = $('#password-generate').val();
+
+    if (!user || !pass) {
+      app.alert('Please enter a username and passphrase', 'danger');
+      return;
+    }
+
     app.switchView('#login-progress', '');
     app.setLoginStatus('Creating Account...');
-    // $('#login-progress').show();
-
-    var user = $('#username-login').val();
-    var pass = $('#password-login').val();
-
+    
     function callback (err) {
+      console.error(err);
       app.switchView('#account-login', '');
       app.clearLoginStatus();
 
       if (err) {
         app.alert(err, 'danger');
         return;
-      }
+     } 
 
       app.switchView('#scan-select', 'Verify ID Card');
     }
@@ -465,12 +489,21 @@ var app = {
     app.register(user, pass, callback);
   },
 
+  beginRegistration: function beginRegistration() {
+    app.switchView('#generate-account', 'Create Account');
+    // generate a long password
+    var passphrase = generatePassphrase();
+    // display new form
+    $('#password-generate').val(passphrase);
+  },
+  
   register: function (user, pass, callback) {
     app.setLoginStatus('Generating account...');
     app.switchView('#login-progress', '');
 
     crypton.generateAccount(user, pass, function (err) {
       if (err) {
+	console.error(err);
         app.switchView('#account-login', 'Account');
         return callback(err);
       }
@@ -480,14 +513,24 @@ var app = {
   },
 
   login: function () {
-    app.switchView('#login-progress', '');
-    $('.alert').remove();
-
-    app.setLoginStatus('Logging in...');
-
     var user = $('#username-login').val();
     var pass = $('#password-login').val();
 
+    if (!user || !pass) {
+      user = $('#username-generate').val();
+      pass = $('#password-generate').val();
+    }
+
+    if (!user || !pass) {
+      app.alert('Please enter a username and passphrase');
+      return;
+    }
+    
+    app.switchView('#login-progress', '');
+    $('.alert').remove();
+    
+    app.setLoginStatus('Logging in...');
+    
     function callback (err, session) {
       if (err) {
         app.alert(err, 'danger');
@@ -523,6 +566,7 @@ var app = {
         }
 
         $('#password-login').val('');
+	$('#password-generate-login').val('');
       });
     }
 

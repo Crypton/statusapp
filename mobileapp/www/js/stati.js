@@ -425,7 +425,7 @@ app.createMediaElement = function createMediaElement(data, localUser) {
 	+ '    <span class="media-status">' + data.statusText + '</span>'
         + '    <br />'
 	+ '    <span class="media-timestamp">' + data.humaneTimestamp + '</span>'
-        + '    <span class="media-location"> from: ' + gps + '</span>';
+        + '    <span class="media-location">' + gps + '</span>';
   if (imageHtml) {
     html = html + imageHtml;
   }
@@ -634,47 +634,48 @@ app.updatePeerStatus = function updatePeerStatus(username, statusItem) {
   $('#my-feed-entries').prepend(statusNode);
 };
 
-app.createStatusUpdateNode = function (username, statusItem) {
-  console.log('createStatusUpdateNode()', arguments);
-  var location = statusItem.location || 'undisclosed location';
-  var date = new Date(statusItem.timestamp);
-  var klass = username + '-' + statusItem.timestamp;
-  var statusUpdate = '<div class="status-update '
-                   + klass
-                   + '">'
-                   + '<h4 class="status-update-username">'
-                   + username
-                   + '</h4>'
-                   + '<div class="status-update-data">'
-                   + '<span class="status-text">'
-                   + statusItem.status
-                   + '</span>'
-                   + '<ul class="status-metadata">'
-                   + '<li>'
-                   + location
-                   + '</li>'
-                   + '<li>'
-                   +  date
-                   + '</li>'
-                   + '</ul>'
-                   + '</div>';
-
-  return $(statusUpdate);
-};
-
 app.setMyLocation = function setMyLocation(highAccuracy) {
   // set location data to the location div
   var accuracy = highAccuracy || false;
   var options = {
     enableHighAccuracy: highAccuracy,
-    timeout: 10000,
+    timeout: 5000,
     maximumAge: 0
   };
 
   function success(pos) {
     var crd = pos.coords;
     var gps = crd.latitude + ' ' + crd.longitude;
-    $('#my-geoloc').text(app.obfuscateLocation(gps));
+    var obfuGps = app.obfuscateLocation(gps) + ' ';
+    $('#my-geoloc').text(obfuGps);
+    
+    var lat = new Number(crd.latitude).toFixed(1);
+    var long = new Number(crd.longitude).toFixed(1);
+    var geoIdx = lat + '__' + long;
+    
+    if (!app.getPlaceName) {
+      // load the geoPlaces script
+      $.ajaxSetup({
+	cache: true
+      });
+      console.log('loading geo-places...');
+      $.getScript( "js/geo-places.js", function( data, textStatus, jqxhr ) {
+	console.log( "geo-places is loaded" );
+	app.getPlaceName = function getPlaceName (geoIdx) {
+	  var placeArr = window.geoPlaces[geoIdx];
+	  if (placeArr) {
+	    return placeArr[0] + ' ' +  placeArr[2] + ' ' + placeArr[1];
+	  } else {
+	    return 'unknown';
+	  }
+	};
+	var name = app.getPlaceName(geoIdx);
+	app.setLocationName(name);
+      });
+    } else {
+      var name = app.getPlaceName(geoIdx);
+      app.setLocationName(name);
+    }
   };
 
   function error(err) {
@@ -682,6 +683,13 @@ app.setMyLocation = function setMyLocation(highAccuracy) {
   };
 
   navigator.geolocation.getCurrentPosition(success, error, options);
+};
+
+app.setLocationName = function setLocationName (name) {
+  var html = ' <span id="geoloc-name"> <i>near</i> '
+	+ name
+	+ '</span>';
+  $('#my-geoloc').append($(html));
 };
 
 app.logoutCleanup = function logoutCleanup() {

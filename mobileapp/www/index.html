@@ -112,6 +112,33 @@
 
       </div>
 
+      <div id="generate-account" class="view">
+	<form id="generate-form" class="input-group input-group-lg">
+	  <input placeholder="Username"
+		 autocapitalize="off"
+		 size="12"
+		 maxlength="32"
+		 class="form-control login-input" 
+		 id="username-generate" type="text" />
+	  <p id="generate-account-verbage">A long passphrase has been generated randomly for you, <i class="ired">in red below</i>. It is highly suggested you use a long passphrase and save it into a password manager application. [This is optional.]</p>
+	  <p id="get-new-passphrase-wrapper">
+	    <button id="get-new-passphrase" class="btn btn-primary">
+	      Re-generate Passphrase
+	    </button>
+	  </p>
+	  <input placeholder="Passphrase" 
+		 size="12"
+		 maxlength="32"
+		 class="form-control login-input"
+		 id="password-generate" type="text" 
+		 autocomplete="off" />
+	  <div id="generate-buttons">
+	    <button class="btn btn-primary" 
+		    id="register-generate-btn">Create Account</button>
+	  </div>
+	</form>
+      </div>
+      
       <div id="account-login" class="view active">
 	<form id="login-form" class="input-group input-group-lg">
 	  <input placeholder="Username"
@@ -129,10 +156,10 @@
 	</form>
 
 	<div id="login-buttons">
-	  <button class="btn btn-success"
-		  id="login-btn">Login</button>
 	  <button class="btn btn-primary" 
 		  id="register-btn">Create Account</button>
+	  <button class="btn btn-success"
+		  id="login-btn">Login</button>
 	</div>
       </div>
 
@@ -281,6 +308,7 @@
     <script type="text/javascript" src="js/vendor/bootstrap.min.js"></script>
     <script type="text/javascript" src="js/vendor/canvas-toBlob.js"></script>
     <script type="text/javascript" src="js/vendor/FileSaver.js"></script>
+    <script async type="text/javascript" src="js/passphrase-corpus.js"></script>
     <!-- BEGIN QR Code Reader --> 
     <script type="text/javascript" src="js/vendor/jsqrcode/grid.js"></script>
     <script type="text/javascript" src="js/vendor/jsqrcode/version.js"></script>
