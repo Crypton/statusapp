@@ -53,9 +53,14 @@ var app = {
       app.logout();
     });
 
-    $("#register-btn").click(function () {
-      // app.createAccount();
+    $("#register-btn").click(function (e) {
+      e.preventDefault();
       app.beginRegistration();
+    });
+
+    $("#register-generate-cancel-btn").click(function (e) {
+      e.preventDefault();
+      app.switchView('#account-login', 'ZK');
     });
 
     $("#register-generate-btn").click(function (e) {
