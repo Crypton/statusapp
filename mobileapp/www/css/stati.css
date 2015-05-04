@@ -230,3 +230,9 @@
 #register-generate-cancel-btn {
     margin-top: 1em;
 }
+
+#feed-progress-wrapper {
+    display: none;
+    height: 5px !important;
+    margin-top: 1px;
+}

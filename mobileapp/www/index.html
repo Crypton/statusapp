@@ -37,6 +37,11 @@
 	    <i class="fa fa-list"></i> <span>Feed</span>
 	  </a>
 	</li>
+	<li class="main-btn" id="refresh-feed">
+	  <a href="#">
+	    <i class="fa fa-refresh"></i> <span>Refresh Feed</span>
+	  </a>
+	</li>
 	<li class="main-btn" id="my-contacts">
 	  <a href="#">
 	    <i class="fa fa-users"></i> Contacts
@@ -87,12 +92,21 @@
 	<button class="btn" id="capture-picture">Capture</button>
       </div>
       
-       <div id="feed" class="view">
+      <div id="feed" class="view">
+
+	<div id="feed-progress-wrapper"
+	     class="progress progress-striped active">
+	  <div class="progress-bar"  role="progressbar" 
+	       aria-valuenow="100" aria-valuemin="0" 
+	       aria-valuemax="100" style="width: 100%">
+	  </div>
+	</div>
+	
 	<div id="my-status-wrapper">
 	  
 	</div>
 	
-	<div id="my-feed-entries">  
+	<div id="my-feed-entries">
 	</div>
       </div>
 

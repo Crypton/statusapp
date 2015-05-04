@@ -40,12 +40,17 @@ app.postPeerTrustCallback = function postPeerTrustCallback(peer) {
 };
 
 app.resumeEventHandler = function resumeEventHandler () {
-  if ((app.lastInterval - Date.now()) < (60 * 5 * 1000)) {
+  if ((app.lastInterval - Date.now()) >  (60 * 5 * 1000)) {
     // More than 5 minutes have elapsed since last interval
     // fetch from the server
     app.loadRecentFeed();
   }
 };
+
+app.pauseEventHandler = function pauseEventHandler () {
+  app.clearLoadingInterval();
+};
+
 
 app.setAvatar = function setAvatar() {
   var avatarData = app.session.items.avatar.value.avatar;
@@ -189,12 +194,18 @@ app.createInitialItems = function createInitialItems (callback) {
   });
 };
 
+app.refreshFeed = function refreshFeed () {
+  // Show progressbar at top:
+  
+};
+
 app.loadRecentFeed = function loadRecentFeed () {
   // for now this is all feed hmacs we have in
   // items.feed.feedHmacs
   if (app.loadingInterval) {
     return;
   }
+  $('#feed-progress-wrapper').show();
   var that = this;
   var hmacs = [];
   var feedHmacs = Object.keys(app.session.items.feed.value.feedHmacs);
@@ -203,10 +214,10 @@ app.loadRecentFeed = function loadRecentFeed () {
     return;
   }
   var idx = 0;
-  
+  console.log('interval set...');
   app.loadingInterval = window.setInterval(function () {
-    console.log('interval started...');
-    if (idx == feedHmacs.length) {
+    console.log('running an interval callback: ');
+    if (idx >= feedHmacs.length) {
       // Reached the end of the feed
       app.clearLoadingInterval();
       return;
@@ -219,6 +230,13 @@ app.loadRecentFeed = function loadRecentFeed () {
       idx++;
       return;
     }
+
+    if (!peerName) {
+      app.clearLoadingInterval();
+      console.error('Cannot get peerName in feedHmacs object!?');
+      return;
+    }
+    
     app.session.getPeer(peerName, function (err, peer) {
       if (err) {
         return console.error(err);
@@ -234,16 +252,18 @@ app.loadRecentFeed = function loadRecentFeed () {
 	// We probably should not update the DOM from this interval and inside
 	// a nested callback
         app.updatePeerStatus(peerName, item.value);
-        if ((idx - 1) == feedLength) {
+        if ((idx - 1) >= feedLength) {
 	  app.clearLoadingInterval();
+	  return;
         }
         idx++;
       });
     });
-  }, 3000); // Every 3 seconds 
+  }, 2000); // Every 2 seconds 
 };
 
 app.clearLoadingInterval = function clearLoadingInterval() {
+  $('#feed-progress-wrapper').hide();
   window.clearInterval(app.loadingInterval);
   app.loadingInterval = null;
   app.lastInterval = Date.now();

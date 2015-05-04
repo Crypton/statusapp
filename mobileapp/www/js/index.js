@@ -53,6 +53,12 @@ var app = {
       app.logout();
     });
 
+    $('#refresh-feed').click(function () {
+      app.hideMenu();
+      app.switchView('#feed', 'ZK');
+      app.loadRecentFeed();
+    });
+
     $("#register-btn").click(function (e) {
       e.preventDefault();
       app.beginRegistration();
@@ -194,6 +200,16 @@ var app = {
 
       }, 0);
     }, false);
+
+    document.addEventListener('pause', function() {
+      console.log('Application Pause Event!');
+      if (app.resumeEventHandler &&
+	  (typeof app.pauseEventHandler == 'function')) {
+	app.pauseEventHandler();
+	console.log('app pausing');
+      }
+    }, false);
+    
   },
   // Update DOM on a Received Event
   receivedEvent: function(id) {
@@ -1000,13 +1016,20 @@ var app = {
       }
       app._contacts = contacts;
       $('#contacts-list').children().remove();
-      var contactNames = Object.keys(contacts).sort();
+      var names = Object.keys(contacts);
+      app.contactNameMap = {};
+      var contactNames = names.map(function (value) {
+	var lcName = value.toLowerCase();
+	app.contactNameMap[lcName] = value;
+	return value.toLowerCase();
+      }).sort();
+      
 
       for (var i = 0; i < contactNames.length; i++) {
         var html = '<li class="contact-record" id="contact-'
-              + contactNames[i]
+              + app.contactNameMap[contactNames[i]]
               + '">'
-              + contactNames[i]
+              + app.contactNameMap[contactNames[i]]
               + '</li>';
         $('#contacts-list').append($(html));
       }
