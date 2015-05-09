@@ -67,7 +67,7 @@ app.setAvatar = function setAvatar() {
       // $('#my-avatar').style({ width: '64px', height: '48px' });
     }
   }
-  
+
 };
 
 app.setCustomEvents = function setCustomEvents () {
@@ -75,14 +75,27 @@ app.setCustomEvents = function setCustomEvents () {
     app.hideMenu();
     // XXXddahl: reset status UI
     // Get avatar if not present
-    
+
     app.switchView('#stati', 'Update Status');
     $('#set-my-status-textarea').focus();
   });
 
   $('#my-feed').click(function () {
     app.hideMenu();
-    app.loadAndViewMyStatus();
+    // app.loadAndViewMyStatus();
+    app.switchView('#feed', app.FEED_LABEL);
+  });
+
+  $('#header-refresh-btn').click(function () {
+    app.hideMenu();
+    app.switchView('#feed', app.FEED_LABEL);
+    app.loadFeed();
+  });
+
+  $('#refresh-feed').click(function () {
+    app.hideMenu();
+    app.switchView('#feed', app.FEED_LABEL);
+    app.loadFeed();
   });
 
   $('#set-my-status-btn').click(function () {
@@ -96,16 +109,20 @@ app.setCustomEvents = function setCustomEvents () {
   $('#take-a-photo-btn').click(function () {
     app.takeAPhoto();
   });
-  
+
   $('#pick-an-image-btn').click(function () {
     app.pickAnImage();
+  });
+
+  $('#fetch-previous-items').click(function () {
+    app.loadPreviousFeed();
   });
 };
 
 app.takeAPhoto = function takeAPhoto () {
   // remove any photos in the DOM:
   $('#my-image-to-post').children().remove();
-  
+
   // get photo
   var directionBack = 0;
   app.getPhoto({ width: 320, height: 240, cameraDirection: directionBack },
@@ -123,7 +140,7 @@ app.takeAPhoto = function takeAPhoto () {
 app.pickAnImage = function pickAnImage () {
   // remove any photos in the DOM:
   $('#my-image-to-post').children().remove();
-  
+
   app.getPhoto({ width: 320, height: 240, pictureSourceType: navigator.camera.PictureSourceType.SAVEDPHOTOALBUM },
   function (err, imgData) {
     if (err) {
@@ -136,14 +153,107 @@ app.pickAnImage = function pickAnImage () {
   });
 };
 
+app.createNewLocalProfile = function () {
+  var user = crypton.hmac('', app.username);
+  var profile = {};
+  profile[user] = {
+    tlOptions: {
+      lastItemRead: 0,
+      limit: 5,
+      offset: 0
+    },
+    historyOptions: {
+      lastItemRead: 0,
+      limit: 5,
+      offset: 0
+    }
+  };
+  app.saveProfile(profile);
+  return profile;
+}
+
+app.addNewLocalProfile = function (profile) {
+  var user = crypton.hmac('', app.username);
+  profile[user] = {
+    tlOptions: {
+      lastItemRead: 0,
+      limit: 5,
+      offset: 0
+    },
+    historyOptions: {
+      lastItemRead: 0,
+      limit: 5,
+      offset: 0
+    }
+  };
+  app.saveProfile(profile);
+  return profile;
+};
+
+app.saveProfile = function saveProfile (profileObj) {
+  var str = JSON.stringify(profileObj);
+  localStorage.setItem('_profile_', str);
+};
+
+app.setupClientProfile = function setupClientProfile () {
+
+  var strProfile = localStorage.getItem('_profile_');
+  if (!strProfile) {
+    var profile = app.createNewLocalProfile();
+    localStorage.setItem('_profile_', JSON.stringify(profile));
+  } else {
+    var profileObj = JSON.parse(strProfile);
+    var user = crypton.hmac('', app.username);
+    if (!profileObj[user]) {
+      // Need to add this username to the profile obj
+      app.addNewLocalProfile(profileObj);
+    }
+  }
+};
+
+app.getCurrentProfile = function getCurrentProfile () {
+  var user = crypton.hmac('', app.username);
+  this._profile = JSON.parse(localStorage.getItem('_profile_'));
+  return this._profile[user];
+};
+
+app.saveLocalProfile = function saveLocalProfile() {
+  var profiles = JSON.parse(localStorage.getItem('_profile_'));
+  var user = crypton.hmac('', app.username);
+  profiles[user] = this._profile[user];
+  localStorage.setItem('_profile_', JSON.stringify(profiles));
+}
+
 app.customInitialization = function customInitialization() {
   console.log('customInitialization()');
   // check for existing avatar
   if (!localStorage.getItem('avatarPath')) {
     app.setInitialAvatar();
   } else {
-    app.avatarPath = localStorage.getItem('avatarPath'); 
+    app.avatarPath = localStorage.getItem('avatarPath');
   }
+
+  app.setupClientProfile();
+  // Profile setup
+  var that = this;
+  if (!app.currentProfile) {
+    Object.defineProperty(app, 'currentProfile', {
+      get: function() {
+        return app.getCurrentProfile();
+      },
+
+      set: function(value) {
+        var user = crypton.hmac('', app.username);
+        if (value.lastItemRead && value.offset && value.limit) {
+          that._profile[user] = value;
+          app.saveLocalProfile();
+        } else {
+          console.error('Error setting local profile data');
+        }
+      }
+    });
+  }
+
   // XXXddahl: need a indeterminate progress indicator
   app.createInitialItems(function (err) {
     if (err) {
@@ -196,7 +306,144 @@ app.createInitialItems = function createInitialItems (callback) {
 
 app.refreshFeed = function refreshFeed () {
   // Show progressbar at top:
-  
+
+};
+
+app.tlOptions = { lastItemRead: 0, offset: 0, limit: 5 };
+
+app.feedIsLoading = false;
+
+app.loadPreviousFeed = function loadPreviousFeed() {
+  // get the timeline_id of the first item rendered
+  var firstTimelineId = $('.media').last().attr('id');
+  var options = {
+      lastItemRead: firstTimelineId,
+      direction: 'prev',
+      limit: 10,
+      offset: 0
+  };
+  var append = true;
+  app.loadFeed(options, append);
+};
+
+app.loadFeed = function loadFeed(options, append) {
+  if (app.feedIsLoading) {
+    return;
+  }
+  app.feedIsLoading = true;
+  $('#feed-progress-wrapper').show();
+  var user = app.hmacUser();
+  if (!options) {
+    options = app.currentProfile.tlOptions;
+  }
+  if (typeof parseInt(options.lastItemRead) != 'number') {
+    options.lastItemRead = app.lastTimelineItemId || 0;
+  }
+  if (typeof parseInt(options.offset) != 'number') {
+    options.offset = 0;
+  }
+  if (typeof parseInt(options.limit) != 'number') {
+    options.limit = 5;
+  }
+
+  app.session.getTimeline(options, function tlCallback (err, timeline) {
+    if (err) {
+      console.error(err);
+      app.feedIsLoading = false;
+      $('#feed-progress-wrapper').hide();
+      return app.alert('Cannot get Timeline data from server', 'danger');
+    }
+    if (timeline.length < 1) {
+      $('#feed-progress-wrapper').hide();
+      console.log('No rows found. At the end of timeline');
+    }
+    if (append) {
+      timeline.reverse(); // XXXddahl: hack for now, need to reverse the sort oder in the server db query
+    }
+    for (var i = 0; i < timeline.length; i++) {
+      // XXXddahl: check if we already have the item before decrypting
+      //           and not add it to the feed
+
+      // expecting data  properties of:
+      // XXX: look for the user's avatar in the contacts Item
+      // location, avatar, username, imageData, timestamp, statusText, humaneTimeStamp
+      if (!timeline[i].value) {
+        // this is some other kind of item, not a status update!
+        // Ignore this for now, probably a 'trustedAt notification'
+        // XXXddahl: need a way to filter these out of query at the server
+        continue;
+      }
+      if (!timeline[i].value.status) {
+        // this is some other kind of item, not a status update!
+        // Ignore this for now, probably a 'trustedAt notification'
+        // XXXddahl: need a way to filter these out of query at the server
+        continue;
+      }
+
+      var localUser =
+        (timeline[i].creatorUsername == app.username);
+      var data = app.massageTimelineUpdate(timeline[i]);
+      data.itemId = timeline[i].timelineId;
+      var node = app.createMediaElement(data, localUser);
+      if (append) {
+        $('#my-feed-entries').append(node);
+      } else {
+        $('#my-feed-entries').prepend(node);
+      }
+      app.tlOptions.lastItemRead = timeline[i].timelineId;
+      options.lastItemRead = timeline[i].timelineId;
+    }
+    $('#feed-progress-wrapper').hide();
+    var user = app.hmacUser();
+    console.log(options);
+    if (!append) {
+      app._profile[user].tlOptions = options;
+      app.saveLocalProfile();
+    }
+    app.feedIsLoading = false;
+    // display the more... button if it does not exist
+    // if(!$("#fetch-previous-items").is(":visible")) {
+    //   $("#fetch-previous-items").show();
+    // }
+    // XXXddahl: update the _prefs_ with the tlOptions, perhaps instead of using localStorage?
+  });
+};
+
+app.loadTimelineInterval = function loadTimelineInterval() {
+  if (app.loadingInterval) {
+    return;
+  }
+
+  app.loadingInterval = window.setInterval(function () {
+    app.loadFeed();
+  }, (5 * 60 * 1000));
+};
+
+app.hmacUser = function () {
+  return crypton.hmac('', app.username);
+};
+
+app.massageTimelineUpdate = function massageTimelineUpdate (data) {
+  var avatar;
+  if (data.creatorUsername == app.session.account.username) {
+    avatar = app.session.items.avatar.value.avatar;
+  } else {
+    try {
+      avatar = app.session.items._trusted_peers.value[data.creatorUsername].avatar;
+    } catch (ex) {
+      avatar = null;
+    }
+  }
+
+  return {
+    avatar: avatar,
+    location: data.value.location,
+    statusText: data.value.status,
+    username: data.creatorUsername,
+    imageData: data.value.imageData,
+    timestamp: data.modTime,
+    humaneTimestamp: humaneDate(new Date(data.modTime))
+  };
 };
 
 app.loadRecentFeed = function loadRecentFeed () {
@@ -222,7 +469,7 @@ app.loadRecentFeed = function loadRecentFeed () {
       app.clearLoadingInterval();
       return;
     }
-    
+
     var itemNameHmac = feedHmacs[idx];
     var peerName =
       app.session.items.feed.value.feedHmacs[itemNameHmac].fromUser;
@@ -236,7 +483,7 @@ app.loadRecentFeed = function loadRecentFeed () {
       console.error('Cannot get peerName in feedHmacs object!?');
       return;
     }
-    
+
     app.session.getPeer(peerName, function (err, peer) {
       if (err) {
         return console.error(err);
@@ -259,7 +506,7 @@ app.loadRecentFeed = function loadRecentFeed () {
         idx++;
       });
     });
-  }, 2000); // Every 2 seconds 
+  }, 2000); // Every 2 seconds
 };
 
 app.clearLoadingInterval = function clearLoadingInterval() {
@@ -307,21 +554,21 @@ app.setMyStatus = function setMyStatus() {
   $('#set-my-status-textarea').val('');
   $('#my-image-to-post').children().remove();
   app.toggleSetStatusButton();
-  app.loadAndViewMyStatus();
+  // app.loadAndViewMyStatus();
+  app.switchView('#feed', app.FEED_LABEL);
 };
 
 app.displayInitialView = function displayInitialView() {
   // Check for first run
   if (!app.firstRunIsNow) {
     $('#my-avatar')[0].src = app.session.items.avatar.value.avatar;
-    app.loadAndViewMyStatus();
-    app.loadRecentFeed();
+    app.switchView('#feed', app.FEED_LABEL);
 
     app.session.on('message', function (message) {
       console.log('session.on("message") event called', message);
       app.handleMessage(message);
     });
-    
+
     // onSharedItemSync
     app.session.events.onSharedItemSync = function (item) {
       console.log('onSharedItemSync()', item);
@@ -340,6 +587,8 @@ app.displayInitialView = function displayInitialView() {
 	app.updatePeerStatus(item.creator.username, item.value);
       });
     };
+    // Load the timeline
+    app.loadFeed();
   }
 };
 
@@ -402,7 +651,7 @@ app.obfuscateLocation = function obfuscateLocation (location, decimalPlaces) {
   var loc1 = new Number(gps[0]).toFixed(decimalPlaces);
   var loc2 = new Number(gps[1]).toFixed(decimalPlaces);
 
-  return loc1 + ' ' + loc2;  
+  return loc1 + ' ' + loc2;
 };
 
 app.createMediaElement = function createMediaElement(data, localUser) {
@@ -436,7 +685,8 @@ app.createMediaElement = function createMediaElement(data, localUser) {
   }
 
   var classId = data.username + '-' + data.timestamp;
-  var html = '<div class="media attribution ' + classId  + '">'
+  var itemId = data.username + '-' + data.itemId;
+  var html = '<div id="' + data.itemId  + '" class="media attribution ' + classId + ' ' + itemId + '">'
 	+ '<a class="img">'
         + avatarMarkup
   	+ '  </a>'
@@ -452,7 +702,7 @@ app.createMediaElement = function createMediaElement(data, localUser) {
   html = html
     + '  </div>'
     + '</div>';
-  
+
   return $(html);
 };
 
@@ -497,7 +747,7 @@ app.shareStatus = function shareStatus (peerObj) {
       });
     }
   }
-  
+
   if (typeof peerObj == 'string') {
     // share status container with peer
     app.session.getPeer(peerObj, function (err, peer) {
@@ -536,8 +786,9 @@ app.handleMessage = function handleMessage (message) {
   if (message.headers.notification != 'sharedItem') {
     return;
   }
-    
+
   var itemNameHmac = message.payload.itemNameHmac;
+  var username = message.payload.from;
   // cache the hmac sent to us!
   var newFeedHmac = {
     fromUser: username,
@@ -654,13 +905,13 @@ app.updatePeerStatus = function updatePeerStatus(username, statusItem) {
   $('#my-feed-entries').prepend(statusNode);
 };
 
-app.setMyLocation = function setMyLocation(highAccuracy) {
+app.setMyLocation = function setMyLocation() {
   // set location data to the location div
-  var accuracy = highAccuracy || false;
+  var accuracy = true;
   var options = {
-    enableHighAccuracy: highAccuracy,
-    timeout: 5000,
-    maximumAge: 0
+    enableHighAccuracy: accuracy,
+    timeout: 10000,
+    maximumAge: 6000
   };
 
   function success(pos) {
@@ -668,11 +919,11 @@ app.setMyLocation = function setMyLocation(highAccuracy) {
     var gps = crd.latitude + ' ' + crd.longitude;
     var obfuGps = app.obfuscateLocation(gps) + ' ';
     $('#my-geoloc').text(obfuGps);
-    
+
     var lat = new Number(crd.latitude).toFixed(1);
-    var long = new Number(crd.longitude).toFixed(1);
-    var geoIdx = lat + '__' + long;
-    
+    var lng = new Number(crd.longitude).toFixed(1);
+    var geoIdx = lat + '__' + lng;
+
     if (!app.getPlaceName) {
       // load the geoPlaces script
       $.ajaxSetup({
@@ -699,7 +950,8 @@ app.setMyLocation = function setMyLocation(highAccuracy) {
   };
 
   function error(err) {
-    console.warn('ERROR(' + err.code + '): ' + err.message);
+    console.error('Cannot set location');
+    console.error(err);
   };
 
   navigator.geolocation.getCurrentPosition(success, error, options);

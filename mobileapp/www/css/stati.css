@@ -233,6 +233,18 @@
 
 #feed-progress-wrapper {
     display: none;
-    height: 5px !important;
     margin-top: 1px;
+}
+
+#header-refesh-btn {
+    font-size: 1.2em;
+    display: none;
+    color: white;
+}
+
+#fetch-previous-items {
+    display: none;
+    width: 90%;
+    margin: 1em;
+    text-align: center;
 }

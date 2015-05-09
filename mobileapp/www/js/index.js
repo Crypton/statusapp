@@ -53,12 +53,6 @@ var app = {
       app.logout();
     });
 
-    $('#refresh-feed').click(function () {
-      app.hideMenu();
-      app.switchView('#feed', 'ZK');
-      app.loadRecentFeed();
-    });
-
     $("#register-btn").click(function (e) {
       e.preventDefault();
       app.beginRegistration();
@@ -73,7 +67,7 @@ var app = {
       e.preventDefault();
       app.createAccount();
     });
-    
+
     $('#password-login').keyup(function (event) {
       if ((event.keyCode == 13) && $('#password-login').val()) {
 	event.preventDefault();
@@ -86,7 +80,7 @@ var app = {
       var pass = generatePassphrase();
       $('#password-generate').val(pass);
     });
-    
+
     $("#login-btn").click(function () {
       app.login();
     });
@@ -209,7 +203,16 @@ var app = {
 	console.log('app pausing');
       }
     }, false);
-    
+
+    try {
+      // For android only, will fail on iOS
+      // XXX: need to learn how to #IFDEF
+      screen.lockOrientation('portrait');
+    } catch (ex) {
+      console.log('Not iOS');
+      // iOS, noop
+    }
+
   },
   // Update DOM on a Received Event
   receivedEvent: function(id) {
@@ -493,7 +496,7 @@ var app = {
 
     app.switchView('#login-progress', '');
     app.setLoginStatus('Creating Account...');
-    
+
     function callback (err) {
       console.error(err);
       app.switchView('#account-login', '');
@@ -502,7 +505,7 @@ var app = {
       if (err) {
         app.alert(err, 'danger');
         return;
-     } 
+     }
 
       app.switchView('#scan-select', 'Verify ID Card');
     }
@@ -517,7 +520,7 @@ var app = {
     // display new form
     $('#password-generate').val(passphrase);
   },
-  
+
   register: function (user, pass, callback) {
     app.setLoginStatus('Generating account...');
     app.switchView('#login-progress', '');
@@ -546,12 +549,12 @@ var app = {
       app.alert('Please enter a username and passphrase');
       return;
     }
-    
+
     app.switchView('#login-progress', '');
     $('.alert').remove();
-    
+
     app.setLoginStatus('Logging in...');
-    
+
     function callback (err, session) {
       if (err) {
         app.alert(err, 'danger');
@@ -1023,7 +1026,7 @@ var app = {
 	app.contactNameMap[lcName] = value;
 	return value.toLowerCase();
       }).sort();
-      
+
 
       for (var i = 0; i < contactNames.length; i++) {
         var html = '<li class="contact-record" id="contact-'

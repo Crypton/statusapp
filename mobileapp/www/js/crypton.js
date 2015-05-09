@@ -989,6 +989,9 @@ var Session = crypton.Session = function (id) {
   this.events = {};
   this.containers = [];
   this.items = {};
+  this.itemHistory = {};
+  this.itemKeyLedger = {};
+  this.timeline = [];
   this.inbox = new crypton.Inbox(this);
 
   var that = this;
@@ -1035,7 +1038,6 @@ var Session = crypton.Session = function (id) {
       console.error(ERRS.ARG_MISSING);
       throw new Error(ERRS.ARG_MISSING);
     }
-    console.log('Item updated!', itemObj);
     // if any of the cached items match the HMAC
     // in the notification, sync the items and
     // call the listener if one has been set
@@ -1057,7 +1059,6 @@ var Session = crypton.Session = function (id) {
         }
       });
     } else {
-      console.log('Loading the item as it is not cached');
       // load item!
       // get the peer first:
       that.getPeer(itemObj.creator, function (err, peer) {
@@ -1154,7 +1155,7 @@ function getOrCreateItem (itemName,  callback) {
     return;
   }
 
-  var creator = this.createSelfPeer();
+  var creator = this.selfPeer;
   var item =
   new crypton.Item(itemName, null, this, creator, function getItemCallback(err, item) {
     if (err) {
@@ -1199,6 +1200,14 @@ function getSharedItem (itemNameHmac,  peer, callback) {
   new crypton.Item(null, null, this, peer, getItemCallback, itemNameHmac);
 };
 
+Session.prototype.__defineGetter__("selfPeer", function() {
+  if (this._selfPeer) {
+    return this._selfPeer;
+  }
+  this._selfPeer = this.createSelfPeer();
+  return this._selfPeer;
+});
+
 /**!
  * ### createSelfPeer()
  * returns a 'selfPeer' object which is needed for any kind of
@@ -1216,6 +1225,138 @@ Session.prototype.createSelfPeer = function () {
   selfPeer.trusted = true;
   return selfPeer;
 };
+
+/**!
+ * ### getItemHistory()
+ * returns a row of items the user created
+ *
+ * Calls back with ItemHistory Array and without error if successful
+ *
+ * Calls back with error if unsuccessful
+ *
+ * @param {Object} options // e.g.: {lastItemRead: 12,offset: 350,limit: 20 }
+ * @param {Function} callback
+ */
+Session.prototype.getItemHistory =
+function getItemHistory (options, callback) {
+  if (typeof options != 'object') {
+    return callback(ERRS.ARG_MISSING_OBJECT);
+  }
+  if (typeof callback != 'function') {
+    return callback(ERRS.ARG_MISSING_CALLBACK);
+  }
+  var lastItemRead = options.lastItemRead; // item_history_id
+  var offset = options.offset;
+  var limit = options.limit;
+  if (typeof parseInt(lastItemRead) != 'number') {
+    lastItemRead = 0;
+  }
+  if (typeof parseInt(offset) != 'number') {
+    offset = 0;
+  }
+  if (typeof parseInt(limit) != 'number') {
+    limit = 10; // default MAX of 10 - for now
+  }
+
+  var that = this;
+  var url = crypton.url() + '/itemhistory/' + '?sid=' + crypton.sessionId
+          + '&historyid=' + lastItemRead // item_history_id
+          + '&offset=' + offset
+          + '&limit=' + limit;
+
+  superagent.get(url)
+  .withCredentials()
+  .end(function (res) {
+    if (!res.body || res.body.success !== true) {
+      console.error(res.body);
+      return callback('Cannot get item history');
+    }
+
+    // expand all item_history rows into actual items
+    var rows = res.body.rawData;
+    var history = [];
+    // XXXddahl: use async() ?
+    for (var i = 0; i < rows.length; i++) {
+      var timelineId = rows[i].timelineId;
+      if (that.itemHistory[timelineId]) {
+        // Let's not re-decrypt something that is most likely in our feed
+        continue;
+      }
+      var hitem = new crypton.HistoryItem(that, rows[i]);
+      history.push(hitem);
+    }
+    callback(null, history);
+  });
+};
+
+/**!
+ * ### getTimeline()
+ * returns a row of Timeline items
+ *
+ * Calls back with ItemHistory Array and without error if successful
+ *
+ * Calls back with error if unsuccessful
+ *
+ * @param {Object} options // e.g.: {lastItemRead: 12,offset: 350,limit: 20 }
+ * @param {Function} callback
+ */
+Session.prototype.getTimeline =
+function getTimeline (options, callback) {
+  if (typeof options != 'object') {
+    return callback(ERRS.ARG_MISSING_OBJECT);
+  }
+  if (typeof callback != 'function') {
+    return callback(ERRS.ARG_MISSING_CALLBACK);
+  }
+
+  var lastItemRead = options.lastItemRead; // item_history_id
+  var offset = options.offset;
+  var limit = options.limit;
+  var direction = options.direction;
+  if (typeof parseInt(lastItemRead) != 'number') {
+    lastItemRead = 0;
+  }
+  if (typeof parseInt(offset) != 'number') {
+    offset = 0;
+  }
+  if (typeof parseInt(limit) != 'number') {
+    limit = 10; // default MAX of 10 - for now
+  }
+  if (typeof direction != 'string') {
+    direction = 'next';
+  }
+  if (direction != 'prev' || direction != 'next') {
+    direction = 'next';
+  }
+
+  var that = this;
+  var url = crypton.url() + '/timeline/' + '?sid=' + crypton.sessionId
+          + '&timelineid=' + lastItemRead // timeline_id
+          + '&offset=' + offset
+          + '&limit=' + limit
+          + '&direction=' + direction;
+
+  superagent.get(url)
+  .withCredentials()
+  .end(function (res) {
+    if (!res.body || res.body.success !== true) {
+      console.error(res.body);
+      return callback('Cannot get timeline');
+    }
+
+    // expand all item_history rows into actual items
+    var rows = res.body.rawData;
+    var history = [];
+    // XXXddahl: use async() ?
+    for (var i = 0; i < rows.length; i++) {
+      var hitem = new crypton.HistoryItem(that, rows[i]);
+      history.push(hitem);
+    }
+    callback(null, history);
+  });
+};
+
+// =================== Containers ===================== //
 
 /**!
  * ### load(containerName, callback)
@@ -3842,7 +3983,6 @@ Item.prototype.unshare = function (peer, callback) {
 
   superagent.post(url)
     .withCredentials()
-    // .set('X-Session-ID', crypton.sessionId)
     .send(payload)
     .end(function (res) {
     if (!res.body.success) {
@@ -3871,6 +4011,149 @@ Item.prototype.unshare = function (peer, callback) {
  */
 Item.prototype.lastUpdate = function (callback) {
   console.warn('Unimplemented!');
+};
+
+})();
+/* Crypton Client, Copyright 2015 SpiderOak, Inc.
+ *
+ * This file is part of Crypton Client.
+ *
+ * Crypton Client is free software: you can redistribute it and/or modify it
+ * under the terms of the Affero GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * Crypton Client is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE.  See the Affero GNU General Public
+ * License for more details.
+ *
+ * You should have received a copy of the Affero GNU General Public License
+ * along with Crypton Client.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+(function() {
+
+'use strict';
+
+var ERRS;
+
+var HistoryItem =
+crypton.HistoryItem = function HistoryItem (session, rawData) {
+  ERRS = crypton.errors;
+  this.rawData = rawData;
+  this.session = session;
+  this.timelineId = rawData.timelineId;
+  // fill out the rest of the properties needed at this level
+  this.modTime = this.rawData.modTime;
+  this.creationTime = this.rawData.creationTime;
+  var record;
+  if (!this.rawData.creatorUsername) {
+    this.itemHistoryId = this.rawData.itemHistoryId;
+    this.itemNameHmac = this.rawData.itemNameHmac;
+    record = this.decryptHistoryItem(null, null); // No shortcuts for now...
+    return record;
+  } else {
+    this.creatorUsername = this.rawData.creatorUsername;
+    this.timelineId = this.rawData.timelineId;
+    record = this.decryptTimelineItem(this.rawData.creatorUsername, null);
+  }
+  return record;
+};
+
+HistoryItem.prototype.decryptHistoryItem =
+function decryptHistoryItem (creator, sessionKey) {
+  if (!creator) {
+    this.creator = this.session.selfPeer;
+  } else {
+    this.creator = creator;
+  }
+
+  if (sessionKey) {
+    this.sessionKey = sessionKey;
+  }
+
+  var rawData = this.rawData;
+  var cipherItem = rawData.ciphertext;
+  var wrappedSessionKey = JSON.parse(rawData.wrappedSessionKey);
+
+  // check if this key is already in memory
+  var _key = app.session.itemKeyLedger[wrappedSessionKey.ciphertext.kemtag];
+  if (_key) {
+    this.sessionKey = _key;
+  }
+
+  // XXXddahl: create 'unwrapPayload()'
+  var ct = JSON.stringify(cipherItem.ciphertext);
+  var hash = sjcl.hash.sha256.hash(ct);
+  var verified = false;
+  try {
+    verified = this.creator.signKeyPub.verify(hash, cipherItem.signature);
+  } catch (ex) {
+    console.error(ex);
+    console.error(ex.stack);
+    throw new Error(ex);
+  }
+
+  // TODO: Keep a ledger of unwrapped keys so we dont have to unwrap a key for each item
+
+  // Check for this.sessionKey, or unwrap it
+  var sessionKeyResult;
+  if (!this.sessionKey) {
+    sessionKeyResult =
+      this.session.account.verifyAndDecrypt(wrappedSessionKey, this.creator);
+    if (sessionKeyResult.error) {
+      return new Error(ERRS.UNWRAP_KEY_ERROR);
+    }
+    this.sessionKey = JSON.parse(sessionKeyResult.plaintext);
+    var tag = wrappedSessionKey.ciphertext.kemtag;
+    app.session.itemKeyLedger[tag] = this.sessionKey;
+  }
+
+  var decrypted;
+  try {
+    decrypted = sjcl.decrypt(this.sessionKey, ct, crypton.cipherOptions);
+  } catch (ex) {
+    console.error(ex);
+    console.error(ex.stack);
+    throw new Error(ERRS.DECRYPT_CIPHERTEXT_ERROR);
+  }
+
+  if (decrypted) {
+    try {
+      this.value = JSON.parse(decrypted);
+    } catch (ex) {
+      console.error(ex);
+      console.error(ex.stack);
+      // XXXddahl: check to see if this is an actual JSON error (malformed string, etc)
+      this.value = decrypted; // Just a string, not an object
+    }
+
+    this.session.itemHistory[this.timelineId] = this;
+    return this.value;
+  }
+};
+
+HistoryItem.prototype.decryptTimelineItem =
+function decryptTimelineItem (creatorName, sessionKey) {
+  var that = this;
+  // get creator
+  // if creatorName is self, use selfPeer
+  if (creatorName == this.session.account.username) {
+    this.decryptHistoryItem(this.session.selfPeer, sessionKey);
+    return;
+  }
+  // Handle data from actual peers...
+  this.session.getPeer(creatorName, function (err, peer) {
+    if (err) {
+      console.error(err);
+      return { error: err };
+    }
+    if (!peer.trusted) {
+      return console.error('Cannot decrypt data: Peer is not trusted.');
+    }
+    that.decryptHistoryItem(peer, sessionKey);
+  });
 };
 
 })();
