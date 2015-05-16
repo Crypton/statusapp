@@ -881,7 +881,7 @@ var app = {
         app.saveIdToDesktop_desktop(idCard);
       } else {
 	var _base64Img = idCard.toDataURL("image/png");
-        window.plugins.socialsharing.share(null, idCardTitle, _base64Img, null);
+        window.plugins.socialsharing.share(app.sharingMessage, app.sharingTitle, _base64Img, app.sharingUrl);
       }
     });
 

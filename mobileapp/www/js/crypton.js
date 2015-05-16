@@ -1322,12 +1322,12 @@ function getTimeline (options, callback) {
   if (typeof parseInt(limit) != 'number') {
     limit = 10; // default MAX of 10 - for now
   }
-  if (typeof direction != 'string') {
-    direction = 'next';
-  }
-  if (direction != 'prev' || direction != 'next') {
-    direction = 'next';
-  }
+  // if (typeof direction != 'string') {
+  //   direction = 'next';
+  // }
+  // if (direction != 'prev' || direction != 'next') {
+  //   direction = 'next';
+  // }
 
   var that = this;
   var url = crypton.url() + '/timeline/' + '?sid=' + crypton.sessionId

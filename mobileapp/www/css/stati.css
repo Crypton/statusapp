@@ -58,7 +58,7 @@
 }
 
 #feed {
-    /* margin-top: -20px; */
+    margin-top: -0.5em;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
 }
@@ -74,6 +74,7 @@
 #my-feed-entries {
     color: black;
     background-color: whitesmoke;
+    overflow: scroll;
 }
 
 #my-handle {
@@ -201,39 +202,7 @@
     color: red;
 }
 
-#password-generate {
-    color: red;
-    font-size: 14px;
-}
-
-#generate-account-verbage {
-    margin: 10px;
-}
-
-#username-generate {
-    margin-bottom: 1em;
-}
-
-#generate-form {
-    margin-bottom: 1em;
-    padding: 0px 37px;
-}
-
-#generate-buttons {
-    margin-bottom: 1em;
-}
-
-#register-generate-btn {
-    margin-top: 1em;
-}
-
-#register-generate-cancel-btn {
-    margin-top: 1em;
-}
-
 #feed-progress-wrapper {
-    display: none;
-    margin-top: 1px;
 }
 
 #header-refesh-btn {
@@ -248,3 +217,20 @@
     margin: 1em;
     text-align: center;
 }
+
+#top-progress-wrapper {
+    background-color: whitesmoke;
+    height: 10px;
+    display: none;
+    margin-top: -1em;
+}
+
+#first-run-empty-feed-btn {
+    display: none;
+}
+
+.media-link-url { color: green !important; }
+.media-link-email { color: green !important; }
+.media-link-phone { color: red !important; }
+.media-link-twitter { color: blue !important; }
+.media-link-hashtag { color: purple !important; }

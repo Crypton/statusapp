@@ -16,6 +16,12 @@ app.setInitialAvatar = function setInitialAvatar () {
   return avatar;
 };
 
+app.sharingUrl = 'https://zk.gs/ZK/';
+
+app.sharingMessage = 'I would like to share messages with you privately via ZK app. \n\nThis message\'s attachment is my \'App ID card\', which users exchange in order to establish a private connection. \n\nFor more information: https://zk.gs/ZK/GettingStarted';
+
+app.sharingTitle = 'Just started using ZK app...';
+
 app.ITEMS = {
   firstRun: 'firstRun',
   feed: 'feed',
@@ -40,15 +46,15 @@ app.postPeerTrustCallback = function postPeerTrustCallback(peer) {
 };
 
 app.resumeEventHandler = function resumeEventHandler () {
-  if ((app.lastInterval - Date.now()) >  (60 * 5 * 1000)) {
-    // More than 5 minutes have elapsed since last interval
-    // fetch from the server
-    app.loadRecentFeed();
-  }
+  // if ((app.lastInterval - Date.now()) >  (60 * 5 * 1000)) {
+  //   // More than 5 minutes have elapsed since last interval
+  //   // fetch from the server
+  //   app.loadRecentFeed();
+  // }
 };
 
 app.pauseEventHandler = function pauseEventHandler () {
-  app.clearLoadingInterval();
+  // app.clearLoadingInterval();
 };
 
 
@@ -67,7 +73,6 @@ app.setAvatar = function setAvatar() {
       // $('#my-avatar').style({ width: '64px', height: '48px' });
     }
   }
-
 };
 
 app.setCustomEvents = function setCustomEvents () {
@@ -117,6 +122,12 @@ app.setCustomEvents = function setCustomEvents () {
   $('#fetch-previous-items').click(function () {
     app.loadPreviousFeed();
   });
+  
+  // $('#first-run-empty-feed-btn').click(function () {
+  //   $('#first-run-empty-feed-btn').hide();
+  //   app.switchView('#stati', 'Update Status');
+  //   $('#set-my-status-textarea').focus();
+  // });
 };
 
 app.takeAPhoto = function takeAPhoto () {
@@ -261,7 +272,6 @@ app.customInitialization = function customInitialization() {
     }
     console.log('Initial items fetched or created');
     app.displayInitialView();
-    // XXXddahl: hide indeterminate progress indicator
   });
 };
 
@@ -313,53 +323,62 @@ app.tlOptions = { lastItemRead: 0, offset: 0, limit: 5 };
 
 app.feedIsLoading = false;
 
-app.loadPreviousFeed = function loadPreviousFeed() {
+app.loadPreviousFeed = function loadPreviousFeed(callback) {
   // get the timeline_id of the first item rendered
-  var firstTimelineId = $('.media').last().attr('id');
+  // var firstTimelineId = $('.media').last().attr('id');
   var options = {
-      lastItemRead: firstTimelineId,
-      direction: 'prev',
-      limit: 10,
-      offset: 0
+    lastItemRead: null,
+    direction: 'prev',
+    limit: 10,
+    offset: app.prevOffset || 0
   };
   var append = true;
-  app.loadFeed(options, append);
+  app.loadFeed(options, append, callback);
 };
 
-app.loadFeed = function loadFeed(options, append) {
+app.loadFeed = function loadFeed(options, append, callback) {
   if (app.feedIsLoading) {
     return;
   }
   app.feedIsLoading = true;
-  $('#feed-progress-wrapper').show();
+  $('#top-progress-wrapper').show();
   var user = app.hmacUser();
   if (!options) {
     options = app.currentProfile.tlOptions;
   }
   if (typeof parseInt(options.lastItemRead) != 'number') {
-    options.lastItemRead = app.lastTimelineItemId || 0;
+    options.lastItemRead = 0;
   }
   if (typeof parseInt(options.offset) != 'number') {
     options.offset = 0;
   }
   if (typeof parseInt(options.limit) != 'number') {
-    options.limit = 5;
+    options.limit = 10;
   }
+  // if (typeof options.direction != 'string') {
+  //   options.direction = 'next'; // default behavior 
+  // }
+  // var directions = ['next', 'prev'];
+  // if (directions.indexOf(options.direction) == -1) {
+  //   options.direction = 'next'; // default behavior 
+  // }
 
+  console.log(options.direction);
+  
   app.session.getTimeline(options, function tlCallback (err, timeline) {
     if (err) {
       console.error(err);
       app.feedIsLoading = false;
-      $('#feed-progress-wrapper').hide();
+      $('#top-progress-wrapper').hide();
       return app.alert('Cannot get Timeline data from server', 'danger');
     }
     if (timeline.length < 1) {
-      $('#feed-progress-wrapper').hide();
+      $('#top-progress-wrapper').hide();
       console.log('No rows found. At the end of timeline');
+      // re-run query looking backwards...
+      app.feedIsLoading = false;
     }
-    if (append) {
-      timeline.reverse(); // XXXddahl: hack for now, need to reverse the sort oder in the server db query
-    }
+
     for (var i = 0; i < timeline.length; i++) {
       // XXXddahl: check if we already have the item before decrypting
       //           and not add it to the feed
@@ -393,18 +412,23 @@ app.loadFeed = function loadFeed(options, append) {
       app.tlOptions.lastItemRead = timeline[i].timelineId;
       options.lastItemRead = timeline[i].timelineId;
     }
-    $('#feed-progress-wrapper').hide();
+    $('#top-progress-wrapper').hide();
     var user = app.hmacUser();
     console.log(options);
     if (!append) {
       app._profile[user].tlOptions = options;
       app.saveLocalProfile();
+    } else {
+      app.prevOffset = options.offset + 10;
     }
     app.feedIsLoading = false;
     // display the more... button if it does not exist
-    // if(!$("#fetch-previous-items").is(":visible")) {
-    //   $("#fetch-previous-items").show();
-    // }
+    if(!$("#fetch-previous-items").is(":visible")) {
+      $("#fetch-previous-items").show();
+    }
+    if (typeof callback == 'function') {
+      callback();
+    }
     // XXXddahl: update the _prefs_ with the tlOptions, perhaps instead of using localStorage?
   });
 };
@@ -452,7 +476,7 @@ app.loadRecentFeed = function loadRecentFeed () {
   if (app.loadingInterval) {
     return;
   }
-  $('#feed-progress-wrapper').show();
+  $('#top-progress-wrapper').show();
   var that = this;
   var hmacs = [];
   var feedHmacs = Object.keys(app.session.items.feed.value.feedHmacs);
@@ -510,7 +534,7 @@ app.loadRecentFeed = function loadRecentFeed () {
 };
 
 app.clearLoadingInterval = function clearLoadingInterval() {
-  $('#feed-progress-wrapper').hide();
+  $('#top-progress-wrapper').hide();
   window.clearInterval(app.loadingInterval);
   app.loadingInterval = null;
   app.lastInterval = Date.now();
@@ -527,11 +551,14 @@ app.toggleSetStatusButton = function toggleSetStatusButton() {
 };
 
 app.setMyStatus = function setMyStatus() {
-  app.toggleSetStatusButton();
+  // app.toggleSetStatusButton();
   // validate length of data to be sent
   var status = $('#set-my-status-textarea').val();
   if (!status.length) {
-    app.alert('Please enter a status update', 'info');
+    return app.alert('Please enter a status update', 'warning');
+  }
+  if (status.length > 512) {
+    return app.alert('Status update is too long, please shorten it', 'danger');
   }
   // update the item
   // XXXddahl: archive status into a day's history item
@@ -553,8 +580,6 @@ app.setMyStatus = function setMyStatus() {
 
   $('#set-my-status-textarea').val('');
   $('#my-image-to-post').children().remove();
-  app.toggleSetStatusButton();
-  // app.loadAndViewMyStatus();
   app.switchView('#feed', app.FEED_LABEL);
 };
 
@@ -575,7 +600,7 @@ app.displayInitialView = function displayInitialView() {
 
       if (item.value.avatar) {
 	// this is an avatar update
-	console.log('we were handed an avatat Item!', item.value);
+	console.log('we were handed an avatar Item!', item.value);
 	app.updateContactAvatar(item.creator.username, item.value);
 	return;
       }
@@ -584,11 +609,14 @@ app.displayInitialView = function displayInitialView() {
 	if (err) {
           return console.error(err);
 	}
-	app.updatePeerStatus(item.creator.username, item.value);
+	// app.updatePeerStatus(item.creator.username, item.value);
+	app.loadFeed();
       });
     };
     // Load the timeline
-    app.loadFeed();
+    app.loadPreviousFeed(function () { app.loadFeed(); });
+  } else {
+    $('#first-run-empty-feed-btn').show();
   }
 };
 
@@ -604,11 +632,8 @@ app.updateContactAvatar = function updateContactAvatar (username, value) {
   });
 };
 
-app.saveItemToFeed = function saveItemToFeed (item, callback) {
+app.saveItemToFeed = function saveItemToFeed (itemNameHmac, username, callback) {
   console.log('saving item to Feed...');
-  var itemNameHmac = item.getPublicName();
-  var username = item.creator.username;
-
   if (app.session.items.feed.value.feedHmacs[itemNameHmac]) {
     console.log(itemNameHmac +  ' is already saved');
     return callback(null);
@@ -627,7 +652,7 @@ app.saveItemToFeed = function saveItemToFeed (item, callback) {
     app.session.getPeer(username, function (err, peer) {
       if (err) {
         console.error(err);
-        return callback(err);;
+        return callback(err);
       }
       // We need to load and watch this container
       app.session.getSharedItem(itemNameHmac, peer, function (err, statusItem) {
@@ -635,7 +660,7 @@ app.saveItemToFeed = function saveItemToFeed (item, callback) {
           console.error(err);
           return callback(err);
         }
-        app.updatePeerStatus(username, statusItem.value);
+        // app.updatePeerStatus(username, statusItem.value);
         callback(null);
       });
     });
@@ -692,7 +717,8 @@ app.createMediaElement = function createMediaElement(data, localUser) {
   	+ '  </a>'
 	+ '  <div class="bd media-metadata">'
 	+ '    <span class="media-username">' + data.username + '</span>'
-	+ '    <span class="media-status">' + data.statusText + '</span>'
+	+ '    <span class="media-status">'
+	+ Autolinker.link(data.statusText, {className: 'media-link'}) + '</span>'
         + '    <br />'
 	+ '    <span class="media-timestamp">' + data.humaneTimestamp + '</span>'
         + '    <span class="media-location">' + gps + '</span>';

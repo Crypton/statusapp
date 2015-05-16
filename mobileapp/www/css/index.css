@@ -104,6 +104,7 @@ h1 {
     bottom: 0;
     -webkit-transform: translate3d(-100%, 0, 0);
     -webkit-transition: all 0.1s ease;
+    margin-top: 5em;
 }
 
 .view.active {
@@ -144,7 +145,7 @@ h1 {
 }
 
 #login-form {
-    margin-bottom: 1em;
+    margin-bottom: 2em;
     padding: 0px 37px;
 }
 
@@ -289,6 +290,10 @@ input[type="password"]:focus {
 
 #find-user-form {
     margin-bottom: 1em;
+}
+
+#contacts {
+    margin-top: -0.5em;
 }
 
 #contacts-list {
@@ -448,4 +453,34 @@ strong {
 
 a { 
     color: #000000 !important; 
+}
+
+#password-generate {
+    color: red;
+    font-size: 14px;
+}
+
+#generate-account-verbage {
+    margin: 10px;
+}
+
+#username-generate {
+    margin-bottom: 1em;
+}
+
+#generate-form {
+    margin-bottom: 2em;
+    padding: 0px 37px;
+}
+
+#generate-buttons {
+    margin-bottom: 1em;
+}
+
+#register-generate-btn {
+    margin-top: 1em;
+}
+
+#register-generate-cancel-btn {
+    margin-top: 1em;
 }
