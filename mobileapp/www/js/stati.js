@@ -46,11 +46,7 @@ app.postPeerTrustCallback = function postPeerTrustCallback(peer) {
 };
 
 app.resumeEventHandler = function resumeEventHandler () {
-  // if ((app.lastInterval - Date.now()) >  (60 * 5 * 1000)) {
-  //   // More than 5 minutes have elapsed since last interval
-  //   // fetch from the server
-  //   app.loadRecentFeed();
-  // }
+  app.loadFeed();
 };
 
 app.pauseEventHandler = function pauseEventHandler () {
@@ -567,8 +563,8 @@ app.setMyStatus = function setMyStatus() {
     imageData = $('#my-image-to-post').children()[0].src;
   }
    var updateObj= {
-    status: status,
-    location: $('#my-geoloc').text(),
+     status: status,
+     location: $('#my-geoloc').text(),
      timestamp: Date.now(),
      imageData: null
    };
@@ -576,11 +572,21 @@ app.setMyStatus = function setMyStatus() {
     updateObj.imageData = imageData;
   }
 
-  app.session.items.status.value = updateObj;
+  app.session.items.status.value.status = updateObj.status;
+  app.session.items.status.value.location = updateObj.location;
+  app.session.items.status.value.timestamp = updateObj.timestamp;
+  app.session.items.status.value.imageData = updateObj.imageData;
 
-  $('#set-my-status-textarea').val('');
-  $('#my-image-to-post').children().remove();
-  app.switchView('#feed', app.FEED_LABEL);
+  app.session.items.status.save(function (err) {
+    if (err) {
+      console.error(err);
+      return app.alert('Cannot update status', 'danger');
+    }
+    $('#set-my-status-textarea').val('');
+    $('#my-image-to-post').children().remove();
+    app.switchView('#feed', app.FEED_LABEL);
+    app.loadFeed();
+  });
 };
 
 app.displayInitialView = function displayInitialView() {
