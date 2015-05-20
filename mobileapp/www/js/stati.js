@@ -118,7 +118,7 @@ app.setCustomEvents = function setCustomEvents () {
   $('#fetch-previous-items').click(function () {
     app.loadPreviousFeed();
   });
-  
+
   // $('#first-run-empty-feed-btn').click(function () {
   //   $('#first-run-empty-feed-btn').hide();
   //   app.switchView('#stati', 'Update Status');
@@ -352,15 +352,15 @@ app.loadFeed = function loadFeed(options, append, callback) {
     options.limit = 10;
   }
   // if (typeof options.direction != 'string') {
-  //   options.direction = 'next'; // default behavior 
+  //   options.direction = 'next'; // default behavior
   // }
   // var directions = ['next', 'prev'];
   // if (directions.indexOf(options.direction) == -1) {
-  //   options.direction = 'next'; // default behavior 
+  //   options.direction = 'next'; // default behavior
   // }
 
   console.log(options.direction);
-  
+
   app.session.getTimeline(options, function tlCallback (err, timeline) {
     if (err) {
       console.error(err);
@@ -717,17 +717,27 @@ app.createMediaElement = function createMediaElement(data, localUser) {
 
   var classId = data.username + '-' + data.timestamp;
   var itemId = data.username + '-' + data.itemId;
-  var html = '<div id="' + data.itemId  + '" class="media attribution ' + classId + ' ' + itemId + '">'
-	+ '<a class="img">'
-        + avatarMarkup
-  	+ '  </a>'
-	+ '  <div class="bd media-metadata">'
-	+ '    <span class="media-username">' + data.username + '</span>'
-	+ '    <span class="media-status">'
-	+ Autolinker.link(data.statusText, {className: 'media-link'}) + '</span>'
-        + '    <br />'
-	+ '    <span class="media-timestamp">' + data.humaneTimestamp + '</span>'
-        + '    <span class="media-location">' + gps + '</span>';
+
+  var status = Autolinker.link(data.statusText,
+                             { className: 'media-link',
+                               replaceFn: app.linkOutput });
+  console.log(status);
+
+  var html = '<div id="' + data.itemId
+           + '" class="media attribution ' + classId + ' ' + itemId + '">'
+	   + '<a class="img">'
+           + avatarMarkup
+  	   + '  </a>'
+           + '  <div class="bd media-metadata">'
+	   + '    <span class="media-username">' + data.username + '</span>'
+	   + '    <span class="media-status">'
+	   + status
+           + '</span>'
+           + '    <br />'
+	   + '    <span class="media-timestamp">'
+           + data.humaneTimestamp + '</span>'
+           + '    <span class="media-location">'
+           + gps + '</span>';
   if (imageHtml) {
     html = html + imageHtml;
   }
@@ -736,6 +746,44 @@ app.createMediaElement = function createMediaElement(data, localUser) {
     + '</div>';
 
   return $(html);
+};
+
+app.linkOutput = function linkOutput(autolinker, match) {
+  var text = match.getAnchorText();
+  var href = match.getAnchorHref();
+
+  function makeLink(url, klass) {
+    var link = '<a href="#" class="media-link media-link-'
+             + klass
+             + '" onclick="'
+             + 'window.open(\'' + url  + '\', \'_system\', \'\')">'
+             + text
+             + '</a>';
+    return link;
+  }
+
+  switch(match.getType()) {
+    case 'url' :
+      return makeLink(match.getUrl(), 'url');
+    case 'email' :
+      var email = match.getEmail();
+      return makeLink(email, 'email');
+    case 'phone' :
+      var phoneNumber = match.getPhoneNumber();
+      return makeLink(phoneNumber, 'phone');
+    case 'twitter' :
+      var twitterHandle = match.getTwitterHandle();
+      return makeLink(twitterHandle, 'twitter');
+    case 'hashtag' :
+      var hashtag = match.getHashtag();
+      return makeLink(hashtag, 'hashtag');
+    default:
+      return true;
+  }
+};
+
+app.openDeviceBrowser = function openDeviceBrowser(link) {
+
 };
 
 app.loadAndViewMyStatus = function loadAndViewMyStatus () {
