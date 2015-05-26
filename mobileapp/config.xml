@@ -11,4 +11,6 @@
     <access origin="https://zk.gs" />
     <preference name="target-device" value="universal" />
     <preference name="BackupWebStorage" value="none" />
+    <preference name="webviewbounce" value="false" />
+    <preference name="orientation" value="portrait" /> 
 </widget>

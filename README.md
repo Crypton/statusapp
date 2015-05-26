@@ -21,6 +21,8 @@ org.apache.cordova.camera
 
 org.devgeeks.privacyscreen
 
+org.apache.cordova.inappbrowser
+
 # Android Only
 
 net.yoik.cordova.plugins.screenorientation.wkwebview

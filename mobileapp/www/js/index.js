@@ -251,7 +251,7 @@ var app = {
     }, 2000);
   },
 
-  logout: function () {
+  logout: function logout () {
     app.session = null;
     // cleanup function:
     if (typeof app.logoutCleanup == 'function') {

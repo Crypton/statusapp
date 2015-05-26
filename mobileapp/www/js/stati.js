@@ -46,7 +46,9 @@ app.postPeerTrustCallback = function postPeerTrustCallback(peer) {
 };
 
 app.resumeEventHandler = function resumeEventHandler () {
-  app.loadFeed();
+  if (app.session) {
+    app.loadFeed();
+  }
 };
 
 app.pauseEventHandler = function pauseEventHandler () {
