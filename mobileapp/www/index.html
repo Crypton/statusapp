@@ -58,7 +58,7 @@
 	</li>
 	<li class="main-btn" id="my-fingerprint">
 	  <a href="#">
-	    <i class="fa fa-user"></i> ID Card
+	    <i class="fa fa-user"></i> My Contact Card
 	  </a>
 	</li>
 	<li class="main-btn" id="logout">
@@ -70,13 +70,13 @@
 
       <div id="stati" class="view">
 	<div id="set-my-status-form">
-	  <img id="my-avatar" src="img/avatars/franklin-4.png">
 	  <div id="status-update-wrapper">
 	    <textarea placeholder="Enlighten us, please!"
 		      id="set-my-status-textarea"></textarea>
 	  </div>
 	  <br />
 	  <div id="button-row">
+	    <img id="my-avatar" src="img/avatars/franklin-4.png">
 	    <i id="take-a-photo-btn"
 	       class="fa fa-camera-retro post-button"></i>
 	    <i id="pick-an-image-btn"
@@ -241,8 +241,10 @@
       </div>
 
       <div id="contacts" class="view">
-	<ul id="contacts-list" class="nav nav-pills nav-stacked">
-	</ul>
+	<div id="contacts-list-wrapper">
+	  <ul id="contacts-list" class="nav nav-pills nav-stacked">
+	  </ul>
+	</div>
 	<button class="btn btn-success" id="add-contact-button">
 	  <i class="fa fa-plus"></i>
 	</button>

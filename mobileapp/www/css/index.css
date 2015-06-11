@@ -104,7 +104,7 @@ h1 {
     bottom: 0;
     -webkit-transform: translate3d(-100%, 0, 0);
     -webkit-transition: all 0.1s ease;
-    margin-top: 5em;
+    margin-top: 1em;
 }
 
 .view.active {
@@ -116,7 +116,8 @@ h1 {
     position: fixed;
     top: 0;
     left: 0;
-    width: 260px;
+    width: 80%;
+    height: 70%;
     bottom: 0;
     z-index: 20;
     padding-top: 5px;
@@ -285,7 +286,7 @@ input[type="password"]:focus {
 }
 
 #main-menu-btn {
-    font-size: 1.2em;
+    font-size: 1.4em;
 }
 
 #find-user-form {
@@ -294,6 +295,14 @@ input[type="password"]:focus {
 
 #contacts {
     margin-top: -0.5em;
+}
+
+#contacts-list-wrapper {
+    padding-top: 5px;
+    height: 90%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
 #contacts-list {
@@ -330,7 +339,7 @@ input[type="password"]:focus {
 }
 
 #my-fingerprint-id {
-  text-align: center;
+    text-align: center;
 }
 
 #my-fingerprint-id canvas {
@@ -458,6 +467,10 @@ a {
 #password-generate {
     color: red;
     font-size: 14px;
+}
+
+#generate-account {
+    display: none;
 }
 
 #generate-account-verbage {

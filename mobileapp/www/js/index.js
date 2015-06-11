@@ -870,7 +870,7 @@ var app = {
     $('#my-fingerprint-id').append(idCard);
     var idCardTitle = app.username + ' ' + app.APPNAME + ' ID Card';
     var html = '<button id="retake-id-picture" '
-             + 'class="btn btn-primary">Retake ID Picture</button>'
+             + 'class="btn btn-primary">Retake Photo</button>'
              + '<button id="share-my-id-card" '
              + 'class="btn btn-success">Share</button>';
     // XXXddahl: add a 'remove ID picture' button

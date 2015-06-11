@@ -771,8 +771,9 @@ app.linkOutput = function linkOutput(autolinker, match) {
       var email = match.getEmail();
       return makeLink(email, 'email');
     case 'phone' :
-      var phoneNumber = match.getPhoneNumber();
-      return makeLink(phoneNumber, 'phone');
+      return true;
+      // var phoneNumber = match.getPhoneNumber();
+      // return makeLink(phoneNumber, 'phone');
     case 'twitter' :
       var twitterHandle = match.getTwitterHandle();
       return makeLink(twitterHandle, 'twitter');

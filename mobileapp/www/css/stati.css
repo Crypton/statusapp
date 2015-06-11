@@ -1,8 +1,9 @@
 #set-my-status-textarea {
-    width: 260px;
+    width: 95%;
     margin: 0.5em;
     font-size: 1.3em;
-    height: 150px;
+    height: 200px;
+    /* min-height: 200px; */
     font-style: normal;
     padding: 0.3em;
     border-radius: 4px;
@@ -59,7 +60,8 @@
 
 #feed {
     margin-top: -0.5em;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -170,21 +172,23 @@
     float: right;
 }
 
-#status-update-wrapper {
-    float: right; margin-top: -105px; margin-right: 5px;
-}
+#status-update-wrapper {/* float: right; */
+margin-top: 5px;
+/* margin-right: 5px; */}
 
-#my-avatar {
-    width: 60px; height: 80px; margin-top: 20px; margin-left: 10px;
-}
+#my-avatar {width: 30px;
+height: 40px;
+margin-bottom: 20px;
+margin-right: 20px;}
 
 #my-image-to-post {
     padding-top: 1em;
     text-align: center;
+    /* float: right; */
 }
 
 #stati {
-    padding-top: 1em;
+    /* padding-top: 1em; */
 }
 
 #post-button-cog {
