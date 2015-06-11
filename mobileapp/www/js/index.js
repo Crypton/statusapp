@@ -98,15 +98,15 @@ var app = {
     $('#verify-id-card').click(function () {
       app.hideMenu();
       if (app.isNodeWebKit) {
-        app.switchView('#scan-select-desktop', 'Verify ID Card');
+        app.switchView('#scan-select-desktop', 'Verify Contact Card');
       } else {
-        app.switchView('#scan-select', 'Verify ID Card');
+        app.switchView('#scan-select', 'Verify Contact Card');
       }
     });
 
     $('#my-fingerprint').click(function () {
       app.hideMenu();
-      app.switchView('#my-fingerprint-id', 'ID Card');
+      app.switchView('#my-fingerprint-id', 'My Contact Card');
       app.displayMyFingerprint(true);
     });
 
@@ -125,9 +125,9 @@ var app = {
 
     $('#add-contact-button').click(function () {
       if (app.isNodeWebKit) {
-        app.switchView('#scan-select-desktop', 'Verify ID Card');
+        app.switchView('#scan-select-desktop', 'Verify Contact Card');
       } else {
-        app.switchView('#scan-select', 'Verify ID Card');
+        app.switchView('#scan-select', 'Verify Contact Card');
       }
     });
 
@@ -143,7 +143,7 @@ var app = {
     $('#create-id-card').click(function () {
       app.firstRunCreateIdCard( function () {
         $('#tasks-btn').addClass('active');
-        app.switchView('#my-fingerprint-id', 'ID Card');
+        app.switchView('#my-fingerprint-id', 'My Contact Card');
 	// need to set this here in order to call the firstRunComplete function properly
 	app.firstRunIsNow = false;
         app.firstRunComplete();
@@ -507,7 +507,7 @@ var app = {
         return;
      }
 
-      app.switchView('#scan-select', 'Verify ID Card');
+      app.switchView('#scan-select', 'Verify Contact Card');
     }
 
     app.register(user, pass, callback);
@@ -692,7 +692,7 @@ var app = {
         peer.trust(function (err) {
           if (err) {
             console.log('peer trust failed: ' + err);
-            app.switchView('#scan-select', 'Verify ID Card');
+            app.switchView('#scan-select', 'Verify Contact Card');
             app.alert(err, 'danger');
           } else {
             app.alert(username + ' is now a trusted contact', 'info');
@@ -701,7 +701,7 @@ var app = {
               app.postPeerTrustCallback(peer);
             }
             // TODO: remove click events from buttons
-            app.switchView('#scan-select', 'Verify ID Card');
+            app.switchView('#scan-select', 'Verify Contact Card');
           }
         });
       }
@@ -711,9 +711,9 @@ var app = {
         $('#verify-user-failure-msg').children().remove();
         // TODO: remove click events from buttons
         if (app.isNodeWebKit) {
-          app.switchView('#scan-select-desktop', 'Verify ID Card');
+          app.switchView('#scan-select-desktop', 'Verify Contact Card');
         } else {
-          app.switchView('#scan-select', 'Verify ID Card');
+          app.switchView('#scan-select', 'Verify Contact Card');
         }
       }
 
@@ -777,7 +777,7 @@ var app = {
              + username
              + '</strong> is: <p/>'
              + '<p id="server-idgrid-canvas"></p>'
-             + '<p>The <strong>scanned</strong> ID card is :</p>'
+             + '<p>The <strong>scanned</strong> Contact Card is :</p>'
              + '<p id="outofband-idgrid-canvas"></p>'
              + '<p>It is NOT A MATCH</p> <strong>'
              + username
@@ -868,7 +868,7 @@ var app = {
   displayIdCard: function (idCard, callback) {
     $(idCard).css({ width: '300px', 'margin-top': '1em'});
     $('#my-fingerprint-id').append(idCard);
-    var idCardTitle = app.username + ' ' + app.APPNAME + ' ID Card';
+    var idCardTitle = app.username + ' ' + app.APPNAME + ' Contact Card';
     var html = '<button id="retake-id-picture" '
              + 'class="btn btn-primary">Retake Photo</button>'
              + '<button id="share-my-id-card" '
@@ -891,7 +891,7 @@ var app = {
     if (callback) {
       callback();
     }
-    app.switchView('#my-fingerprint-id', 'My ID Card');
+    app.switchView('#my-fingerprint-id', 'My Contact Card');
   },
 
   displayMyFingerprint: function (withPhoto) {
