@@ -120,12 +120,6 @@ app.setCustomEvents = function setCustomEvents () {
   $('#fetch-previous-items').click(function () {
     app.loadPreviousFeed();
   });
-
-  // $('#first-run-empty-feed-btn').click(function () {
-  //   $('#first-run-empty-feed-btn').hide();
-  //   app.switchView('#stati', 'Update Status');
-  //   $('#set-my-status-textarea').focus();
-  // });
 };
 
 app.takeAPhoto = function takeAPhoto () {
@@ -353,17 +347,10 @@ app.loadFeed = function loadFeed(options, append, callback) {
   if (typeof parseInt(options.limit) != 'number') {
     options.limit = 10;
   }
-  // if (typeof options.direction != 'string') {
-  //   options.direction = 'next'; // default behavior
-  // }
-  // var directions = ['next', 'prev'];
-  // if (directions.indexOf(options.direction) == -1) {
-  //   options.direction = 'next'; // default behavior
-  // }
-
-  console.log(options.direction);
 
   app.session.getTimeline(options, function tlCallback (err, timeline) {
+    var trustedPeersUpdated = false;
+
     if (err) {
       console.error(err);
       app.feedIsLoading = false;
@@ -390,15 +377,65 @@ app.loadFeed = function loadFeed(options, append, callback) {
         // XXXddahl: need a way to filter these out of query at the server
         continue;
       }
-      if (!timeline[i].value.status) {
+      if (timeline[i].value.avatar) {
         // this is some other kind of item, not a status update!
         // Ignore this for now, probably a 'trustedAt notification'
         // XXXddahl: need a way to filter these out of query at the server
+        // or be able to flow them into the timeline to see
+        // other events that happened
+        console.log('unknown timeline object: ', timeline[i], timeline[i].value);
+        function updateTimelineWithNewAvatar() {
+          if (trustedPeersUpdated) {
+            // display an update here...
+            var data = { avatar: timeline[i].value.avatar,
+                         itemId: timeline[i].timelineId,
+                         username: timeline[i].creatorUsername,
+                         modTime: timeline[i].modTime
+                       };
+            var avatarNode =
+              app.createAvatarUpdateElement(data);
+            if (append) {
+              $('#my-feed-entries').append(avatarNode);
+            } else {
+              $('#my-feed-entries').prepend(avatarNode);
+            }
+          }
+        }
+
+        // when we get a new avatar we need to save it to the contacts object
+        var user = timeline[i].creatorUsername;
+        if (!app.session.items._trusted_peers.value[user]) {
+          // Let's tell the user about this 1 way connection
+          console.warn('User ', user, ' is not trusted - one way connection');
+          continue; // we dont trust this user (yet)
+        }
+        if (!app.session.items._trusted_peers.value[user].avatar) {
+          app.session.items._trusted_peers.value[user].avatar =
+            timeline[i].value.avatar;
+          app.session.items._trusted_peers.value[user].avatarUpdated =
+            timeline[i].value.updated;
+          trustedPeersUpdated = true;
+          updateTimelineWithNewAvatar();
+          continue;
+        }
+        if (app.session.items._trusted_peers.value[user].avatarUpdated <
+            timeline[i].value.updated) {
+          app.session.items._trusted_peers.value[user].avatar =
+            timeline[i].value.avatar;
+          app.session.items._trusted_peers.value[user].avatarUpdated =
+            timeline[i].value.updated;
+          trustedPeersUpdated = true;
+          updateTimelineWithNewAvatar();
+          continue;
+        }
+      }
+      // End avatar update handling
+      if (!timeline[i].value.status) {
         continue;
       }
-
+      // Begin status update handling
       var localUser =
-        (timeline[i].creatorUsername == app.username);
+          (timeline[i].creatorUsername == app.username);
       var data = app.massageTimelineUpdate(timeline[i]);
       data.itemId = timeline[i].timelineId;
       var node = app.createMediaElement(data, localUser);
@@ -424,10 +461,17 @@ app.loadFeed = function loadFeed(options, append, callback) {
     if(!$("#fetch-previous-items").is(":visible")) {
       $("#fetch-previous-items").show();
     }
+    if (trustedPeersUpdated) {
+      // save the trustedPeers item
+      app.session.items._trusted_peers.save(function (err) {
+        if (err) {
+          console.error(err);
+        }
+      });
+    }
     if (typeof callback == 'function') {
       callback();
     }
-    // XXXddahl: update the _prefs_ with the tlOptions, perhaps instead of using localStorage?
   });
 };
 
@@ -468,83 +512,13 @@ app.massageTimelineUpdate = function massageTimelineUpdate (data) {
   };
 };
 
-app.loadRecentFeed = function loadRecentFeed () {
-  // for now this is all feed hmacs we have in
-  // items.feed.feedHmacs
-  if (app.loadingInterval) {
-    return;
-  }
-  $('#top-progress-wrapper').show();
-  var that = this;
-  var hmacs = [];
-  var feedHmacs = Object.keys(app.session.items.feed.value.feedHmacs);
-  var feedLength = feedHmacs.length;
-  if (!feedLength) {
-    return;
-  }
-  var idx = 0;
-  console.log('interval set...');
-  app.loadingInterval = window.setInterval(function () {
-    console.log('running an interval callback: ');
-    if (idx >= feedHmacs.length) {
-      // Reached the end of the feed
-      app.clearLoadingInterval();
-      return;
-    }
-
-    var itemNameHmac = feedHmacs[idx];
-    var peerName =
-      app.session.items.feed.value.feedHmacs[itemNameHmac].fromUser;
-    if (peerName == app.username) { // XXXddahl: this is a hack, server should not be handing this item to us!
-      idx++;
-      return;
-    }
-
-    if (!peerName) {
-      app.clearLoadingInterval();
-      console.error('Cannot get peerName in feedHmacs object!?');
-      return;
-    }
-
-    app.session.getPeer(peerName, function (err, peer) {
-      if (err) {
-        return console.error(err);
-      }
-      console.log(peer.username, itemNameHmac);
-      app.session.getSharedItem(itemNameHmac, peer, function (err, item) {
-        if (err) {
-          return console.error(err);
-        }
-        // display the shared item!
-	// XXXddahl: this function should just update a status object per
-	// Peer that we attach an observer to in order to uopdate the DOM
-	// We probably should not update the DOM from this interval and inside
-	// a nested callback
-        app.updatePeerStatus(peerName, item.value);
-        if ((idx - 1) >= feedLength) {
-	  app.clearLoadingInterval();
-	  return;
-        }
-        idx++;
-      });
-    });
-  }, 2000); // Every 2 seconds
-};
-
-app.clearLoadingInterval = function clearLoadingInterval() {
-  $('#top-progress-wrapper').hide();
-  window.clearInterval(app.loadingInterval);
-  app.loadingInterval = null;
-  app.lastInterval = Date.now();
-},
-
-app.toggleSetStatusButton = function toggleSetStatusButton() {
-  if ($('#set-my-status-btn').is(':visible')) {
-    $('#set-my-status-btn').hide();
-    $('#post-button-cog').show();
+app.toggleSetStatusProgress = function toggleSetStatusProgress() {
+  if(!$("#top-progress-wrapper").is(":visible")) {
+    $("#button-row").hide();
+    $("#top-progress-wrapper").show();
   } else {
-    $('#post-button-cog').hide();
-    $('#set-my-status-btn').show();
+    $("#button-row").show();
+    $("#top-progress-wrapper").hide();
   }
 };
 
@@ -559,11 +533,12 @@ app.setMyStatus = function setMyStatus() {
     return app.alert('Status update is too long, please shorten it', 'danger');
   }
   // update the item
-  // XXXddahl: archive status into a day's history item
+  app.toggleSetStatusProgress();
   var imageData;
   if ($('#my-image-to-post').children().length) {
     imageData = $('#my-image-to-post').children()[0].src;
   }
+  // XXX: need to parse out all HTML and entityify it
    var updateObj= {
      status: status,
      location: $('#my-geoloc').text(),
@@ -581,12 +556,14 @@ app.setMyStatus = function setMyStatus() {
 
   app.session.items.status.save(function (err) {
     if (err) {
+      app.toggleSetStatusProgress();
       console.error(err);
       return app.alert('Cannot update status', 'danger');
     }
     $('#set-my-status-textarea').val('');
     $('#my-image-to-post').children().remove();
     app.switchView('#feed', app.FEED_LABEL);
+    app.toggleSetStatusProgress();
     app.loadFeed();
   });
 };
@@ -687,6 +664,27 @@ app.obfuscateLocation = function obfuscateLocation (location, decimalPlaces) {
   return loc1 + ' ' + loc2;
 };
 
+app.createAvatarUpdateElement =
+function createAvatarUpdateElement(data) {
+  // data = {avatar: 'hajshjahjsjahj', updated: 123456789}
+
+  var timestamp = humaneDate(new Date(data.modTime));
+  var html = '<div id="' + data.itemId
+           + '" class="media attribution">'
+	   + '<a class="img">'
+           + '<img class="media-avatar" src="' + data.avatar
+           + '" />'
+  	   + '</a>'
+           + '  <div class="bd media-metadata">'
+	   + '    <span class="media-username">' + data.username + '</span>'
+	   + '    <div class="media-avatar-update">'
+	   + 'avatar updated ' + timestamp
+           + '</div>'
+           + '  </div>'
+           + '</div>';
+  return $(html);
+};
+
 app.createMediaElement = function createMediaElement(data, localUser) {
   var gps;
   if (data.location && data.location != 'undisclosed location') {
@@ -719,10 +717,13 @@ app.createMediaElement = function createMediaElement(data, localUser) {
 
   var classId = data.username + '-' + data.timestamp;
   var itemId = data.username + '-' + data.itemId;
-
-  var status = Autolinker.link(data.statusText,
+  var status = '';
+  if (data.statusText) {
+    status = Autolinker.link(data.statusText,
                              { className: 'media-link',
                                replaceFn: app.linkOutput });
+  }
+
   console.log(status);
 
   var html = '<div id="' + data.itemId
@@ -1051,8 +1052,6 @@ app.logoutCleanup = function logoutCleanup() {
   // remove all status updates and my status
   $('.my-status-node').text('');
   $('#my-feed-entries').children().remove();
-  // Set loadingInterval to null
-  app.clearLoadingInterval();
 };
 
 // XXXddahl: TODO
