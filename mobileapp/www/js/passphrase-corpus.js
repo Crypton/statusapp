@@ -4,11 +4,11 @@ function generatePassphrase() {
 
   var size = passphraseCorpus.length - 1;
 
-  function getRandomInt(min, max) {       
+  function getRandomInt(min, max) {
     // Create byte array and fill with 1 random number
     var byteArray = new Uint8Array(1);
     window.crypto.getRandomValues(byteArray);
-    
+
     var range = max - min + 1;
     var max_range = 14680;
     if (byteArray[0] >= Math.floor(max_range / range) * range)
@@ -17,7 +17,7 @@ function generatePassphrase() {
   }
 
   var passLen = 5;
-  
+
   var passphraseArr = [];
 
   for (var i = 0; i < passLen; i++) {
@@ -25,5 +25,5 @@ function generatePassphrase() {
     passphraseArr.push(passphraseCorpus[idx]);
   }
 
-  return passphraseArr.join(' ');
+  return passphraseArr.join(' ').toLowerCase();
 }

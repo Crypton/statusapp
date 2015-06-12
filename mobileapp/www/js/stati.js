@@ -18,9 +18,9 @@ app.setInitialAvatar = function setInitialAvatar () {
 
 app.sharingUrl = 'https://zk.gs/ZK/';
 
-app.sharingMessage = 'I would like to share messages with you privately via ZK app. \n\nThis message\'s attachment is my \'App ID card\', which users exchange in order to establish a private connection. \n\nFor more information: https://zk.gs/ZK/GettingStarted';
+app.sharingMessage = 'I would like to share messages with you privately via an app called "Kloak". \n\nThis message\'s attachment is my \'App Contact card\', which users exchange in order to establish a private connection. \n\nFor more information: https://zk.gs/ZK/';
 
-app.sharingTitle = 'Just started using ZK app...';
+app.sharingTitle = 'Just started using Kloak...';
 
 app.ITEMS = {
   firstRun: 'firstRun',
@@ -29,7 +29,7 @@ app.ITEMS = {
   avatar: 'avatar'
 };
 
-app.FEED_LABEL = 'ZK';
+app.FEED_LABEL = 'Kloak Feed';
 
 app.INITIAL_STATUS_MESSAGE = 'Current Status: null';
 

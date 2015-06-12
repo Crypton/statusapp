@@ -11,7 +11,7 @@
     <link rel="stylesheet" type="text/css" href="css/stati.css" />
     <link rel="stylesheet" type="text/css" href="css/vendor/font-awesome.css" />
     <link rel="stylesheet" type="text/css" href="css/vendor/bootstrap.min.css" />
-    <title>ZK</title>
+    <title>Kloak</title>
   </head>
   <body>
     <div class="overlay"></div>
@@ -19,7 +19,7 @@
       <a href="#" id="tasks-btn">
         <i id="main-menu-btn" class="fa fa-bars"></i>
       </a>
-      <span id="page-title">ZK</span>
+      <span id="page-title">Kloak</span>
       <div id="top-progress-wrapper">
 	<div id="feed-progress-wrapper"
 	     class="progress progress-striped active">
@@ -138,10 +138,10 @@
 		 maxlength="32"
 		 class="form-control login-input" 
 		 id="username-generate" type="text" />
-	  <p id="generate-account-verbage">A long passphrase has been generated randomly for you, <i class="ired">in red below</i>. It is highly suggested you use a long passphrase and save it into a password manager application. [This is optional.]</p>
+	  <p id="generate-account-verbage">A long passphrase might have been generated randomly for you, <i class="ired">in red below</i> (unless you typed one into the login form). It is highly suggested you use a long passphrase and save it into a password manager application.</p>
 	  <p id="get-new-passphrase-wrapper">
 	    <button id="get-new-passphrase" class="btn btn-primary">
-	      Re-generate Passphrase
+	      Generate Long Passphrase
 	    </button>
 	  </p>
 	  <input placeholder="Passphrase" 
@@ -177,10 +177,13 @@
 	</form>
 
 	<div id="login-buttons">
-	  <button class="btn btn-primary" 
-		  id="register-btn">Create Account</button>
 	  <button class="btn btn-success"
 		  id="login-btn">Login</button>
+	</div>
+	<hr />
+	<div id="register-btn-wrapper">
+	  <button class="btn btn-primary"
+		  id="register-btn">Create Account</button>
 	</div>
       </div>
 
@@ -266,17 +269,17 @@
 
       <div id="first-run" class="view">
 	<h3>Initial Setup</h3>
-	<p><strong>Congratulations! You've signed up for ZK.</strong></p>
+	<p><strong>Congratulations! You've signed up for Kloak.</strong></p>
 	<p>
 	  Now that you have an account, you need to create an <strong>ID Card</strong>, which identifies you to other users you would like to communicate with.
 	</p>
 	<p>
-	  Once you share this <strong>ID Card</strong> with another user, and you have received theirs, you can privately share your status.
+	  Once you share this <strong>Contact Card</strong> with another user, and you have received theirs, you can privately communicate.
 	</p>
 	<br />
 	<p class="text-center">
 	  <button class="btn btn-success" 
-		  id="create-id-card">Create ID Card</button>
+		  id="create-id-card">Create Contact Card</button>
 	</p>
       </div>
 
@@ -296,7 +299,7 @@
 	  </p>
 	  <p>
 	    If not, take a screenshot of this, press <strong>Cancel</strong>,
-	    and speak with the person who sent you this ID card.
+	    and speak with the person who sent you this Contact card.
 	  </p>
 	  <div id="verify-user-buttons">
 	    <button id="verify-trust-save" 

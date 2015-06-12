@@ -493,3 +493,15 @@ a {
 #register-generate-cancel-btn {
     margin-top: 1em;
 }
+
+#register-btn {
+    font-size: smaller !important;
+}
+
+#get-new-passphrase {
+    font-size: smaller !important;
+}
+
+#register-btn-wrapper {
+    text-align: center;
+}

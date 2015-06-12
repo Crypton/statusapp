@@ -13,9 +13,7 @@ var app = {
     this.bindEvents();
   },
 
-  MESSAGE_TYPE: 'messengerMessage',
-
-  APPNAME: 'ZK',
+  APPNAME: 'Kloak',
 
   URL: 'https://zk.gs',
 
@@ -60,7 +58,7 @@ var app = {
 
     $("#register-generate-cancel-btn").click(function (e) {
       e.preventDefault();
-      app.switchView('#account-login', 'ZK');
+      app.switchView('#account-login', app.APPNAME);
     });
 
     $("#register-generate-btn").click(function (e) {
@@ -515,10 +513,18 @@ var app = {
 
   beginRegistration: function beginRegistration() {
     app.switchView('#generate-account', 'Create Account');
-    // generate a long password
-    var passphrase = generatePassphrase();
-    // display new form
-    $('#password-generate').val(passphrase);
+    // check for username + pass values
+    var pass = $('#password-login').val();
+    var username = $('#username-login').val();
+    if (pass || username) {
+      $('#password-generate').val(pass);
+      $('#username-generate').val(username);
+    } else {
+      // generate a long password
+      var passphrase = generatePassphrase();
+      // display new form
+      $('#password-generate').val(passphrase);
+    }
   },
 
   register: function (user, pass, callback) {

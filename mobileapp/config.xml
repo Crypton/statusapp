@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="io.crypton.statusapp" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>ZK</name>
+    <name>Kloak</name>
     <description>
     A Zero-Knowledge status application 
   </description>
@@ -13,4 +13,19 @@
     <preference name="BackupWebStorage" value="none" />
     <preference name="webviewbounce" value="false" />
     <preference name="orientation" value="portrait" /> 
+
+  <!-- <preference name="SplashScreen" value="screen" /> -->
+  <!--   <preference name="SplashScreenDelay" value="10000" /> -->
+
+  <!--   <platform name="android"> -->
+  <!--       <splash src="platforms/android/res/drawable-land-hdpi/screen" density="port-hdpi"/> -->
+  <!--       <splash src="platforms/android/res/drawable-land-ldpi/screen" density="port-ldpi"/> -->
+  <!--       <splash src="platforms/android/res/drawable-land-mdpi/screen" density="port-mdpi"/> -->
+  <!--       <splash src="platforms/android/res/drawable-land-xhdpi/screen" density="port-xhdpi"/> -->
+  <!--       <splash src="platforms/android/res/drawable-port-hdpi/screen" density="port-hdpi"/> -->
+  <!--       <splash src="platforms/android/res/drawable-port-ldpi/screen" density="port-ldpi"/> -->
+  <!--       <splash src="platforms/android/res/drawable-port-mdpi/screen" density="port-mdpi"/> -->
+  <!--       <splash src="platforms/android/res/drawable-port-xhdpi/screen" density="port-xhdpi"/> -->
+  <!--   </platform> -->
+
 </widget>
