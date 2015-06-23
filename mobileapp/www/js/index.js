@@ -93,7 +93,7 @@ var app = {
 
   URL: 'https://zk.gs',
 
-  VERSION: "0.0.1",
+  VERSION: "0.0.2",
 
   get isNodeWebKit() { return (typeof process == "object"); },
 
