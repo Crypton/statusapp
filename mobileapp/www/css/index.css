@@ -498,10 +498,33 @@ a {
     font-size: smaller !important;
 }
 
+#switch-user-btn {
+    font-size: smaller !important;
+}
+
 #get-new-passphrase {
     font-size: smaller !important;
 }
 
 #register-btn-wrapper {
     text-align: center;
+}
+
+#username-placehoder {
+    text-align: center !important;
+    display: none;
+    border-bottom: 1px solid gray;
+    margin: 1em !important;
+}
+
+.option {
+    padding-bottom: 0.5em;
+}
+
+.option-text {
+    font-weight: bold;
+}
+
+#options-controls {
+    margin: 1.5em;
 }

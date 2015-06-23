@@ -2,15 +2,91 @@
  * TODO LICENSE
  */
 
+document.addEventListener("deviceready", onDeviceReady, false);
+
+function onDeviceReady() {
+  // Now safe to use device APIs
+  app.init();
+
+
+  document.addEventListener('resume', function() {
+    setTimeout(function(){
+      console.log('Application Resume Event!');
+      if (app.resumeEventHandler &&
+	  (typeof app.resumeEventHandler == 'function')) {
+	app.resumeEventHandler();
+      }
+      
+    }, 0);
+  }, false);
+
+  document.addEventListener('pause', function() {
+    console.log('Application Pause Event!');
+    if (app.resumeEventHandler &&
+	(typeof app.pauseEventHandler == 'function')) {
+      app.pauseEventHandler();
+      console.log('app pausing');
+    }
+  }, false);
+  
+  try {
+    // For android only, will fail on iOS
+    // XXX: need to learn how to #IFDEF
+    screen.lockOrientation('portrait');
+  } catch (ex) {
+    console.log('Not Android');
+    // iOS, noop
+  }
+}
+
 var app = {
+  initilize: function initialize() {
+    console.log('noop initialize');
+  },
   // Application Constructor
-  initialize: function() {
-    app.enableLoginButtons();
-    app.switchView('#account-login');
-    $('#username-login').focus();
+  init: function init() {
+    console.log('app initializing!: ', arguments);
     crypton.host = 'zk.gs';
     this.card =  new crypton.Card();
     this.bindEvents();
+    $('#password-login').show();
+    $('#username-login').show();
+    
+    function defaultLoginBehavior () {
+      app.enableLoginButtons();
+      app.switchView('#account-login');
+      $('#username-login').focus();
+    }
+    // Check if any user has ever logged in before:
+    var lastUser = window.localStorage.getItem('lastUserLogin');
+    if (lastUser) {
+      $('#username-login').val(lastUser);
+      // initialize keychain
+      app.keyChain.init(lastUser, function _keychain_initCB (err) {
+	if (err) {
+	  console.error(err);
+	  return defaultLoginBehavior();
+	}
+	app.keyChain.getPassphrase(function (err, passphrase) {
+	  if (err) {
+	    console.error(err);
+	    // just display the normal login password. something is wrong...
+	    return defaultLoginBehavior();
+	  }
+	  // we have a passphrase!
+	  $('#username-login').hide();
+	  $('#username-placeholder').html(lastUser).show();
+	  // XXX: hide the login passphrase field
+	  $('#password-login').hide();
+	  $('#password-login').val(passphrase);
+	  app.enableLoginButtons();
+	  app.switchView('#account-login');
+	  $('#login-btn').focus();
+	});
+      });
+    } else {
+      defaultLoginBehavior();
+    }
   },
 
   APPNAME: 'Kloak',
@@ -24,13 +100,9 @@ var app = {
   get username() { return app.session.account.username; },
 
   get fingerprint() { return app.session.account.fingerprint; },
-  // Bind Event Listeners
-  //
-  // Bind any events that are required on startup. Common events are:
-  // 'load', 'deviceready', 'offline', and 'online'.
-  bindEvents: function() {
-    document.addEventListener('deviceready', app.onDeviceReady, false);
 
+  // Bind Event Listeners
+  bindEvents: function() {
     $('.view').click(function () {
       app.hideMenu();
     });
@@ -108,6 +180,31 @@ var app = {
       app.displayMyFingerprint(true);
     });
 
+    $('#my-options').click(function () {
+      app.hideMenu();
+      var useKeychain = window.localStorage.getItem('use-keychain');
+      if (useKeychain == undefined) {
+	window.localStorage.setItem('use-keychain', 't');
+	useKeychain = 't';
+      }
+      if (useKeychain == 't') {
+	$('#use-keychain-for-login').toggle(true);
+      }
+      app.switchView('#my-options-pane', 'Options');
+    });
+
+    $('#use-keychain-for-login').click(function () {
+      if (this.checked) {
+	window.localStorage.setItem('use-keychain', 't');
+	return;
+      }
+      
+      if (!this.checked) {
+	window.localStorage.setItem('use-keychain', 'f');
+	return;
+      }
+    });
+    
     $('#find-users').click(function () {
       app.switchView('#find-users-view', 'Find Users');
     });
@@ -119,6 +216,10 @@ var app = {
 
     $('#tasks-btn').click(function (){
       app.toggleMenu();
+    });
+
+    $('#switch-user-btn').click(function (){
+      app.switchUser();
     });
 
     $('#add-contact-button').click(function () {
@@ -171,66 +272,25 @@ var app = {
     }
   },
 
-  // deviceready Event Handler
-  //
-  // The scope of 'this' is the event. In order to call the 'receivedEvent'
-  // function, we must explicity call 'app.receivedEvent(...);'
-  onDeviceReady: function onDeviceReady () {
-    app.enableLoginButtons();
+  // // Update DOM on a Received Event
+  // receivedEvent: function(id) {
+  //   if (!id) {
+  //     console.error("No id provided to receivedEvent");
+  //     return;
+  //   }
+  //   var parentElement = document.getElementById(id);
+  //   if (!parentElement) {
+  //     console.error('Element with id: ' + id + ' does not exist.');
+  //     return;
+  //   }
+  //   var listeningElement = parentElement.querySelector('.listening');
+  //   var receivedElement = parentElement.querySelector('.received');
 
-    console.log('Device Ready Event!');
+  //   listeningElement.setAttribute('style', 'display:none;');
+  //   receivedElement.setAttribute('style', 'display:block;');
 
-    app.receivedEvent('deviceready');
-
-    document.addEventListener('resume', function() {
-      setTimeout(function(){
-        console.log('Application Resume Event!');
-	if (app.resumeEventHandler &&
-	    (typeof app.resumeEventHandler == 'function')) {
-	  app.resumeEventHandler();
-	}
-
-      }, 0);
-    }, false);
-
-    document.addEventListener('pause', function() {
-      console.log('Application Pause Event!');
-      if (app.resumeEventHandler &&
-	  (typeof app.pauseEventHandler == 'function')) {
-	app.pauseEventHandler();
-	console.log('app pausing');
-      }
-    }, false);
-
-    try {
-      // For android only, will fail on iOS
-      // XXX: need to learn how to #IFDEF
-      screen.lockOrientation('portrait');
-    } catch (ex) {
-      console.log('Not iOS');
-      // iOS, noop
-    }
-
-  },
-  // Update DOM on a Received Event
-  receivedEvent: function(id) {
-    if (!id) {
-      console.error("No id provided to receivedEvent");
-      return;
-    }
-    var parentElement = document.getElementById(id);
-    if (!parentElement) {
-      console.error('Element with id: ' + id + ' does not exist.');
-      return;
-    }
-    var listeningElement = parentElement.querySelector('.listening');
-    var receivedElement = parentElement.querySelector('.received');
-
-    listeningElement.setAttribute('style', 'display:none;');
-    receivedElement.setAttribute('style', 'display:block;');
-
-    console.log('Received Event: ' + id);
-  },
+  //   console.log('Received Event: ' + id);
+  // },
 
   alert: function (message, level) {
     // success, info, warning, danger
@@ -246,7 +306,7 @@ var app = {
       node.slideUp(100, function () {
         node.remove();
       });
-    }, 2000);
+    }, 3500);
   },
 
   logout: function logout () {
@@ -255,13 +315,45 @@ var app = {
     if (typeof app.logoutCleanup == 'function') {
       app.logoutCleanup();
     }
+    
+    var lastUser = window.localStorage.getItem('lastUserLogin');
+    if (lastUser) {
+      $('#username-placeholder').html(lastUser);
+      if (app.keyChain.prefix) {
+	app.keyChain.getPassphrase(function (err, passphrase) {
+	  if (err) {
+	    console.error(err);
+	    // just display the normal login password. something is wrong...
+	    $('#password-login').show();
+	    $('#username-login').show();
+	    $('#username-placeholder').hide();
+	    return;
+	  }
+	  // we have a passphrase!
+	  $('#username-login').hide();
+	  $('#username-placeholder').html(lastUser).show();
+	  // XXX: hide the login passphrase field
+	  $('#password-login').hide();
+	  $('#password-login').val(passphrase);
+	  app.enableLoginButtons();
+	  $('#login-btn').focus();
+	});
+      }
+    }
+    
     app.hideMenu();
-    app.switchView('#account-login', app.FEED_LABEL);
+    app.switchView('#account-login', app.FEED_LBAEL);
     $('#tasks-btn').removeClass('active');
     app.alert('You are logged out', 'info');
     $('#password-login').focus();
   },
 
+  switchUser: function switchUser() {
+    $('#username-login').show();
+    $('#username-placeholder').html('').hide();
+    $('#password-login').show();
+  },
+  
   scanQRCode_desktop: function scanQRCode_desktop () {
     // Use GUMHelper here instead
     console.error('Scan QR NOT IMPLEMENTED');
@@ -274,11 +366,10 @@ var app = {
     cordova.plugins.barcodeScanner.scan(
       function (result) {
         var userObj = JSON.parse(result.text);
-        console.log(userObj);
         app.verifyUser(userObj.username, userObj.fingerprint);
       },
       function (error) {
-        app.alert("Scanning failed: " + error, 'danger');
+        app.alert("QR Scanning failed: " + error, 'danger');
       }
     );
   },
@@ -503,9 +594,20 @@ var app = {
       if (err) {
         app.alert(err, 'danger');
         return;
-     }
-
-      app.switchView('#scan-select', 'Verify Contact Card');
+      }
+      // set the passphrase into the keychain:
+      app.keyChain.init(user, function (err) {
+	if (err) {
+	  console.error(err, 'Cannot init keychain!');
+	  return;
+	}
+	app.keyChain.setPassphrase(pass, function _keychainSetPassphraseCB(err) {
+	  if (err) {
+	    console.error(err);
+	  }
+	  app.switchView('#scan-select', 'Verify Contact Card');
+	});
+      });
     }
 
     app.register(user, pass, callback);
@@ -569,6 +671,8 @@ var app = {
         return;
       }
 
+      window.localStorage.setItem('lastUserLogin', user);
+      
       app.username = user;
       app.session = session;
       app.setLoginStatus('Loading prefs and feed...');
@@ -673,7 +777,7 @@ var app = {
 
   verifyUser: function (username, fingerprint) {
     if (!fingerprint) {
-      var error = 'ID Fingerprint was not extracted';
+      var error = 'Contact data was not extracted';
       app.alert(error, 'danger');
       return console.error(error);
     }
@@ -686,7 +790,7 @@ var app = {
     $('#verify-user-failure-msg').children().remove();
     $('#verify-trust-failure-ok').hide();
 
-    app.switchView('#verify-user', 'Verify User');
+    // app.switchView('#verify-user', 'Verify User');
 
     app.session.getPeer(username, function(err, peer) {
       if (err) {
@@ -698,16 +802,15 @@ var app = {
         peer.trust(function (err) {
           if (err) {
             console.log('peer trust failed: ' + err);
-            app.switchView('#scan-select', 'Verify Contact Card');
+            // app.switchView('#scan-select', 'Verify Contact Card');
             app.alert(err, 'danger');
           } else {
             app.alert(username + ' is now a trusted contact', 'info');
-            $('#verify-user-success-msg').children().remove();
+            // $('#verify-user-success-msg').children().remove();
             if (app.postPeerTrustCallback && typeof app.postPeerTrustCallback == 'function') {
               app.postPeerTrustCallback(peer);
             }
-            // TODO: remove click events from buttons
-            app.switchView('#scan-select', 'Verify Contact Card');
+            // app.switchView('#scan-select', 'Verify Contact Card');
           }
         });
       }
@@ -748,28 +851,29 @@ var app = {
       resizeIdCard(peerIdGrid);
 
       if (peer.fingerprint == outOfBandFingerprint) {
-        $('#verify-user-success').show();
-        $('#verify-user-failure').hide();
-        var conf = '<div id="server-supplied"><strong>Server supplied</strong>'
-                 + '<p id="server-idgrid-canvas"></p></div>'
-                 + '<div id="scan-spplied"><strong>Scan supplied</strong>'
-                 + '<p id="outofband-idgrid-canvas"></p></div>';
-        var msg = $(conf);
-        $('#verify-user-success-msg').append(msg);
-        // add canvases to DOM
-        $('#server-idgrid-canvas').append(peerIdGrid);
+	success();
+        // $('#verify-user-success').show();
+        // $('#verify-user-failure').hide();
+        // var conf = '<div id="server-supplied"><strong>Server supplied</strong>'
+        //          + '<p id="server-idgrid-canvas"></p></div>'
+        //          + '<div id="scan-spplied"><strong>Scan supplied</strong>'
+        //          + '<p id="outofband-idgrid-canvas"></p></div>';
+        // var msg = $(conf);
+        // $('#verify-user-success-msg').append(msg);
+        // // add canvases to DOM
+        // $('#server-idgrid-canvas').append(peerIdGrid);
 
-        $('#outofband-idgrid-canvas').append(outOfBandIdGrid);
+        // $('#outofband-idgrid-canvas').append(outOfBandIdGrid);
 
-        $('#verify-trust-save').click(function () {
-          success();
-        });
+        // $('#verify-trust-save').click(function () {
+        //   success();
+        // });
 
-        $('#verify-trust-cancel').click(function () {
-          cancelTrust();
-        });
-        $('#verify-trust-save').show();
-        $('#verify-trust-cancel').show();
+        // $('#verify-trust-cancel').click(function () {
+        //   cancelTrust();
+        // });
+        // $('#verify-trust-save').show();
+        // $('#verify-trust-cancel').show();
       } else {
         // Failure to match fingerprints
         $('#verify-user-success').hide();
@@ -779,7 +883,7 @@ var app = {
         $('#verify-trust-cancel').hide();
 
         var conf = '<p>The server supplied</strong> '
-                 + 'ID color grid for <strong>'
+                 + 'Contact color grid for <strong>'
              + username
              + '</strong> is: <p/>'
              + '<p id="server-idgrid-canvas"></p>'
@@ -1077,7 +1181,7 @@ var app = {
     });
   },
 
-  setPassphraseInKeychain: function (passphrase) {
+  setPassphraseInKeychain: function (username) {
     // if we set the username + password into the keychain, we then:
     // * create a keychain object in localStorage like: { username: Date.now()}
     // * when we render the login screen, we can check this value and
@@ -1085,29 +1189,37 @@ var app = {
     // * Perhaps the login screen is dynamic, if a username is not in
     //   the keychain property, we render the password field
     // * Provide a manual override checkbox?
+    
   },
 
   keyChain: {
 
-    init: function init_keyChain (prefix) {
+    init: function init_keyChain (username, callback) {
+      this.prefix = username;
+      var that = this;
       this.ss = new cordova.plugins.SecureStorage(
-	function () { console.log('KeyChain initialized'); },
-	function (error) { console.log('KeyChain Error ' + error); },
+	function () {
+	  console.log('KeyChain initialized');
+	  callback(null);
+	},
+	function (error) {
+	  console.log('KeyChain Error ' + error);
+	  callback(error);
+	},
 	app.APPNAME);
-      this.passphraseKeyPrefix(prefix);
     },
 
     _prefix: undefined,
 
-    set passphraseKeyPrefix(prefix) {
-      this.prefix = prefix;
+    set prefix(prefix) {
+      this._prefix = prefix;
     },
 
     get prefix() {
-      if (!this.prefix) {
+      if (!this._prefix) {
 	console.error('Prefix required to get keychain data');
       }
-      return this.prefix;
+      return this._prefix;
     },
 
     getPassphrase: function _getPassphrase (callback) {
@@ -1124,11 +1236,17 @@ var app = {
 	passphraseKey);
     },
 
-    setPassphrase: function _setPassphrase (passphraseValue) {
+    setPassphrase: function _setPassphrase (passphraseValue, callback) {
       var _passphraseKey = this.prefix + '-' + app.APPNAME;
       this.ss.set(
-	function (key) { console.log('Set ' + key); },
-	function (error) { console.log('Error ' + error); },
+	function (key) {
+	  console.log('Set ' + key);
+	  callback(null);
+	},
+	function (error) {
+	  console.log('Error ' + error);
+	  callback(error);
+	},
 	_passphraseKey, passphraseValue);
     },
 

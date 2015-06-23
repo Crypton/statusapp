@@ -51,6 +51,11 @@
 	    <i class="fa fa-refresh"></i> <span>Refresh Feed</span>
 	  </a>
 	</li>
+	<li class="main-btn" id="my-options">
+	  <a href="#">
+	    <i class="fa fa-cog"></i> Options
+	  </a>
+	</li>
 	<li class="main-btn" id="my-contacts">
 	  <a href="#">
 	    <i class="fa fa-users"></i> Contacts
@@ -177,11 +182,14 @@
 	</form>
 
 	<div id="login-buttons">
+	  <h3 id="username-placeholder"></h3>
 	  <button class="btn btn-success"
 		  id="login-btn">Login</button>
 	</div>
 	<hr />
 	<div id="register-btn-wrapper">
+	  <button class="btn btn-primary"
+		  id="switch-user-btn">Switch User</button>
 	  <button class="btn btn-primary"
 		  id="register-btn">Create Account</button>
 	</div>
@@ -203,14 +211,9 @@
       <div id="scan-select" class="view">
 	<p>
 	  To add a contact, you must first have them send you
-	  their ID card. Depending on the medium they send it over,
-	  you may either scan it with your camera or load it from
-	  your phone.
-	</p>
-	<p>
-	  After you scan the image, you will be asked to verify
-	  the integrity of their fingerprint against one
-	  supplied by the server.
+	  their Contact Card. Depending on the method it is sent,
+	  you may either scan the QR Code or load the Contact Card image from
+	  your image library.
 	</p>
 	<div id="scan-select-buttons">
 	  <button type="button" 
@@ -218,7 +221,7 @@
 		  id="scan">Scan QR</button>
 	  <button type="button" 
 		  class="btn btn-primary"
-		  id="get-image">Load file</button>
+		  id="get-image">Load File</button>
 	</div>
       </div>
 
@@ -261,6 +264,47 @@
 	</div>
       </div>
 
+      <div id="my-options-pane" class="view">
+	<div id="options-controls">
+	  <p class="option option-text">
+	    Your login credentials can be securely remembered to allow for quicker login
+	  </p>
+	  <p class="option">
+	  <input checked type="checkbox" id="use-keychain-for-login"> Remember credentials
+	  </p>
+	  <p class="option option-text">
+	    Display My Passphrase
+	  </p>
+	  <p class="option">
+	  <button type="button"
+		  id="display-passphrase"
+		  class="btn btn-success">Display My Passphrase</button>
+	  </p>
+	  <p class="option option-text">
+	    Change your passphrase
+	  </p>
+	  <p class="option">
+	  <button type="button"
+		  id="change-passphrase"
+		  class="btn btn-success">Change Passphrase</button>
+	  </p>
+	  <p class="option option-text">
+	    Delete Account & All Data Created
+	  </p>
+	  <p class="option">
+	  <button type="button"
+		  id="delete-account"
+		  class="btn btn-primary">Delete Account</button>
+	  </p>
+	   <p class="option option-text">
+	    Self-destruct Account on:
+	  </p>
+	  <p class="option">
+	    [Need Date & Timepicker widget]
+	  </p>
+	</div>
+      </div>
+      
       <div id="my-fingerprint-id" class="view">
       </div>
 

@@ -29,7 +29,7 @@ app.ITEMS = {
   avatar: 'avatar'
 };
 
-app.FEED_LABEL = 'Kloak Feed';
+app.FEED_LABEL = 'Feed';
 
 app.INITIAL_STATUS_MESSAGE = 'Current Status: null';
 
