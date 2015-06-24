@@ -8,7 +8,6 @@ function onDeviceReady() {
   // Now safe to use device APIs
   app.init();
 
-
   document.addEventListener('resume', function() {
     setTimeout(function(){
       console.log('Application Resume Event!');
@@ -30,12 +29,10 @@ function onDeviceReady() {
   }, false);
   
   try {
-    // For android only, will fail on iOS
     // XXX: need to learn how to #IFDEF
     screen.lockOrientation('portrait');
   } catch (ex) {
-    console.log('Not Android');
-    // iOS, noop
+    console.log('Lock orientation not supported');
   }
 }
 
@@ -55,8 +52,14 @@ var app = {
     function defaultLoginBehavior () {
       app.enableLoginButtons();
       app.switchView('#account-login');
+      // do not show "remember credentials" if keychain is not supported
+      if (!app.keyChain.supported) {
+	$('#remember-credentials')[0].checked = false;
+	$('#remember-credentials-wrapper').hide();
+      }
       $('#username-login').focus();
     }
+    
     // Check if any user has ever logged in before:
     var lastUser = window.localStorage.getItem('lastUserLogin');
     if (lastUser) {
@@ -76,15 +79,21 @@ var app = {
 	  // we have a passphrase!
 	  $('#username-login').hide();
 	  $('#username-placeholder').html(lastUser).show();
-	  // XXX: hide the login passphrase field
+
+	  // XXX: hide the login passphrase field, etc
 	  $('#password-login').hide();
 	  $('#password-login').val(passphrase);
+
+	  $('#remember-credentials')[0].checked = false;
+	  $('#remember-credentials-wrapper').hide();
+	  
 	  app.enableLoginButtons();
 	  app.switchView('#account-login');
 	  $('#login-btn').focus();
 	});
       });
     } else {
+      // check if keychain is supported
       defaultLoginBehavior();
     }
   },
@@ -123,6 +132,10 @@ var app = {
       app.logout();
     });
 
+    $('#about').click(function () {
+      app.about();
+    });
+    
     $("#register-btn").click(function (e) {
       e.preventDefault();
       app.beginRegistration();
@@ -160,6 +173,34 @@ var app = {
       app.login();
     });
 
+    $('#forget-credentials').click(function (e) {
+      app.keyChain.removePassphrase(function (err) {
+	if (err) {
+	  console.error(err);
+	  app.alert('There is no passphrase to remove from keychain', 'warning');
+	} else {
+	  app.alert('Passphrase removed!', 'info');
+	}
+	delete window.localStorage.lastUserLogin;
+	// re-set the login screen
+	$('#username-login').show();
+	$('#username-placeholder').html('').hide();
+	$('#password-login').show();
+	e.disabled = true;
+      });
+    });
+    
+    $('#display-passphrase').click(function (e) {
+      // check if we have the passphrase!
+      app.keyChain.getPassphrase(function (err, passphrase) {
+	if (err) {
+	  console.error(err);
+	  return app.alert('Cannot get passphrase from keychain', 'danger');
+	}
+	app.alert(passphrase, 'info');
+      });
+    });
+    
     $('#my-contacts').click(function () {
       app.hideMenu();
       app.displayContacts();
@@ -182,27 +223,14 @@ var app = {
 
     $('#my-options').click(function () {
       app.hideMenu();
-      var useKeychain = window.localStorage.getItem('use-keychain');
-      if (useKeychain == undefined) {
-	window.localStorage.setItem('use-keychain', 't');
-	useKeychain = 't';
-      }
-      if (useKeychain == 't') {
-	$('#use-keychain-for-login').toggle(true);
-      }
-      app.switchView('#my-options-pane', 'Options');
-    });
 
-    $('#use-keychain-for-login').click(function () {
-      if (this.checked) {
-	window.localStorage.setItem('use-keychain', 't');
-	return;
+      // disable forget credentials if not supported
+      if (!app.keyChain.supported) {
+	$('#forget-credentials')[0].disabled = true;
+	$('#display-passphrase')[0].disabled = true;
       }
       
-      if (!this.checked) {
-	window.localStorage.setItem('use-keychain', 'f');
-	return;
-      }
+      app.switchView('#my-options-pane', 'Options');
     });
     
     $('#find-users').click(function () {
@@ -271,7 +299,7 @@ var app = {
       $('#login-progress').hide();
     }
   },
-
+  
   // // Update DOM on a Received Event
   // receivedEvent: function(id) {
   //   if (!id) {
@@ -326,7 +354,9 @@ var app = {
 	    // just display the normal login password. something is wrong...
 	    $('#password-login').show();
 	    $('#username-login').show();
-	    $('#username-placeholder').hide();
+	    $('#username-placeholder').html('').hide();
+	    $('#remember-credentials')[0].checked = true;
+	    $('#remember-credentials-wrapper').show();
 	    return;
 	  }
 	  // we have a passphrase!
@@ -335,6 +365,8 @@ var app = {
 	  // XXX: hide the login passphrase field
 	  $('#password-login').hide();
 	  $('#password-login').val(passphrase);
+	  $('#remember-credentials')[0].checked = false;
+	  $('#remember-credentials-wrapper').hide();
 	  app.enableLoginButtons();
 	  $('#login-btn').focus();
 	});
@@ -342,7 +374,7 @@ var app = {
     }
     
     app.hideMenu();
-    app.switchView('#account-login', app.FEED_LBAEL);
+    app.switchView('#account-login', app.APPNAME);
     $('#tasks-btn').removeClass('active');
     app.alert('You are logged out', 'info');
     $('#password-login').focus();
@@ -352,6 +384,8 @@ var app = {
     $('#username-login').show();
     $('#username-placeholder').html('').hide();
     $('#password-login').show();
+    $('#remember-credentials')[0].checked = true;
+    $('#remember-credentials').show();
   },
   
   scanQRCode_desktop: function scanQRCode_desktop () {
@@ -403,7 +437,7 @@ var app = {
         // pass off the image data to callback
         callback(null, img);
       };
-    }, function _error (err) { alert("GUM: there was an error " + err)});
+    }, function _error (err) { alert("GUM: there was an error " + err);});
   },
 
   captureAvatar_desktop: function captureAvatar_desktop () {
@@ -605,7 +639,6 @@ var app = {
 	  if (err) {
 	    console.error(err);
 	  }
-	  app.switchView('#scan-select', 'Verify Contact Card');
 	});
       });
     }
@@ -672,7 +705,20 @@ var app = {
       }
 
       window.localStorage.setItem('lastUserLogin', user);
-      
+      // Save passphrase if the checkbox is checked
+      if ($('#remember-credentials')[0].checked && app.keyChain.supported) {
+	app.keyChain.init(user, function (err) {
+	  if (err) {
+	    return console.error(err);
+	  }
+	  app.keyChain.setPassphrase(pass, function (err) {
+	    if (err) {
+	      return console.error(err);
+	    }
+	    return console.log('success: passphrase remembered');
+	  });
+	});
+      }
       app.username = user;
       app.session = session;
       app.setLoginStatus('Loading prefs and feed...');
@@ -1181,20 +1227,40 @@ var app = {
     });
   },
 
-  setPassphraseInKeychain: function (username) {
-    // if we set the username + password into the keychain, we then:
-    // * create a keychain object in localStorage like: { username: Date.now()}
-    // * when we render the login screen, we can check this value and
-    //   try to get the passphrase automatically and login with just a click
-    // * Perhaps the login screen is dynamic, if a username is not in
-    //   the keychain property, we render the password field
-    // * Provide a manual override checkbox?
-    
+  get isMobile() {
+    if (!device) {
+      return false;
+    }
+    if (device.platform in {Android: 'Android', iOS: 'iOS'}) {
+      return true;
+    }
+    return false;
   },
 
+  get platform() {
+    if (!device) {
+      return undefined;
+    }
+    return device.platform;
+  },
+
+  get version() {
+    if (!device) {
+      return undefined;
+    }
+    return device.version;
+  },
+  
   keyChain: {
 
+    MIN_SUPPORT_IOS: 8,
+
+    MIN_SUPPORT_ANDROID: 5,
+    
     init: function init_keyChain (username, callback) {
+      if (!this.supported) {
+	return callback('Keychain unsupported');
+      }
       this.prefix = username;
       var that = this;
       this.ss = new cordova.plugins.SecureStorage(
@@ -1222,8 +1288,14 @@ var app = {
       return this._prefix;
     },
 
-    getPassphrase: function _getPassphrase (callback) {
-      var passphraseKey = this.prefix + '-' + app.APPNAME;
+    getPassphrase: function _getPassphrase (callback, testKeyName) {
+      var passphraseKey;
+      if (testKeyName) {
+	passphraseKey = testKeyName;
+      } else {
+       passphraseKey = this.prefix + '-' + app.APPNAME;
+      }
+
       this.ss.get(
 	function (value) {
 	  console.log('Success, got ' + value);
@@ -1250,12 +1322,47 @@ var app = {
 	_passphraseKey, passphraseValue);
     },
 
-    removePassphrase: function _removePassphrase () {
+    removePassphrase: function _removePassphrase (callback) {
       var _passphraseKey = this.prefix + '-' + app.APPNAME;
       this.ss.remove(
-	function (key) { console.log('Removed ' + key); },
-	function (error) { console.log('Error, ' + error); },
+	function (key) {
+	  console.log('Removed ' + key);
+	  callback(null);
+	},
+	function (error) {
+	  console.error('Error, ' + error);
+	  callback(error);
+	},
 	_passphraseKey);
+    },
+
+    get supported() {
+      // test to see if the keychain is supported.
+      // iOS 8+ & Android 5+ are supported
+      if (!app.isMobile) {
+	return false;
+      }
+      if (device.platform == 'Android') {
+	if (new Number(device.version[0]) < this.MIN_SUPPORT_ANDROID) {
+	  return false;
+	}
+	return true;
+      }
+      if (device.platform == 'iOS') {
+	if (new Number(device.version[0]) < this.MIN_SUPPORT_IOS) {
+	return false;
+	}
+	return true;
+      }
+      return false;
+    }
+  },
+
+  about: function _about () {
+    app.hideMenu();
+    app.switchView('#app-about', 'About ' + app.APPNAME);
+    if (typeof app.aboutView == 'function') {
+      app.aboutView();
     }
   }
 };

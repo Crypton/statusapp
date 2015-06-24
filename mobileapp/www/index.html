@@ -66,6 +66,11 @@
 	    <i class="fa fa-user"></i> My Contact Card
 	  </a>
 	</li>
+	<li class="main-btn" id="about">
+	  <a href="#">
+	    <i class="fa fa-info-circle"></i> About
+	  </a>
+	</li>
 	<li class="main-btn" id="logout">
 	  <a href="#">
 	    <i class="fa fa-sign-out"></i> Logout
@@ -179,6 +184,11 @@
 		 class="form-control login-input"
 		 id="password-login" type="password" 
 		 autocomplete="off" />
+	  <div id="remember-credentials-wrapper">
+	    <input type="checkbox" id="remember-credentials" checked />
+	    <label id="rememeber-credentials-label"
+		   for="remember-credentials">Remember credentials</label>
+	  </div>
 	</form>
 
 	<div id="login-buttons">
@@ -267,10 +277,12 @@
       <div id="my-options-pane" class="view">
 	<div id="options-controls">
 	  <p class="option option-text">
-	    Your login credentials can be securely remembered to allow for quicker login
+	    By default (on supported devices), your credentials are securely remembered to allow for fast login
 	  </p>
 	  <p class="option">
-	  <input checked type="checkbox" id="use-keychain-for-login"> Remember credentials
+	    <button type="button"
+		    id="forget-credentials"
+		    class="btn btn-success">Forget credentials</button>
 	  </p>
 	  <p class="option option-text">
 	    Display My Passphrase
@@ -278,30 +290,30 @@
 	  <p class="option">
 	  <button type="button"
 		  id="display-passphrase"
-		  class="btn btn-success">Display My Passphrase</button>
+		  class="btn btn-success">Display passphrase</button>
 	  </p>
 	  <p class="option option-text">
-	    Change your passphrase
+	    Change my passphrase
 	  </p>
 	  <p class="option">
-	  <button type="button"
+	  <button disabled type="button"
 		  id="change-passphrase"
-		  class="btn btn-success">Change Passphrase</button>
+		  class="btn btn-success">Change passphrase</button>
 	  </p>
 	  <p class="option option-text">
 	    Delete Account & All Data Created
 	  </p>
 	  <p class="option">
-	  <button type="button"
+	  <button disabled type="button"
 		  id="delete-account"
-		  class="btn btn-primary">Delete Account</button>
+		  class="btn btn-primary">Delete account</button>
 	  </p>
-	   <p class="option option-text">
-	    Self-destruct Account on:
-	  </p>
-	  <p class="option">
-	    [Need Date & Timepicker widget]
-	  </p>
+	  <!--  <p class="option option-text"> -->
+	  <!--   Self-destruct Account on: -->
+	  <!-- </p> -->
+	  <!-- <p class="option"> -->
+	  <!--   [Need Date & Timepicker widget] -->
+	  <!-- </p> -->
 	</div>
       </div>
       
@@ -311,6 +323,9 @@
       <div id="peer-fingerprint-id" class="view">
       </div>
 
+      <div id="app-about" class="view">
+      </div>
+      
       <div id="first-run" class="view">
 	<h3>Initial Setup</h3>
 	<p><strong>Congratulations! You've signed up for Kloak.</strong></p>
@@ -399,8 +414,5 @@
     <script type="text/javascript" src="js/vendor/jsqrcode/databr.js"></script>
     <!-- END QR Code Reader -->
     <script type="text/javascript" src="js/vendor/Autolinker.js"></script>
-    <script type="text/javascript">
-      app.initialize();
-    </script>
   </body>
 </html>

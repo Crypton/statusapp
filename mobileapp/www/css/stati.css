@@ -241,3 +241,11 @@ margin-right: 20px;}
 .media-link-phone { color: red !important; }
 .media-link-twitter { color: blue !important; }
 .media-link-hashtag { color: purple !important; }
+
+#about-view {
+    margin: 2em;
+}
+
+.app-logo {
+    margin-bottom: 1em;
+}

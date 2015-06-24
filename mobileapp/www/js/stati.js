@@ -1,3 +1,5 @@
+// This file is the application specific code and includes all implemented functions expected by index.js
+
 app.localAvatarsPath = 'img/avatars/';
 
 app.localAvatars = ['franklin-1.png', 'franklin-2.png', 'franklin-3.png',
@@ -55,7 +57,6 @@ app.pauseEventHandler = function pauseEventHandler () {
   // app.clearLoadingInterval();
 };
 
-
 app.setAvatar = function setAvatar() {
   var avatarData = app.session.items.avatar.value.avatar;
   if ($('#my-avatar')[0].src.indexOf('avatars') == -1) {
@@ -71,6 +72,25 @@ app.setAvatar = function setAvatar() {
       // $('#my-avatar').style({ width: '64px', height: '48px' });
     }
   }
+};
+
+app.aboutView = function _aboutView () {
+  var header = 'About Kloak';
+  var logos = '<p><img class="app-logo" src="img/spideroak_logo.png" /> </p>';
+  var info = 'Kloak is an <strong>*experiment*</strong> in social networking that is un-dataminable. All data sent to the server is "end to end" encrypted and unreadable by the server operator. <br /> Kloak is in beta and <strong>should not be used to hide communications in life or death situations!</strong> <p><a href="https://github.com/Crypton/statusapp" target="_system">Kloak Source code and issue tracker</a> <br />Kloak is built with <a href="https://crypton.io" target="_system">Crypton</a> by SpiderOak</p>';
+
+  var html = '<div id="about-view"><h4>'
+	+ header
+        + '</h4>'
+	+ '<p>'
+        + info
+	+ '</p>'
+	+ '<p>'
+	+ logos
+	+ '</p>'
+	+ '</div>';
+  $('#app-about').children().remove();
+  $('#app-about').append($(html));
 };
 
 app.setCustomEvents = function setCustomEvents () {

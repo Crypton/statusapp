@@ -23,6 +23,10 @@ org.devgeeks.privacyscreen
 
 org.apache.cordova.inappbrowser
 
+org.apache.cordova.device
+
+com.crypho.plugins.securestorage
+
 # Android Only
 
 net.yoik.cordova.plugins.screenorientation.wkwebview
