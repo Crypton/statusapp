@@ -1322,12 +1322,6 @@ function getTimeline (options, callback) {
   if (typeof parseInt(limit) != 'number') {
     limit = 10; // default MAX of 10 - for now
   }
-  // if (typeof direction != 'string') {
-  //   direction = 'next';
-  // }
-  // if (direction != 'prev' || direction != 'next') {
-  //   direction = 'next';
-  // }
 
   var that = this;
   var url = crypton.url() + '/timeline/' + '?sid=' + crypton.sessionId
@@ -1352,6 +1346,171 @@ function getTimeline (options, callback) {
       var hitem = new crypton.HistoryItem(that, rows[i]);
       history.push(hitem);
     }
+    callback(null, history);
+  });
+};
+
+/**!
+ * ### getLatestTimeline()
+ * returns latest Timeline items
+ *
+ * Calls back with ItemHistory Array and without error if successful
+ *
+ * Calls back with error if unsuccessful
+ *
+ * @param {Object} options // e.g.: { limit: 20 }
+ * @param {Function} callback
+ */
+Session.prototype.getLatestTimeline =
+function getLatestTimeline (options, callback) {
+  if (typeof options != 'object') {
+    return callback(ERRS.ARG_MISSING_OBJECT);
+  }
+  if (typeof callback != 'function') {
+    return callback(ERRS.ARG_MISSING_CALLBACK);
+  }
+
+  var limit = options.limit;
+  if (typeof parseInt(limit) != 'number') {
+    limit = 10; // default MAX of 10 - for now
+  }
+
+  var that = this;
+  var url = crypton.url() + '/timeline-latest/' + '?sid=' + crypton.sessionId
+          + '&limit=' + limit;
+
+  superagent.get(url)
+  .withCredentials()
+  .end(function (res) {
+    if (!res.body || res.body.success !== true) {
+      console.error(res.body);
+      return callback('Cannot get timeline');
+    }
+
+    // expand all item_history rows into actual items
+    var rows = res.body.rawData;
+    var history = [];
+    for (var i = 0; i < rows.length; i++) {
+      var hitem = new crypton.HistoryItem(that, rows[i]);
+      history.push(hitem);
+    }
+    history.reverse();
+  
+    callback(null, history);
+  });
+};
+
+
+/**!
+ * ### getTimelineBefore()
+ * returns Timeline items before ID
+ *
+ * Calls back with ItemHistory Array and without error if successful
+ *
+ * Calls back with error if unsuccessful
+ *
+ * @param {Object} options // e.g.: { limit: 20, beforeId: 12345 }
+ * @param {Function} callback
+ */
+Session.prototype.getTimelineBefore =
+function getTimelineBefore (options, callback) {
+  if (typeof options != 'object') {
+    return callback(ERRS.ARG_MISSING_OBJECT);
+  }
+  if (typeof callback != 'function') {
+    return callback(ERRS.ARG_MISSING_CALLBACK);
+  }
+
+  var limit = options.limit;
+  if (typeof parseInt(limit) != 'number') {
+    limit = 10; // default MAX of 10 - for now
+  }
+
+  var beforeId = options.beforeId;
+  if (typeof parseInt(beforeId) != 'number') {
+    console.error('\'beforeId\' property is missing from the options argument');	
+    return callback(ERRS.ARG_MISSING);
+  }
+    
+  var that = this;
+  var url = crypton.url() + '/timeline-before/' + '?sid=' + crypton.sessionId
+          + '&limit=' + limit
+          + '&beforeId=' + beforeId;
+    
+  superagent.get(url)
+  .withCredentials()
+  .end(function (res) {
+    if (!res.body || res.body.success !== true) {
+      console.error(res.body);
+      return callback('Cannot get timeline');
+    }
+
+    // expand all item_history rows into actual items
+    var rows = res.body.rawData;
+    var history = [];
+    for (var i = 0; i < rows.length; i++) {
+      var hitem = new crypton.HistoryItem(that, rows[i]);
+      history.push(hitem);
+    }
+  
+    callback(null, history);
+  });
+};
+
+
+/**!
+ * ### getTimelineAfter()
+ * returns Timeline items after ID
+ *
+ * Calls back with ItemHistory Array and without error if successful
+ *
+ * Calls back with error if unsuccessful
+ *
+ * @param {Object} options // e.g.: { limit: 20, afterId: 12345 }
+ * @param {Function} callback
+ */
+Session.prototype.getTimelineAfter =
+function getTimelineAfter (options, callback) {
+  if (typeof options != 'object') {
+    return callback(ERRS.ARG_MISSING_OBJECT);
+  }
+  if (typeof callback != 'function') {
+    return callback(ERRS.ARG_MISSING_CALLBACK);
+  }
+
+  var limit = options.limit;
+  if (typeof parseInt(limit) != 'number') {
+    limit = 10; // default MAX of 10 - for now
+  }
+
+  var afterId = options.afterId;
+  if (typeof parseInt(afterId) != 'number') {
+    console.error('\'afterId\' property is missing from the options argument');	
+    return callback(ERRS.ARG_MISSING);
+  }
+    
+  var that = this;
+  var url = crypton.url() + '/timeline-after/' + '?sid=' + crypton.sessionId
+          + '&limit=' + limit
+          + '&afterId=' + afterId;
+    
+  superagent.get(url)
+  .withCredentials()
+  .end(function (res) {
+    if (!res.body || res.body.success !== true) {
+      console.error(res.body);
+      return callback('Cannot get timeline');
+    }
+
+    // expand all item_history rows into actual items
+    var rows = res.body.rawData;
+    var history = [];
+    for (var i = 0; i < rows.length; i++) {
+      var hitem = new crypton.HistoryItem(that, rows[i]);
+      history.push(hitem);
+    }
+    history.reverse();
+  
     callback(null, history);
   });
 };
