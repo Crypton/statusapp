@@ -541,3 +541,13 @@ option-label {
     color: #a1a1a1;
     margin-left: 0.5em;
 }
+
+.following-complete {
+    color: green;
+    font-size: 80%;
+}
+
+.following-not-complete {
+    color: red;
+    font-size: 80%;
+}

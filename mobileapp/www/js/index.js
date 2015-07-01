@@ -821,6 +821,13 @@ var app = {
     return this.card.createFingerprintArr(fingerprint).join(" ");
   },
 
+  logNewContct: function _logNewContact(username) {
+    var html = '<li class="logged-new-contact">Conatct "'
+	  + username + '" added to contacts'
+	  + '</li>';
+    $('#contact-add-log').prepend($(html));
+  },
+  
   verifyUser: function (username, fingerprint) {
     if (!fingerprint) {
       var error = 'Contact data was not extracted';
@@ -836,8 +843,6 @@ var app = {
     $('#verify-user-failure-msg').children().remove();
     $('#verify-trust-failure-ok').hide();
 
-    // app.switchView('#verify-user', 'Verify User');
-
     app.session.getPeer(username, function(err, peer) {
       if (err) {
         app.alert(err, 'danger');
@@ -848,15 +853,13 @@ var app = {
         peer.trust(function (err) {
           if (err) {
             console.log('peer trust failed: ' + err);
-            // app.switchView('#scan-select', 'Verify Contact Card');
             app.alert(err, 'danger');
           } else {
             app.alert(username + ' is now a trusted contact', 'info');
-            // $('#verify-user-success-msg').children().remove();
+	    app.logNewContact(peer.username);
             if (app.postPeerTrustCallback && typeof app.postPeerTrustCallback == 'function') {
               app.postPeerTrustCallback(peer);
             }
-            // app.switchView('#scan-select', 'Verify Contact Card');
           }
         });
       }
@@ -876,12 +879,12 @@ var app = {
         var oldCanvas = canvas.toDataURL("image/png");
         var img = new Image();
         img.src = oldCanvas;
-        img.onload = function (){
+        img.onload = function () {
           canvas.height = 120;
           canvas.width = 120;
           var ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0);
-        }
+        };
       }
 
       var outOfBandFingerprint = rawFingerprint;
@@ -898,28 +901,6 @@ var app = {
 
       if (peer.fingerprint == outOfBandFingerprint) {
 	success();
-        // $('#verify-user-success').show();
-        // $('#verify-user-failure').hide();
-        // var conf = '<div id="server-supplied"><strong>Server supplied</strong>'
-        //          + '<p id="server-idgrid-canvas"></p></div>'
-        //          + '<div id="scan-spplied"><strong>Scan supplied</strong>'
-        //          + '<p id="outofband-idgrid-canvas"></p></div>';
-        // var msg = $(conf);
-        // $('#verify-user-success-msg').append(msg);
-        // // add canvases to DOM
-        // $('#server-idgrid-canvas').append(peerIdGrid);
-
-        // $('#outofband-idgrid-canvas').append(outOfBandIdGrid);
-
-        // $('#verify-trust-save').click(function () {
-        //   success();
-        // });
-
-        // $('#verify-trust-cancel').click(function () {
-        //   cancelTrust();
-        // });
-        // $('#verify-trust-save').show();
-        // $('#verify-trust-cancel').show();
       } else {
         // Failure to match fingerprints
         $('#verify-user-success').hide();
@@ -1185,16 +1166,28 @@ var app = {
 
 
       for (var i = 0; i < contactNames.length; i++) {
+	var lcName = contactNames[i];
+	var name = app.contactNameMap[lcName];
+	var followingStatus;
+	if (!app._contacts[name].trustedAt) {
+	  followingStatus = ' <span class="following-not-complete"> Follow Back?</span>';
+	} else {
+	  followingStatus = ' <span class="following-complete"> Private Contact</span>';
+	}
+
+	
         var html = '<li class="contact-record" id="contact-'
               + app.contactNameMap[contactNames[i]]
-              + '">'
+              + '"><span class="contact-name">'
               + app.contactNameMap[contactNames[i]]
+	      + '</span>'
+	      + followingStatus
               + '</li>';
         $('#contacts-list').append($(html));
       }
 
       $('.contact-record').click(function () {
-        var contact = $(this).text();
+        var contact = $(this).attr('id').split('-')[1];
         console.log(contact);
         app.contactDetails(contact);
       });
@@ -1205,14 +1198,23 @@ var app = {
   contactDetails: function (name) {
     var contact = app._contacts[name];
     // display the contact's fingerprint ID card:
-    var canvas = app.card.createIdCard(contact.fingerprint,
-                                        name,
-                                        app.APPNAME, app.URL);
+    var fingerprint = contact.fingerprint || '0000000000000000000000000000000000000000000000000000000000000000';
+    var canvas = app.card.createIdCard(fingerprint,
+                                       name,
+                                       app.APPNAME, app.URL);
     $(canvas).css({ width: '300px', 'margin-top': '1em'});
     $(canvas).attr({'class': 'contact-id'});
     $('#contact-details .contact-id').remove();
     $('#contact-details').prepend(canvas);
-
+    
+    $('#contact-message').children().remove();
+    if (!contact.fingerprint) {
+      var html = '<p class="contact-msg">'
+	    + name
+	    + ' has scanned your Contact Card, but you need to obtain and scan their card in order to communicate</span>';
+      $('#contact-message').append($(html));
+    }
+    
     app.switchView('#contact-details', name);
   },
 

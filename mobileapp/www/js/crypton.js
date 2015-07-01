@@ -1374,10 +1374,10 @@ function getLatestTimeline (options, callback) {
   if (typeof parseInt(limit) != 'number') {
     limit = 10; // default MAX of 10 - for now
   }
-
+  
   var that = this;
   var url = crypton.url() + '/timeline-latest/' + '?sid=' + crypton.sessionId
-          + '&limit=' + limit;
+        + '&limit=' + limit;
 
   superagent.get(url)
   .withCredentials()

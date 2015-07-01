@@ -105,7 +105,8 @@
 /* ====== media ====== */
 
 .media {
-    margin: 15px 10px 10px 10px;
+    /* margin: 15px 10px 10px 10px; */
+    border-bottom: 1px solid #d5d5d5;
 }
 
 .media, .bd {
@@ -126,12 +127,15 @@
 }
 
 .media-avatar {
-    width: 30px;
-    height: 40px; 
+    width: 40px;
+    height: 50px;
+    margin-left: 10px;
+    -webkit-border-radius: 20px;
+    border: 2px solid #d5d5d5;;
 }
 
 .media-metadata {
-    border-bottom: 1px solid #d5d5d5;
+    /* border-bottom: 1px solid #d5d5d5; */
     padding-bottom: 0.5em;
 }
 
@@ -195,6 +199,10 @@ margin-right: 20px;}
     /* padding-top: 1em; */
 }
 
+.status-block {
+    margin-top: 0.5em;
+}
+
 #post-button-cog {
     display: none;
     font-size: 4em;
@@ -202,7 +210,8 @@ margin-right: 20px;}
 
 .feed-image {
     border: 2 px solid #5d5d5d;
-    margin: 0.7em;
+    margin-top: 0.5em;
+    width: 97%;
 }
 
 .ired {
@@ -248,4 +257,8 @@ margin-right: 20px;}
 
 .app-logo {
     margin-bottom: 1em;
+}
+
+.empty-timeline-element {
+    display: none;
 }

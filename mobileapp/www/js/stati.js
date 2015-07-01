@@ -49,12 +49,14 @@ app.postPeerTrustCallback = function postPeerTrustCallback(peer) {
 
 app.resumeEventHandler = function resumeEventHandler () {
   if (app.session) {
-    app.loadFeed();
+    app.loadNewTimeline();
+    // XXX: need to also check if there were items between latestVisible & newest-first item
   }
 };
 
 app.pauseEventHandler = function pauseEventHandler () {
-  // app.clearLoadingInterval();
+  app.feedIsLoading = false;
+  $('#top-progress-wrapper').hide();
 };
 
 app.setAvatar = function setAvatar() {
@@ -77,7 +79,7 @@ app.setAvatar = function setAvatar() {
 app.aboutView = function _aboutView () {
   var header = 'About Kloak';
   var logos = '<p><img class="app-logo" src="img/spideroak_logo.png" /> </p>';
-  var info = 'Kloak is an <strong>*experiment*</strong> in social networking that is un-dataminable. All data sent to the server is "end to end" encrypted and unreadable by the server operator. <br /> Kloak is in beta and <strong>should not be used to hide communications in life or death situations!</strong> <p><a href="https://github.com/Crypton/statusapp" target="_system">Kloak Source code and issue tracker</a> <br />Kloak is built with <a href="https://crypton.io" target="_system">Crypton</a> by SpiderOak</p>';
+  var info = 'Kloak is an <strong>*experiment*</strong> in social networking that is un-dataminable. All data sent to the server is "end to end" encrypted and unreadable by the server operator. <br /> Kloak is in beta and <strong>should not be used to hide communications from well-equipped potential attackers</strong> <p><a onclick="window.open(\'https://github.com/Crypton/statusapp\', \'_system\')" class="media-link media-link-url">Kloak Source code and issue tracker</a> <br />Kloak is built with <a onclick="window.open(\'https://crypton.io\', \'_system\')" class="media-link media-link-url">Crypton</a> by <a onclick="window.open(\'https://spideroak.com\', \'_system\')" class="media-link media-link-url">SpiderOak</a></p>';
 
   var html = '<div id="about-view"><h4>'
 	+ header
@@ -329,19 +331,6 @@ app.tlOptions = { lastItemRead: 0, offset: 0, limit: 5 };
 
 app.feedIsLoading = false;
 
-app.loadPreviousFeed = function loadPreviousFeed(callback) {
-  // get the timeline_id of the first item rendered
-  // var firstTimelineId = $('.media').last().attr('id');
-  var options = {
-    lastItemRead: null,
-    direction: 'prev',
-    limit: 10,
-    offset: app.prevOffset || 0
-  };
-  var append = true;
-  app.loadFeed(options, append, callback);
-};
-
 app.loadNewTimeline = function loadNewTimeline () {
   if (app.feedIsLoading) {
     return;
@@ -370,6 +359,10 @@ app.loadNewTimeline = function loadNewTimeline () {
   }
 };
 
+app.statusNameHmac = function statusNameHmac() {
+  return app.session.items.status.getPublicName();
+};
+
 app.loadInitialTimeline = function loadInitialTimeline(callback) {
   if (app.feedIsLoading) {
     return;
@@ -388,6 +381,9 @@ app.loadInitialTimeline = function loadInitialTimeline(callback) {
     app.renderTimeline(timeline);
     $('#top-progress-wrapper').hide();
     app.feedIsLoading = false;
+    if ($('.empty-timeline-element').length > 9) {
+      app.loadPastTimeline();
+    }
   });
 };
 
@@ -400,6 +396,7 @@ app.loadPastTimeline = function loadPastTimeline () {
   $('#top-progress-wrapper').show();
   var beforeId = $("#my-feed-entries").children().last().attr('id');
   if (typeof parseInt(beforeId) == 'number') {
+    var emptyItems = $('.empty-timeline-element').length; 
     var options = { limit: 15, beforeId: beforeId };
     app.session.getTimelineBefore(options, function tlCallback (err, timeline) {
       if (err) {
@@ -408,9 +405,14 @@ app.loadPastTimeline = function loadPastTimeline () {
 	$('#top-progress-wrapper').hide();
 	return app.alert('Cannot get feed', 'info');
       }
+      // TRY??
       app.renderTimeline(timeline, true);
       $('#top-progress-wrapper').hide();
       app.feedIsLoading = false;
+      var newEmptyItems = $('.empty-timeline-element').length;
+      // if ((newEmptyItems - emptyItems) > 9) {
+      // 	app.loadPastTimeline();
+      // }
     });
   } else {
     $('#top-progress-wrapper').hide();
@@ -421,38 +423,44 @@ app.loadPastTimeline = function loadPastTimeline () {
 
 app.renderTimeline = function renderTimeline (timeline, append) {
   var trustedPeersUpdated = false;
-  if (!append) {
-    append = false;
-  }
   if (!timeline.length) {
     return;
   }
   
   for (var i = 0; i < timeline.length; i++) {
+    console.log(timeline[i]);
+    var node;
     if (!timeline[i].value) {
       // this is some other kind of item, not a status update!
       // Ignore this for now, probably a 'trustedAt notification'
+      node = app.createEmptyElement(timeline[i]);
+      if (append) {
+	$('#my-feed-entries').append(node);
+      } else {
+	$('#my-feed-entries').prepend(node);
+      }
+      continue;
+    }
+    if (!timeline[i].value.status) {
+      // this is some other kind of item, not a status update!
+      // Ignore this for now, probably a 'trustedAt notification'
+      node = app.createEmptyElement(timeline[i]);
+      if (append) {
+	$('#my-feed-entries').append(node);
+      } else {
+	$('#my-feed-entries').prepend(node);
+      }
       continue;
     }
     if (timeline[i].value.avatar) {
       // this is some other kind of item, not a status update!
       // Ignore this for now, probably a 'trustedAt notification'
-      console.log('unknown timeline object: ', timeline[i], timeline[i].value);
-      function updateTimelineWithNewAvatar() {
-        if (trustedPeersUpdated) {
-          // display an update here...
-          var data = { avatar: timeline[i].value.avatar,
-                       itemId: timeline[i].timelineId,
-                       username: timeline[i].creatorUsername,
-                       modTime: timeline[i].modTime
-                     };
-          var avatarNode = app.createAvatarUpdateElement(data);
-          if (append) {
-            $('#my-feed-entries').append(avatarNode);
-          } else {
-            $('#my-feed-entries').prepend(avatarNode);
-          }
-        }
+      console.log('avatar update object: ', timeline[i], timeline[i].value);
+      node = app.createAvatarUpdateElement(data);
+      if (append) {
+	$('#my-feed-entries').append(node);
+      } else {
+	$('#my-feed-entries').prepend(node);
       }
 
       // when we get a new avatar we need to save it to the contacts object
@@ -460,30 +468,15 @@ app.renderTimeline = function renderTimeline (timeline, append) {
       if (!app.session.items._trusted_peers.value[user]) {
         // Let's tell the user about this 1 way connection
         console.warn('User ', user, ' is not trusted - one way connection');
-        // continue; // we dont trust this user (yet)
+	console.warn('User ', user, ' is not trusted - Adding this peer to contacts as *untrusted*');
+	// add this usser to contacts as an untrusted user
+	app.session.items._trusted_peers.value[user] = { avatar: null,
+						         trustedAt: null,
+							 avatarUpdated: null,
+							 fingerprint: null
+						       };
+	app.newContactDiscovered = true;
       }
-      if (!app.session.items._trusted_peers.value[user].avatar) {
-        app.session.items._trusted_peers.value[user].avatar =
-          timeline[i].value.avatar;
-        app.session.items._trusted_peers.value[user].avatarUpdated =
-          timeline[i].value.updated;
-        trustedPeersUpdated = true;
-        updateTimelineWithNewAvatar();
-        continue;
-      }
-      if (app.session.items._trusted_peers.value[user].avatarUpdated <
-          timeline[i].value.updated) {
-        app.session.items._trusted_peers.value[user].avatar =
-          timeline[i].value.avatar;
-        app.session.items._trusted_peers.value[user].avatarUpdated =
-          timeline[i].value.updated;
-        trustedPeersUpdated = true;
-        updateTimelineWithNewAvatar();
-        continue;
-      }
-    }
-    // End avatar update handling
-    if (!timeline[i].value.status) {
       continue;
     }
     // Begin status update handling
@@ -491,7 +484,7 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     var data = app.massageTimelineUpdate(timeline[i]);
     data.itemId = timeline[i].timelineId;
     console.log('rendered timelineid: ', timeline[i].timelineId);
-    var node = app.createMediaElement(data, localUser);
+    node = app.createMediaElement(data, localUser);
     if (append) {
       $('#my-feed-entries').append(node);
     } else {
@@ -502,161 +495,13 @@ app.renderTimeline = function renderTimeline (timeline, append) {
   if (!$("#fetch-previous-items").is(":visible")) {
     $("#fetch-previous-items").show();
   }
-  if (trustedPeersUpdated) {
-    // save the trustedPeers item
-    app.session.items._trusted_peers.save(function (err) {
-      if (err) {
-        console.error(err);
-      }
-    });
-  }
 };
 
-app.loadFeed = function loadFeed(options, append, callback) {
-  if (app.feedIsLoading) {
-    return;
-  }
-  app.feedIsLoading = true;
-  $('#top-progress-wrapper').show();
-  var user = app.hmacUser();
-  if (!options) {
-    options = app.currentProfile.tlOptions;
-  }
-  if (typeof parseInt(options.lastItemRead) != 'number') {
-    options.lastItemRead = 0;
-  }
-  if (typeof parseInt(options.offset) != 'number') {
-    options.offset = 0;
-  }
-  if (typeof parseInt(options.limit) != 'number') {
-    options.limit = 10;
-  }
-
-  app.session.getTimeline(options, function tlCallback (err, timeline) {
-    var trustedPeersUpdated = false;
-
-    if (err) {
-      console.error(err);
-      app.feedIsLoading = false;
-      $('#top-progress-wrapper').hide();
-      return app.alert('Cannot get Timeline data from server', 'danger');
-    }
-    if (timeline.length < 1) {
-      $('#top-progress-wrapper').hide();
-      console.log('No rows found. At the end of timeline');
-      // re-run query looking backwards...
-      app.feedIsLoading = false;
-    }
-
-    for (var i = 0; i < timeline.length; i++) {
-      if (!timeline[i].value) {
-        // this is some other kind of item, not a status update!
-        // Ignore this for now, probably a 'trustedAt notification'
-        continue;
-      }
-      if (timeline[i].value.avatar) {
-        // this is some other kind of item, not a status update!
-        // Ignore this for now, probably a 'trustedAt notification'
-        console.log('unknown timeline object: ', timeline[i], timeline[i].value);
-        function updateTimelineWithNewAvatar() {
-          if (trustedPeersUpdated) {
-            // display an update here...
-            var data = { avatar: timeline[i].value.avatar,
-                         itemId: timeline[i].timelineId,
-                         username: timeline[i].creatorUsername,
-                         modTime: timeline[i].modTime
-                       };
-            var avatarNode =
-              app.createAvatarUpdateElement(data);
-            if (append) {
-              $('#my-feed-entries').append(avatarNode);
-            } else {
-              $('#my-feed-entries').prepend(avatarNode);
-            }
-          }
-        }
-
-        // when we get a new avatar we need to save it to the contacts object
-        var user = timeline[i].creatorUsername;
-        if (!app.session.items._trusted_peers.value[user]) {
-          // Let's tell the user about this 1 way connection
-          console.warn('User ', user, ' is not trusted - one way connection');
-          // continue; // we dont trust this user (yet)
-        }
-        if (!app.session.items._trusted_peers.value[user].avatar) {
-          app.session.items._trusted_peers.value[user].avatar =
-            timeline[i].value.avatar;
-          app.session.items._trusted_peers.value[user].avatarUpdated =
-            timeline[i].value.updated;
-          trustedPeersUpdated = true;
-          updateTimelineWithNewAvatar();
-          continue;
-        }
-        if (app.session.items._trusted_peers.value[user].avatarUpdated <
-            timeline[i].value.updated) {
-          app.session.items._trusted_peers.value[user].avatar =
-            timeline[i].value.avatar;
-          app.session.items._trusted_peers.value[user].avatarUpdated =
-            timeline[i].value.updated;
-          trustedPeersUpdated = true;
-          updateTimelineWithNewAvatar();
-          continue;
-        }
-      }
-      // End avatar update handling
-      if (!timeline[i].value.status) {
-        continue;
-      }
-      // Begin status update handling
-      var localUser =
-          (timeline[i].creatorUsername == app.username);
-      var data = app.massageTimelineUpdate(timeline[i]);
-      data.itemId = timeline[i].timelineId;
-      var node = app.createMediaElement(data, localUser);
-      if (append) {
-        $('#my-feed-entries').append(node);
-      } else {
-        $('#my-feed-entries').prepend(node);
-      }
-      app.tlOptions.lastItemRead = timeline[i].timelineId;
-      options.lastItemRead = timeline[i].timelineId;
-    }
-    $('#top-progress-wrapper').hide();
-    var hmacuser = app.hmacUser();
-    console.log(options);
-    if (!append) {
-      app._profile[hmacuser].tlOptions = options;
-      app.saveLocalProfile();
-    } else {
-      app.prevOffset = options.offset + 10;
-    }
-    app.feedIsLoading = false;
-    // display the more... button if it does not exist
-    if(!$("#fetch-previous-items").is(":visible")) {
-      $("#fetch-previous-items").show();
-    }
-    if (trustedPeersUpdated) {
-      // save the trustedPeers item
-      app.session.items._trusted_peers.save(function (err) {
-        if (err) {
-          console.error(err);
-        }
-      });
-    }
-    if (typeof callback == 'function') {
-      callback();
-    }
-  });
-};
-
-app.loadTimelineInterval = function loadTimelineInterval() {
-  if (app.loadingInterval) {
-    return;
-  }
-
-  app.loadingInterval = window.setInterval(function () {
-    app.loadNewTimeline();
-  }, (5 * 60 * 1000));
+app.createEmptyElement = function createEmptyElement(timelineItem) {
+  var html = '<div id="'
+	+ timelineItem.timelineId
+	+ '" class="empty-timeline-element"></div>';
+  return $(html);
 };
 
 app.hmacUser = function () {
@@ -842,7 +687,7 @@ app.createMediaElement = function createMediaElement(data, localUser) {
 
   var imageHtml;
   if (data.imageData) {
-    imageHtml = '<div><img class="feed-image" src="'
+    imageHtml = '<div class="post-img"><img class="feed-image" src="'
       + data.imageData  + '"/></div>';
   }
 
@@ -863,11 +708,11 @@ app.createMediaElement = function createMediaElement(data, localUser) {
            + avatarMarkup
   	   + '  </a>'
            + '  <div class="bd media-metadata">'
+           + '    <div class="status-block">'
 	   + '    <span class="media-username">' + data.username + '</span>'
 	   + '    <span class="media-status">'
 	   + status
-           + '</span>'
-           + '    <br />'
+           + '</span></div>'
 	   + '    <span class="media-timestamp">'
            + data.humaneTimestamp + '</span>'
            + '    <span class="media-location">'
