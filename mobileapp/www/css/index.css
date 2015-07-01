@@ -1,21 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
 @font-face {
     font-family: Roboto;
     src: url(fonts/Roboto-Regular.ttf);
@@ -56,7 +38,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: white;
+    background-color: whitesmoke;
 }
 
 /* Landscape layout (with min-width) */
@@ -81,7 +63,7 @@ h1 {
 .event {
     border-radius:4px;
     -webkit-border-radius:4px;
-    color:#FFFFFF;
+    color: black;
     font-size:12px;
     margin:0px 30px;
     padding:2px 0px;
@@ -122,6 +104,7 @@ h1 {
     bottom: 0;
     -webkit-transform: translate3d(-100%, 0, 0);
     -webkit-transition: all 0.1s ease;
+    margin-top: 1em;
 }
 
 .view.active {
@@ -129,16 +112,22 @@ h1 {
 }
 
 #top-menu {
-    background: #1a1a1a !important;
-    position: absolute;
+    background: #ffffff !important;
+    position: fixed;
     top: 0;
     left: 0;
-    width: 250px;
+    width: 80%;
+    height: 80%;
     bottom: 0;
     z-index: 20;
     padding-top: 5px;
     -webkit-transform: translate3d(-100%, 0, 0);
     -webkit-transition: all 0.1s ease;
+    margin-top: 56px;
+    opacity: 0.91;
+    margin-bottom: 15em;
+    border: 1px solid #D1D1D1;
+    box-shadow: 5px 5px 15px #d1d1d1;
 }
 
 #top-menu.active {
@@ -157,8 +146,8 @@ h1 {
 }
 
 #login-form {
-    margin-bottom: 1em;
-    padding: 15px;
+    margin-bottom: 2em;
+    padding: 0px 37px;
 }
 
 #login-buttons {
@@ -170,11 +159,12 @@ input[type="text"],
 input[type="password"] {
     border: 0;
     border-radius: 0 !important;
-    border-bottom: 1px solid #e6e6e6;
+    border-bottom: 1px solid gray;
     outline: 0;
     box-shadow: none;
     display: block;
     margin: 10px 0;
+    background-color: whitesmoke;
 }
 
 input[type="text"]:focus,
@@ -184,6 +174,7 @@ input[type="password"]:focus {
     outline: 0;
     /*border-bottom: 1px solid #787878;*/
     border-bottom-width: 2px;
+    background-color: whitesmoke;
 }
 
 ::-webkit-input-placeholder {
@@ -227,11 +218,11 @@ input[type="password"]:focus {
 #page-title {
     display: block;
     text-align: center;
-    font-size: 24px;
+    font-size: 16px;
 }
 
 #header {
-    position: absolute;
+    position: fixed;
     top: 0px;
     right: 0px;
     left: 0px;
@@ -239,8 +230,9 @@ input[type="password"]:focus {
     line-height: 56px;
     background-color: #3f51b5;
     box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.16), 0px 1px 2.5px 0px rgba(0, 0, 0, 0.26);
-    color: #FFF;
+    color: white;
     z-index: 10;
+	padding-top: 10px;
 }
 
 #first-run {
@@ -254,7 +246,7 @@ input[type="password"]:focus {
 
 #tasks-btn {
     display: none;
-    color: inherit;
+    color: #ffffff !important;
     padding: 0 1em;
     font-size: 1.5em;
     text-decoration: none;
@@ -276,14 +268,14 @@ input[type="password"]:focus {
 }
 
 .main-btn a {
-    color: #d1d1d1;
-    font-size: 1.1em;
+    color: #black;
+    font-size: 1.4em;
     padding: 13px 15px !important;
 }
 
 .main-btn a:hover {
     background: none !important;
-    color: #34a5dd !important;
+    color: #000000 !important;
 }
 
 .main-btn i {
@@ -293,8 +285,24 @@ input[type="password"]:focus {
     opacity: 0.9;
 }
 
+#main-menu-btn {
+    font-size: 1.4em;
+}
+
 #find-user-form {
     margin-bottom: 1em;
+}
+
+#contacts {
+    margin-top: -0.5em;
+}
+
+#contacts-list-wrapper {
+    padding-top: 5px;
+    height: 90%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
 #contacts-list {
@@ -331,7 +339,7 @@ input[type="password"]:focus {
 }
 
 #my-fingerprint-id {
-  text-align: center;
+    text-align: center;
 }
 
 #my-fingerprint-id canvas {
@@ -439,3 +447,107 @@ strong {
 }
 
 #capture-avatar { padding: 7em;}
+
+.overlay {
+    display: none;
+    position:fixed;
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
+    background-color:#000;
+    opacity:0.8;
+    z-index:15;
+}
+
+a { 
+    color: #000000 !important; 
+}
+
+#password-generate {
+    color: red;
+    font-size: 14px;
+}
+
+#generate-account-verbage {
+    margin: 10px;
+}
+
+#username-generate {
+    margin-bottom: 1em;
+}
+
+#generate-form {
+    margin-bottom: 2em;
+    padding: 0px 37px;
+}
+
+#generate-buttons {
+    margin-bottom: 1em;
+}
+
+#register-generate-btn {
+    margin-top: 1em;
+}
+
+#register-generate-cancel-btn {
+    margin-top: 1em;
+}
+
+#register-btn {
+    font-size: smaller !important;
+}
+
+#switch-user-btn {
+    font-size: smaller !important;
+}
+
+#get-new-passphrase {
+    font-size: smaller !important;
+}
+
+#register-btn-wrapper {
+    text-align: center;
+}
+
+#username-placehoder {
+    text-align: center !important;
+    display: none;
+    border-bottom: 1px solid gray;
+    margin: 1em !important;
+}
+
+.option {
+    padding-bottom: 0.5em;
+}
+
+.option-text {
+    font-weight: bold;
+    margin: 0 10px;
+}
+
+#options-controls {
+    margin: 1.5em;
+}
+
+option-label {
+    font-size: 1.2em;
+}
+
+#rememeber-credentials-label {
+
+    margin-top: 1em;
+    font-size: 1.2em;
+    color: #a1a1a1;
+    margin-left: 0.5em;
+}
+
+.following-complete {
+    color: green;
+    font-size: 80%;
+}
+
+.following-not-complete {
+    color: red;
+    font-size: 80%;
+}

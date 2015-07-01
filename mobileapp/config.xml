@@ -1,12 +1,17 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="io.crypton.statusapp" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>ZKStatus</name>
+    <name>Kloak</name>
     <description>
-        A Zero-Knowledge status application 
-    </description>
+    A Zero-Knowledge status application 
+  </description>
     <author email="ddahl@nulltxt.se" href="http://nulltxt.se">
-        David Dahl
-    </author>
+    David Dahl
+  </author>
     <content src="index.html" />
-    <access origin="*" />
+    <access origin="https://zk.gs" />
+    <preference name="target-device" value="universal" />
+    <preference name="BackupWebStorage" value="none" />
+    <preference name="webviewbounce" value="false" />
+    <preference name="orientation" value="portrait" /> 
+    <preference name="SplashScreen" value="screen"/>
 </widget>

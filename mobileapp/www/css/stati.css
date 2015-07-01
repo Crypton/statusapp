@@ -1,34 +1,47 @@
 #set-my-status-textarea {
-    width: 90%;
-    margin: 1em;
-    font-size: 1.6em;
-    height: 100px;
+    width: 95%;
+    margin: 0.5em;
+    font-size: 1.3em;
+    height: 200px;
+    /* min-height: 200px; */
     font-style: normal;
-    padding: 0.5em;
+    padding: 0.3em;
     border-radius: 4px;
     box-shadow: 1px 2px 2px #ddd;
+    float: right;
 }
 
 #set-my-status-btn {
-    margin-top: .25em;
-    margin-left: 2em;
-    box-shadow: 1px 2px 2px #ddd;
+    font-size: 4em;
+}
+
+#take-a-photo-btn {
+    color: #000;
+}
+
+#pick-an-image-btn {
+    color: #000;
+}
+
+#include-gps-btn {
+    color: #000;
 }
 
 #set-my-geoloc-btn {
     margin-bottom: .25em;
-    margin-left: 2em;
 }
 
 #my-geoloc {
-    margin-left: 2em;
-    font-size: 1.25em;
+    font-size: 1em;
+    float: right;
+    margin-right: 2em;
+    padding: 1em;
 }
 
 .status-update {
     margin-bottom: 3px;
     padding-left: 1em;
-    border-bottom: 1px solid #5e6ec7;
+    border-bottom: 1px solid gray;
 }
 
 .status-update-username {
@@ -36,43 +49,216 @@
 }
 
 .status-text {
-    font-size: 90%;
+    font-size: 1.3em;
 }
 
 .status-metadata {
-    font-size: 70%;
+    font-size: 90%;
     list-style-type: square;
-    padding-left: 1em;
+    padding-left: 2em;
 }
 
 #feed {
-    /* margin-top: -20px; */
+    margin-top: -0.5em;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 #my-status {
     padding-top: 2em;
     padding-left: 1em;
-    background-color: #5e6ec7;
-    border-bottom: 3px solid #5e6ec7;
-    color: white;
+    background-color: white;
+    border-bottom: 2px solid rgba(67, 67, 67, 0.14);
+    color: black;
 }
 
 #my-feed-entries {
-    padding-top: 1em;
-    color: white;
-    background-color: #8895dc;
+    color: black;
+    background-color: whitesmoke;
 }
 
 #my-handle {
-    font-size: 100%;
+    font-weight: bold;
+    font-size: 1.3em;
+    color: #a1a1a1;
 }
 
 #my-status-text {
-    font-size: 80%;
+    font-size: 1.4em;
 }
 
 #my-status-metadata {
-    font-size: 80%;
+    font-size: 90%;
     list-style-type: square;
-    padding-left: 1em;
+    padding-left: 2em;
+}
+
+.my-avatar {
+    float:left;
+    margin-right: 10px;
+    height: 75px;
+    width: 75px;
+    display:block;
+}
+
+/* ====== media ====== */
+
+.media {
+    /* margin: 15px 10px 10px 10px; */
+    border-bottom: 1px solid #d5d5d5;
+}
+
+.media, .bd {
+    overflow:hidden;
+    _overflow:visible; zoom:1;
+}
+
+.media .img {
+    float:left;
+    margin-right: 10px;
+}
+
+.media .img img { display:block; }
+
+.media .imgExt {
+    float:right;
+    margin-left: 10px;
+}
+
+.media-avatar {
+    width: 40px;
+    height: 50px;
+    margin-left: 10px;
+    -webkit-border-radius: 20px;
+    border: 2px solid #d5d5d5;;
+}
+
+.media-metadata {
+    /* border-bottom: 1px solid #d5d5d5; */
+    padding-bottom: 0.5em;
+}
+
+.media-username {
+    font-weight: bold;
+    color: #3f51b5;
+}
+
+.media-status {
+    margin-left: 0.5em;
+    font-size: 1.2em;
+}
+
+.media-timestamp .media-location {
+    font-size: 70%;
+}
+
+.media-avatar-update {
+    font-size: 70%;
+    margin-bottom: 0.2em;
+}
+.media-generic-avatar {
+    width: 50px;
+    height: 50px;
+    font-size: 44px;
+    font-weight: bold;
+    margin: 10px;
+}
+
+#my-status-wrapper {
+    margin-top: 20px;
+    
+}
+
+.post-button {
+    font-size: 3em;
+    color: #000;
+    margin-right: 0.4em;
+}
+
+#button-row {
+    float: right;
+}
+
+#status-update-wrapper {/* float: right; */
+margin-top: 5px;
+/* margin-right: 5px; */}
+
+#my-avatar {width: 30px;
+height: 40px;
+margin-bottom: 20px;
+margin-right: 20px;}
+
+#my-image-to-post {
+    padding-top: 1em;
+    text-align: center;
+    /* float: right; */
+}
+
+#stati {
+    /* padding-top: 1em; */
+}
+
+.status-block {
+    margin-top: 0.5em;
+}
+
+#post-button-cog {
+    display: none;
+    font-size: 4em;
+}
+
+.feed-image {
+    border: 2 px solid #5d5d5d;
+    margin-top: 0.5em;
+    width: 97%;
+}
+
+.ired {
+    color: red;
+}
+
+#feed-progress-wrapper {
+}
+
+#header-refesh-btn {
+    font-size: 1.2em;
+    display: none;
+    color: white;
+}
+
+#fetch-previous-items {
+    display: none;
+    width: 90%;
+    margin: 1em;
+    text-align: center;
+}
+
+#top-progress-wrapper {
+    background-color: whitesmoke;
+    height: 10px;
+    display: none;
+    margin-top: -1em;
+}
+
+#first-run-empty-feed-btn {
+    display: none;
+}
+
+.media-link-url { color: green !important; }
+.media-link-email { color: green !important; }
+.media-link-phone { color: red !important; }
+.media-link-twitter { color: blue !important; }
+.media-link-hashtag { color: purple !important; }
+
+#about-view {
+    margin: 2em;
+}
+
+.app-logo {
+    margin-bottom: 1em;
+}
+
+.empty-timeline-element {
+    display: none;
 }
