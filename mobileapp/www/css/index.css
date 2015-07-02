@@ -576,3 +576,8 @@ option-label {
     font-size: 1.5em;
     margin-left: 0.5em;
 }
+
+#confirm-delete-contact-wrapper {
+    display: none;
+    margin: 1em;
+}

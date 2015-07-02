@@ -37,9 +37,6 @@ function onDeviceReady() {
 }
 
 var app = {
-  initilize: function initialize() {
-    console.log('noop initialize');
-  },
   // Application Constructor
   init: function init() {
     console.log('app initializing!: ', arguments);
@@ -268,6 +265,64 @@ var app = {
       app.switchView('#contacts', 'Contacts');
     });
 
+    $('#contact-delete-btn').click(function () {
+      $('#contact-details-buttons').hide();
+      $('#confirm-delete-contact-wrapper').show();
+    });
+
+    $('#contacts-detail-cancel-delete-btn').click(function () {
+      $('#confirm-delete-contact-wrapper').hide();
+      $('#contact-details-buttons').show();
+    });
+
+    $('#contact-yes-delete-btn').click(function () {
+      $('#confirm-delete-contact-wrapper').hide();
+      $('#top-progress-wrapper').show();
+      // unshare status feed
+      var username = $('#page-title').text();
+      if (!username) {
+	console.error('Cannot delete and unshare without a username!');
+	$('#contact-details-buttons').show();
+	$('#top-progress-wrapper').hide();
+	return;
+      }
+      app.session.getPeer(username, function (err, peer) {
+	if (err) {
+	  console.error('Cannot get user data from server');
+	  $('#contact-details-buttons').show();
+	  $('#top-progress-wrapper').hide();
+	  return;
+	}
+	// XXXddahl: Move this into a 'cleanUpDeleteUser' function in subclass 
+	app.session.items.status.unshare(peer, function (err) {
+	  if (err) {
+	    console.error('Cannot unshare status from ' + peer.username);
+	    $('#contact-details-buttons').show();
+	    $('#top-progress-wrapper').hide();
+	    return;
+	  }
+	  // delete user from trusted contacts
+	  delete app.session.items._trusted_peers.value[peer.username];
+	  app.session.items._trusted_peers.save(function (err) {
+	    if (err) {
+	      console.error('Cannot delete ' + peer.username + ' from contacts');
+	      $('#contact-details-buttons').show();
+	      $('#top-progress-wrapper').hide();
+	      return;
+	    }
+	    // XXXddahl: send a message to the deleted peer
+	    //           in order to have them remove you as well? 
+
+	    // back to contacts screen
+	    app.alert('Contact ' + peer.username + ' deleted', 'info');
+	    app.displayContacts();
+	    $('#contact-details-buttons').show();
+	    $('#top-progress-wrapper').hide();
+	  });
+	});
+      });
+    });
+    
     if (app.setCustomEvents && typeof app.setCustomEvents == 'function') {
       app.setCustomEvents();
     }

@@ -809,12 +809,13 @@ app.shareStatus = function shareStatus (peerObj) {
   console.log('shareStatus()', arguments);
 
   function shareAvatar(peer) {
-    if (app.session.items.avatar.value.avatar) {
+    if (app.session.items.avatar) {
       app.session.items.avatar.share(peer, function (err) {
 	if (err) {
 	  console.error(err);
 	  console.error('cannot share avatar with ' + peer.username);
 	}
+	console.log('avatar shared with ' + peer.username);
       });
     }
   }
