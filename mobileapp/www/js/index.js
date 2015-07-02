@@ -206,6 +206,11 @@ var app = {
       app.displayContacts();
     });
 
+    $('#header-btn-contacts').click(function () {
+      app.hideMenu();
+      app.displayContacts();
+    });
+
     $('#verify-id-card').click(function () {
       app.hideMenu();
       if (app.isNodeWebKit) {
@@ -339,6 +344,8 @@ var app = {
 
   logout: function logout () {
     app.session = null;
+    $('#header-button-bar').hide();
+    $('#logout-page-title').show();
     // cleanup function:
     if (typeof app.logoutCleanup == 'function') {
       app.logoutCleanup();
@@ -376,6 +383,7 @@ var app = {
     app.hideMenu();
     app.switchView('#account-login', app.APPNAME);
     $('#tasks-btn').removeClass('active');
+    $('#header-button-bar').hide();
     app.alert('You are logged out', 'info');
     $('#password-login').focus();
   },
@@ -692,6 +700,8 @@ var app = {
     }
 
     app.switchView('#login-progress', '');
+    $('#top-progress-wrapper').show();
+    
     $('.alert').remove();
 
     app.setLoginStatus('Logging in...');
@@ -701,6 +711,7 @@ var app = {
         app.alert(err, 'danger');
         app.switchView('#account-login', 'Account');
         app.clearLoginStatus();
+	$('#top-progress-wrapper').hide();
         return;
       }
 
@@ -721,7 +732,7 @@ var app = {
       }
       app.username = user;
       app.session = session;
-      app.setLoginStatus('Loading prefs and feed...');
+      app.setLoginStatus('Loading contacts and  preferences...');
 
       // Check for first run
       app.session.getOrCreateItem('_prefs_', function(err, prefsItem) {
@@ -731,11 +742,14 @@ var app = {
         if (err) {
           console.error(err);
           app.switchView('#account-login', 'Account');
+	  $('#top-progress-wrapper').hide();
           return;
         }
 
         $('#tasks-btn').addClass('active');
-
+	$('#logout-page-title').hide();
+	$('#header-button-bar').show();
+	
         app.username = app.session.account.username;
 
         if (!prefsItem.value.firstRun) {
@@ -785,9 +799,7 @@ var app = {
 
     if ($menu.hasClass('active')) {
       $menu.removeClass('active');
-      // $('.overlay').hide();
     } else {
-      // $('.overlay').show();
       $menu.addClass('active');
     }
   },

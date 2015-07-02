@@ -16,10 +16,24 @@
   <body>
     <div class="overlay"></div>
     <div id="header">
-      <a href="#" id="tasks-btn">
-        <i id="main-menu-btn" class="fa fa-bars"></i>
-      </a>
-      <span id="page-title">Kloak</span>
+      <span id="logout-page-title">Kloak</span>
+      <ul id="header-button-bar">
+	<li>
+	  <a href="#" id="tasks-btn">
+            <i id="main-menu-btn" class="fa fa-bars"></i>
+	  </a>
+	</li>
+	<li class="header-bb-title">
+	  <span id="page-title">Kloak</span>
+	</li>
+	<li class="header-btn-wrap">
+	  <i id="header-btn-update" class="header-btn fa fa-comment"></i>
+	</li>
+	<li class="header-btn-wrap">
+	  <i id="header-btn-refresh" class="header-btn fa fa-refresh"></i>
+	</li>
+      </ul>
+      
       <div id="top-progress-wrapper">
 	<div id="feed-progress-wrapper"
 	     class="progress progress-striped active">
@@ -209,13 +223,13 @@
 	<div id="login-status">
 	  <span class="status"></span>
 	</div>
-	<div id="progress-wrapper"
-	     class="progress progress-striped active">
-	  <div class="progress-bar"  role="progressbar" 
-	       aria-valuenow="100" aria-valuemin="0" 
-	       aria-valuemax="100" style="width: 100%">
-	  </div>
-	</div>
+	<!-- <div id="progress-wrapper" -->
+	<!--      class="progress progress-striped active"> -->
+	<!--   <div class="progress-bar"  role="progressbar"  -->
+	<!--        aria-valuenow="100" aria-valuemin="0"  -->
+	<!--        aria-valuemax="100" style="width: 100%"> -->
+	<!--   </div> -->
+	<!-- </div> -->
       </div>
 
       <div id="scan-select" class="view">

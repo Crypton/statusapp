@@ -216,9 +216,9 @@ input[type="password"]:focus {
 }
 
 #page-title {
-    display: block;
-    text-align: center;
-    font-size: 16px;
+    display: inline;
+    font-size: 1em;
+    margin-left: 0.3em;
 }
 
 #header {
@@ -254,7 +254,8 @@ input[type="password"]:focus {
 
 #tasks-btn.active {
     display: block;
-    position: absolute;
+    margin-left: -2.4em;
+    padding-right: 0 !important;
 }
 
 #account-name-label {
@@ -550,4 +551,28 @@ option-label {
 .following-not-complete {
     color: red;
     font-size: 80%;
+}
+
+#header-button-bar {
+    list-style-type: none;
+    display: none;
+}
+
+#header-button-bar li {
+    display: inline-block;
+}
+
+.header-btn {
+    font-size: 2em;
+    color: whitesmoke;
+    margin-right: 0.3em;
+}
+
+.header-bb-title {
+    width: 72%;
+}
+
+#logout-page-title {
+    font-size: 1.5em;
+    margin-left: 0.5em;
 }

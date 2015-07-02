@@ -98,13 +98,16 @@ app.aboutView = function _aboutView () {
 app.setCustomEvents = function setCustomEvents () {
   $('#my-stati').click(function () {
     app.hideMenu();
-    // XXXddahl: reset status UI
-    // Get avatar if not present
-
     app.switchView('#stati', 'Update Status');
     $('#set-my-status-textarea').focus();
   });
 
+  $('#header-btn-update').click(function () {
+    app.hideMenu();
+    app.switchView('#stati', 'Update Status');
+    $('#set-my-status-textarea').focus();
+  });
+  
   $('#my-feed').click(function () {
     app.hideMenu();
     app.switchView('#feed', app.FEED_LABEL);
@@ -116,6 +119,12 @@ app.setCustomEvents = function setCustomEvents () {
     app.loadNewTimeline();
   });
 
+  $('#header-btn-refresh').click(function () {
+    app.hideMenu();
+    app.switchView('#feed', app.FEED_LABEL);
+    app.loadNewTimeline();
+  });
+  
   $('#refresh-feed').click(function () {
     app.hideMenu();
     app.switchView('#feed', app.FEED_LABEL);
@@ -281,9 +290,11 @@ app.customInitialization = function customInitialization() {
   // XXXddahl: need a indeterminate progress indicator
   app.createInitialItems(function (err) {
     if (err) {
+      $('#top-progress-wrapper').hide();
       return console.error(err);
     }
     console.log('Initial items fetched or created');
+    $('#top-progress-wrapper').hide();
     app.displayInitialView();
   });
 };
