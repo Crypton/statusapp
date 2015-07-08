@@ -556,6 +556,8 @@ app.setMyStatus = function setMyStatus() {
   // app.toggleSetStatusButton();
   // validate length of data to be sent
   var status = $('#set-my-status-textarea').val();
+  status = app.escapeHtml(status);
+  
   if (!status.length) {
     return app.alert('Please enter a status update', 'warning');
   }
@@ -1032,6 +1034,15 @@ app.logoutCleanup = function logoutCleanup() {
   // remove all status updates and my status
   $('.my-status-node').text('');
   $('#my-feed-entries').children().remove();
+};
+
+app.escapeHtml = function escapeHtml(html) {
+  return String(html)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 };
 
 // XXXddahl: TODO

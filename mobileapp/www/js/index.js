@@ -716,6 +716,7 @@ var app = {
     var passphrase = generatePassphrase();
     // display new form
     $('#password-generate').val(passphrase);
+    $('#username-generate').focus();
   },
 
   register: function (user, pass, callback) {
