@@ -262,3 +262,7 @@ margin-right: 20px;}
 .empty-timeline-element {
     display: none;
 }
+
+#header-button-update {
+    padding-right: 0.4em;
+}

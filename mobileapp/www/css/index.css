@@ -123,7 +123,7 @@ h1 {
     padding-top: 5px;
     -webkit-transform: translate3d(-100%, 0, 0);
     -webkit-transition: all 0.1s ease;
-    margin-top: 56px;
+    margin-top: 76px;
     opacity: 0.91;
     margin-bottom: 15em;
     border: 1px solid #D1D1D1;
@@ -206,7 +206,7 @@ input[type="password"]:focus {
 #app {
     /*background-color: #CFD8DC;*/
     position: absolute;
-    top: 56px;
+    top: 76px;
     right: 0px;
     bottom: 0px;
     left: 0px;
@@ -226,8 +226,8 @@ input[type="password"]:focus {
     top: 0px;
     right: 0px;
     left: 0px;
-    height: 56px;
-    line-height: 56px;
+    height: 76px;
+    line-height: 76px;
     background-color: #3f51b5;
     box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.16), 0px 1px 2.5px 0px rgba(0, 0, 0, 0.26);
     color: white;

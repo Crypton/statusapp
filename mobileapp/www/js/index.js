@@ -710,19 +710,12 @@ var app = {
   },
 
   beginRegistration: function beginRegistration() {
-    app.switchView('#generate-account', 'Create Account');
-    // check for username + pass values
-    var pass = $('#password-login').val();
-    var username = $('#username-login').val();
-    if (pass || username) {
-      $('#password-generate').val(pass);
-      $('#username-generate').val(username);
-    } else {
-      // generate a long password
-      var passphrase = generatePassphrase();
-      // display new form
-      $('#password-generate').val(passphrase);
-    }
+    
+    app.switchView('#generate-account', 'Create Account');    
+    // generate a long password
+    var passphrase = generatePassphrase();
+    // display new form
+    $('#password-generate').val(passphrase);
   },
 
   register: function (user, pass, callback) {
