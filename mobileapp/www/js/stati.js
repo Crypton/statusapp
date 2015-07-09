@@ -59,23 +59,6 @@ app.pauseEventHandler = function pauseEventHandler () {
   $('#top-progress-wrapper').hide();
 };
 
-app.setAvatar = function setAvatar() {
-  var avatarData = app.session.items.avatar.value.avatar;
-  if ($('#my-avatar')[0].src.indexOf('avatars') == -1) {
-    if (avatarData) {
-      $('#my-avatar')[0].src = avatarData;
-      $('#my-avatar').style({ width: '64px', height: '48px' });
-    }
-  }
-
-  if ($("#my-status-wrapper img")[0].src.indexOf('avatars') == -1) {
-    if (avatarData) {
-      $("#my-status-wrapper img")[0].src = avatarData;
-      // $('#my-avatar').style({ width: '64px', height: '48px' });
-    }
-  }
-};
-
 app.aboutView = function _aboutView () {
   var header = 'About Kloak';
   var logos = '<p><img class="app-logo" src="img/spideroak_logo.png" /> </p>';
@@ -367,6 +350,7 @@ app.loadNewTimeline = function loadNewTimeline () {
     $('#top-progress-wrapper').hide();
     app.feedIsLoading = false;
     console.error('Cannot get afterId');
+    app.loadPastTimeline();
   }
 };
 
@@ -394,6 +378,16 @@ app.loadInitialTimeline = function loadInitialTimeline(callback) {
     app.feedIsLoading = false;
     if ($('.empty-timeline-element').length > 9) {
       app.loadPastTimeline();
+    }
+    var empties = $('.empty-timeline-element').length;
+    if (timeline.length < 1 || empties == timeline.length) {
+      // An effort to get initial posts on new account establishment
+      // Try to get 'previous items':
+      app.loadPastTimeline();
+      $('#first-run-empty-feed-msg').show();
+      if (!$("#fetch-previous-items").is(":visible")) {
+	$("#fetch-previous-items").show();
+      }
     }
   });
 };
@@ -496,6 +490,12 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     data.itemId = timeline[i].timelineId;
     console.log('rendered timelineid: ', timeline[i].timelineId);
     node = app.createMediaElement(data, localUser);
+
+    // Make sure to hide the "empty feed message"
+    if ($("#first-run-empty-feed-msg").is(":visible")) {
+      $("#first-run-empty-feed-msg").hide();
+    }
+
     if (append) {
       $('#my-feed-entries').append(node);
     } else {
@@ -625,7 +625,7 @@ app.displayInitialView = function displayInitialView() {
     // Load the timeline
     app.loadInitialTimeline();
   } else {
-    $('#first-run-empty-feed-btn').show();
+    $('#first-run-empty-feed-msg').show();
   }
 };
 
@@ -774,38 +774,6 @@ app.linkOutput = function linkOutput(autolinker, match) {
       return true;
   }
 };
-
-app.openDeviceBrowser = function openDeviceBrowser(link) {
-
-};
-
-app.loadAndViewMyStatus = function loadAndViewMyStatus () {
-  console.log('loadAndViewMyStatus()');
-  var location = app.session.items.status.value.location
-    || 'undisclosed location';
-  var statusData = { username: app.username,
-                     statusText: app.session.items.status.value.status,
-                     location: location,
-                     humaneTimestamp: humaneDate(new Date(app.session.items.status.value.timestamp)),
-		     timestamp: app.session.items.status.value.timestamp,
-		     imageData: app.session.items.status.value.imageData || '',
-		     avatar: app.avatarPath
-                   };
-
-  app.displayMyStatus(statusData);
-  app.clearLoginStatus();
-  app.switchView('#feed', app.FEED_LABEL);
-};
-
-app.displayMyStatus = function displayMyStatus (statusData) {
-  console.log('displayMyStatus()', arguments);
-  $('#my-status-wrapper').children().remove();
-  console.log(statusData);
-  var mediaElement = app.createMediaElement(statusData, true);
-  console.log(mediaElement);
-  $('#my-status-wrapper').append(mediaElement);
-};
-
 
 app.shareStatus = function shareStatus (peerObj) {
   console.log('shareStatus()', arguments);

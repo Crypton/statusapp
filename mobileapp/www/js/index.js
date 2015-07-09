@@ -674,15 +674,17 @@ var app = {
   createAccount: function () {
     var user = $('#username-generate').val();
     var pass = $('#password-generate').val();
-
+    $('#top-progress-wrapper').show();
+    
     if (!user || !pass) {
       app.alert('Please enter a username and passphrase', 'danger');
+      $('#top-progress-wrapper').hide();
       return;
     }
 
     app.switchView('#login-progress', '');
     app.setLoginStatus('Creating Account...');
-
+    
     function callback (err) {
       console.error(err);
       app.switchView('#account-login', '');
@@ -690,6 +692,7 @@ var app = {
 
       if (err) {
         app.alert(err, 'danger');
+	$('#top-progress-wrapper').hide();
         return;
       }
       // set the passphrase into the keychain:
@@ -725,16 +728,20 @@ var app = {
 
     crypton.generateAccount(user, pass, function (err) {
       if (err) {
+	$('#top-progress-wrapper').hide();
 	console.error(err);
         app.switchView('#account-login', 'Account');
         return callback(err);
       }
-
+      $('#top-progress-wrapper').hide();
       app.login();
     });
   },
 
-  login: function () {
+  login: function _login () {
+
+    $('#my-feed-entries').children().reomve();
+    
     var user = $('#username-login').val();
     var pass = $('#password-login').val();
 
