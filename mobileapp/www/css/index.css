@@ -581,3 +581,12 @@ option-label {
     display: none;
     margin: 1em;
 }
+
+ul .offline-ui {
+  top: auto;
+  bottom: 0;
+  padding: 5px !important;
+}
+ul .offline-ui-retry {
+  line-height: 30px !important;
+}
