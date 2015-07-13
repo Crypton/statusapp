@@ -126,11 +126,10 @@
 }
 
 .media-avatar {
-    width: 40px;
-    height: 50px;
+    width: 60px;
     margin-left: 10px;
-    -webkit-border-radius: 20px;
-    border: 2px solid #d5d5d5;;
+    -webkit-border-radius: 5px;
+    border: 1px solid #aaaaaa;;
 }
 
 .media-metadata {
@@ -148,7 +147,11 @@
     font-size: 1.2em;
 }
 
-.media-timestamp .media-location {
+.media-timestamp {
+    font-size: 70%;
+}
+
+.media-location {
     font-size: 70%;
 }
 
@@ -179,23 +182,19 @@
     float: right;
 }
 
-#status-update-wrapper {/* float: right; */
+#status-update-wrapper {
 margin-top: 5px;
-/* margin-right: 5px; */}
+}
 
-#my-avatar {width: 30px;
-height: 40px;
-margin-bottom: 20px;
-margin-right: 20px;}
+#my-avatar {
+    width: 50px;
+    margin-bottom: 25px;
+    margin-right: 15px;
+}
 
 #my-image-to-post {
     padding-top: 1em;
     text-align: center;
-    /* float: right; */
-}
-
-#stati {
-    /* padding-top: 1em; */
 }
 
 .status-block {

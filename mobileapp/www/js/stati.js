@@ -380,14 +380,14 @@ app.loadInitialTimeline = function loadInitialTimeline(callback) {
       app.loadPastTimeline();
     }
     var empties = $('.empty-timeline-element').length;
-    if (timeline.length < 1 || empties == timeline.length) {
+    // if (timeline.length < 1 || empties == timeline.length) {
       // An effort to get initial posts on new account establishment
       // Try to get 'previous items':
-      app.loadPastTimeline();
-      $('#first-run-empty-feed-msg').show();
-      if (!$("#fetch-previous-items").is(":visible")) {
-	$("#fetch-previous-items").show();
-      }
+      // $('#first-run-empty-feed-msg').show();
+    // }
+    app.loadPastTimeline();
+    if (!$("#fetch-previous-items").is(":visible")) {
+      $("#fetch-previous-items").show();
     }
   });
 };
@@ -538,7 +538,7 @@ app.massageTimelineUpdate = function massageTimelineUpdate (data) {
     username: data.creatorUsername,
     imageData: data.value.imageData,
     timestamp: data.modTime,
-    humaneTimestamp: humaneDate(new Date(data.modTime))
+    humaneTimestamp: app.formatDate(data.modTime)
   };
 };
 
@@ -559,7 +559,7 @@ app.setMyStatus = function setMyStatus() {
   status = app.escapeHtml(status);
   
   if (!status.length) {
-    return app.alert('Please enter a status update', 'warning');
+    return app.alert('Please enter a status update', 'danger');
   }
   if (status.length > 512) {
     return app.alert('Status update is too long, please shorten it', 'danger');
@@ -657,7 +657,7 @@ app.createAvatarUpdateElement =
 function createAvatarUpdateElement(data) {
   // data = {avatar: 'hajshjahjsjahj', updated: 123456789}
 
-  var timestamp = humaneDate(new Date(data.modTime));
+  var timestamp = app.formatDate(data.modTime);
   var html = '<div id="' + data.itemId
            + '" class="media attribution">'
 	   + '<a class="img">'
@@ -726,10 +726,10 @@ app.createMediaElement = function createMediaElement(data, localUser) {
 	   + '    <span class="media-status">'
 	   + status
            + '</span></div>'
-	   + '    <span class="media-timestamp">'
-           + data.humaneTimestamp + '</span>'
-           + '    <span class="media-location">'
-           + gps + '</span>';
+	   + '    <div class="media-timestamp">'
+           + data.humaneTimestamp + '</div>'
+           + '    <div class="media-location">'
+           + gps + '</div>';
   if (imageHtml) {
     html = html + imageHtml;
   }
@@ -932,7 +932,7 @@ app.updatePeerStatus = function updatePeerStatus(username, statusItem) {
 
   statusItem.username = username;
   statusItem.statusText = statusItem.status;
-  statusItem.humaneTimestamp = humaneDate(new Date(statusItem.timestamp));
+  statusItem.humaneTimestamp = app.formatDate(statusItem.timestamp);
   statusItem.avatar = app.session.items._trusted_peers.value[username].avatar;
 
   var statusNode = app.createMediaElement(statusItem);
@@ -1011,6 +1011,10 @@ app.escapeHtml = function escapeHtml(html) {
     .replace(/'/g, '&#39;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
+};
+
+app.formatDate = function formatDate (timestamp) {
+  return new Date(parseInt(timestamp)).toString();
 };
 
 // XXXddahl: TODO

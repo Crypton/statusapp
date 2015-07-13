@@ -40,7 +40,11 @@ var app = {
   // Application Constructor
   init: function init() {
     console.log('app initializing!: ', arguments);
+
+    // Configure the endpoint:
     crypton.host = 'zk.gs';
+    // crypton.port = 443;
+    
     this.card =  new crypton.Card();
     this.bindEvents();
     $('#password-login').show();
@@ -93,7 +97,7 @@ var app = {
       // check if keychain is supported
       defaultLoginBehavior();
     }
-    // Offline
+   // Offline
     window.Offline.options = {
       // Should we check the connection status immediatly on page load.
       checkOnLoad: false,
@@ -133,7 +137,7 @@ var app = {
 
   APPNAME: 'Kloak',
 
-  URL: 'https://zk.gs',
+  URL: 'https://kloakstaging.crypton.io',
 
   VERSION: "0.0.2",
 
@@ -191,6 +195,10 @@ var app = {
       }
     });
 
+    $('#password-generate').click(function (e) {
+      //e.scrollIntoView({block: "end", behavior: "smooth"});
+    });
+    
     $('#get-new-passphrase').click(function (e) {
       e.preventDefault();
       var pass = generatePassphrase();
