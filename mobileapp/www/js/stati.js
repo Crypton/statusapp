@@ -62,7 +62,7 @@ app.pauseEventHandler = function pauseEventHandler () {
 app.aboutView = function _aboutView () {
   var header = 'About Kloak';
   var logos = '<p><img class="app-logo" src="img/spideroak_logo.png" /> </p>';
-  var info = 'Kloak is an <strong>*experiment*</strong> in social networking that is un-dataminable. All data sent to the server is "end to end" encrypted and unreadable by the server operator. <br /> Kloak is in beta and <strong>should not be used to hide communications from well-equipped potential attackers</strong> <p><a onclick="window.open(\'https://github.com/Crypton/statusapp\', \'_system\')" class="media-link media-link-url">Kloak Source code and issue tracker</a> <br />Kloak is built with <a onclick="window.open(\'https://crypton.io\', \'_system\')" class="media-link media-link-url">Crypton</a> by <a onclick="window.open(\'https://spideroak.com\', \'_system\')" class="media-link media-link-url">SpiderOak</a></p>';
+  var info = 'Kloak is an <strong>*experiment*</strong> in social networking that is un-dataminable. All data sent to the server is "end to end" encrypted and unreadable by the server operator. <br /> Kloak is in beta and <strong>should not be used to hide communications from well-equipped potential attackers</strong> <p><a onclick="window.open(\'https://github.com/Crypton/statusapp\', \'_system\')" class="media-link media-link-url">Kloak issue tracker</a> <br />Kloak is built with <a onclick="window.open(\'https://crypton.io\', \'_system\')" class="media-link media-link-url">Crypton</a> by <a onclick="window.open(\'https://spideroak.com\', \'_system\')" class="media-link media-link-url">SpiderOak</a></p>';
 
   var html = '<div id="about-view"><h4>'
 	+ header
@@ -722,11 +722,11 @@ app.createMediaElement = function createMediaElement(data, localUser) {
   	   + '  </a>'
            + '  <div class="bd media-metadata">'
            + '    <div class="status-block">'
-	   + '    <span class="media-username">' + data.username + '</span>'
 	   + '    <span class="media-status">'
 	   + status
            + '</span></div>'
-	   + '    <div class="media-timestamp">'
+	   + '<div class="media-username">' + data.username + '</div>'
+	   + '<div class="media-timestamp">'
            + data.humaneTimestamp + '</div>'
            + '    <div class="media-location">'
            + gps + '</div>';

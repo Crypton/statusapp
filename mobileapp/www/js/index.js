@@ -504,15 +504,22 @@ var app = {
     if (app.isNodeWebKit) {
       return app.scanQRCode_desktop();
     }
-    cordova.plugins.barcodeScanner.scan(
-      function (result) {
-        var userObj = JSON.parse(result.text);
-        app.verifyUser(userObj.username, userObj.fingerprint);
-      },
-      function (error) {
-        app.alert("QR Scanning failed: " + error, 'danger');
-      }
-    );
+    try {
+      cordova.plugins.barcodeScanner.scan(
+	function (result) {
+          var userObj = JSON.parse(result.text);
+          app.verifyUser(userObj.username, userObj.fingerprint);
+	},
+	function (error) {
+          app.alert("QR Scanning failed: " + error, 'danger');
+	}
+      );
+    } catch (ex) {
+      // Sometimes this throws! Usually because the scanned data is blurry or cannot be read, etc
+      console.error(ex);
+      console.error(ex.stack);
+      app.alert("QR Scanning failed, try again - very slowly and very steady", 'danger');
+    }
   },
 
   avatarStream: null,
@@ -934,7 +941,7 @@ var app = {
   },
 
   logNewContact: function _logNewContact(username) {
-    var html = '<li class="logged-new-contact">Conatct "'
+    var html = '<li class="logged-new-contact">Contact "'
 	  + username + '" added to contacts'
 	  + '</li>';
     $('#contact-add-log').prepend($(html));

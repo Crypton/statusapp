@@ -12,7 +12,7 @@
 }
 
 #set-my-status-btn {
-    font-size: 4em;
+    font-size: 3em;
 }
 
 #take-a-photo-btn {
@@ -140,10 +140,10 @@
 .media-username {
     font-weight: bold;
     color: #3f51b5;
+    font-size: 70%;
 }
 
 .media-status {
-    margin-left: 0.5em;
     font-size: 1.2em;
 }
 
@@ -175,11 +175,12 @@
 .post-button {
     font-size: 3em;
     color: #000;
-    margin-right: 0.4em;
+    margin-right: 0.3em;
 }
 
 #button-row {
     float: right;
+    margin-right: 1em;
 }
 
 #status-update-wrapper {
@@ -198,7 +199,6 @@ margin-top: 5px;
 }
 
 .status-block {
-    margin-top: 0.5em;
 }
 
 #post-button-cog {
@@ -251,6 +251,7 @@ margin-top: 5px;
 
 #about-view {
     margin: 2em;
+    font-size: 118%
 }
 
 .app-logo {
