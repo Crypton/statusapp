@@ -976,7 +976,8 @@ var app = {
           } else {
             app.alert(username + ' is now a trusted contact', 'info');
 	    app.logNewContact(peer.username);
-            if (app.postPeerTrustCallback && typeof app.postPeerTrustCallback == 'function') {
+            if (typeof app.postPeerTrustCallback == 'function') {
+	      console.log('postPeerTrustCallback...');
               app.postPeerTrustCallback(peer);
             }
           }
@@ -1321,7 +1322,7 @@ var app = {
     var canvas = app.card.createIdCard(fingerprint,
                                        name,
                                        app.APPNAME, app.URL);
-    $(canvas).css({ width: '300px', 'margin-top': '1em'});
+    $(canvas).css({ width: '300px' });
     $(canvas).attr({'class': 'contact-id'});
     $('#contact-details .contact-id').remove();
     $('#contact-details').prepend(canvas);

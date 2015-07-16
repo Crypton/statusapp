@@ -230,7 +230,7 @@ input[type="password"]:focus {
     line-height: 76px;
     background-color: #3f51b5;
     box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.16), 0px 1px 2.5px 0px rgba(0, 0, 0, 0.26);
-    color: white;
+    color: whitesmoke;
     z-index: 10;
 	padding-top: 10px;
 }
@@ -580,7 +580,7 @@ option-label {
 
 #confirm-delete-contact-wrapper {
     display: none;
-    margin: 1em;
+    margin-bottom: 1em;
 }
 
 ul .offline-ui {

@@ -352,6 +352,7 @@ app.loadNewTimeline = function loadNewTimeline () {
     console.error('Cannot get afterId');
     app.loadPastTimeline();
   }
+  app.updateEmptyTimelineElements();
 };
 
 app.statusNameHmac = function statusNameHmac() {
@@ -379,16 +380,11 @@ app.loadInitialTimeline = function loadInitialTimeline(callback) {
     if ($('.empty-timeline-element').length > 9) {
       app.loadPastTimeline();
     }
-    var empties = $('.empty-timeline-element').length;
-    // if (timeline.length < 1 || empties == timeline.length) {
-      // An effort to get initial posts on new account establishment
-      // Try to get 'previous items':
-      // $('#first-run-empty-feed-msg').show();
-    // }
     app.loadPastTimeline();
     if (!$("#fetch-previous-items").is(":visible")) {
       $("#fetch-previous-items").show();
     }
+    app.updateEmptyTimelineElements();
   });
 };
 
@@ -424,6 +420,7 @@ app.loadPastTimeline = function loadPastTimeline () {
     app.feedIsLoading = false;
     console.error('cannot get beforeId');
   }
+  app.updateEmptyTimelineElements();
 };
 
 app.renderTimeline = function renderTimeline (timeline, append) {
@@ -431,9 +428,26 @@ app.renderTimeline = function renderTimeline (timeline, append) {
   if (!timeline.length) {
     return;
   }
+
+  var shareAvatarWith = {};
   
   for (var i = 0; i < timeline.length; i++) {
-    console.log(timeline[i]);
+    console.log('from: ', timeline[i].creatorUsername, 'to: ', app.username);
+    console.log('value: ', timeline[i].value);
+    var _username = timeline[i].creatorUsername;
+    if (_username != app.username) {
+      try {
+	var contact = app.session.items._trusted_peers[_username];
+	if (contact) {
+	  if (!contact.avatarShared) {
+	    shareAvatarWith[_username] = null;
+	  }
+	}
+      } catch (ex) {
+	console.error(ex);
+      }
+    }
+    
     var node;
     if (!timeline[i].value) {
       // this is some other kind of item, not a status update!
@@ -444,23 +458,17 @@ app.renderTimeline = function renderTimeline (timeline, append) {
       } else {
 	$('#my-feed-entries').prepend(node);
       }
+      console.warn('no value, not rendering...');
       continue;
     }
-    if (!timeline[i].value.status) {
-      // this is some other kind of item, not a status update!
-      // Ignore this for now, probably a 'trustedAt notification'
-      node = app.createEmptyElement(timeline[i]);
-      if (append) {
-	$('#my-feed-entries').append(node);
-      } else {
-	$('#my-feed-entries').prepend(node);
-      }
-      continue;
-    }
+
     if (timeline[i].value.avatar) {
       // this is some other kind of item, not a status update!
       // Ignore this for now, probably a 'trustedAt notification'
       console.log('avatar update object: ', timeline[i], timeline[i].value);
+      var data = timeline[i].value;
+      data.username = timeline[i].creatorUsername;
+      data.itemId = timeline[i].timelineId;
       node = app.createAvatarUpdateElement(data);
       if (append) {
 	$('#my-feed-entries').append(node);
@@ -481,10 +489,33 @@ app.renderTimeline = function renderTimeline (timeline, append) {
 							 fingerprint: null
 						       };
 	app.newContactDiscovered = true;
+      } else {
+	app.session.items._trusted_peers.value[user].avatar = timeline[i].value.avatar;
+	app.session.items._trusted_peers.value[user].avatarUpdated = Date.now();
+	app.session.items._trusted_peers.save(function (err) {
+	  if (err) {
+	    console.error(err);
+	  }
+	});
       }
       continue;
     }
+
+    if (!timeline[i].value.status) {
+      console.warn('Not a Status element');
+      // this is some other kind of item, not a status update!
+      // Ignore this for now, probably a 'trustedAt notification'
+      node = app.createEmptyElement(timeline[i]);
+      if (append) {
+	$('#my-feed-entries').append(node);
+      } else {
+	$('#my-feed-entries').prepend(node);
+      }
+      continue;
+    }
+    
     // Begin status update handling
+    console.log('Status Update! creating media node');
     var localUser = (timeline[i].creatorUsername == app.username);
     var data = app.massageTimelineUpdate(timeline[i]);
     data.itemId = timeline[i].timelineId;
@@ -506,6 +537,32 @@ app.renderTimeline = function renderTimeline (timeline, append) {
   if (!$("#fetch-previous-items").is(":visible")) {
     $("#fetch-previous-items").show();
   }
+
+  var shareWith = Object.keys(shareAvatarWith);
+  
+  if (shareWith.length) {
+    app.shareAvatar(shareWith);
+  }
+  
+};
+
+app.shareAvatar = function shareAvatar (avatarArr) {
+  for (var i = 0; i < avatarArr.length; i++) {
+    app.session.getPeer(avatarArr[i], function (err, peer) {
+      if (err) {
+	console.error(err);
+	return;
+      }
+      app.session.items.avatar.share(peer, function (err) {
+	if (err) {
+	  console.error(err);
+	  return;
+	}
+	app.session.items._trusted_peers[peer.username].avatarShared = Date.now();
+	// XXX: save the contacts on quit or logout
+      });
+    });
+  }
 };
 
 app.createEmptyElement = function createEmptyElement(timelineItem) {
@@ -518,6 +575,44 @@ app.createEmptyElement = function createEmptyElement(timelineItem) {
 app.hmacUser = function () {
   return crypton.hmac('', app.username);
 };
+
+// XXXddahl: not all timeline updates will be decrypted in bulk fetches by
+// the time the timeline is rendered, so we end up with extra
+// 'empty-timeline-element' entries.
+// We need to run a "post fetch check" a second or 2 after the TL is rendered
+// Object.observe sure will come in handy here!
+
+app.updateEmptyTimelineElements = function updateEmptyTimelineElements () {
+  var empties = [];
+  $('.empty-timeline-element').each(function (idx) {
+    empties.push($(this).attr('id'));
+  });
+  var items = Object.keys(app.session.itemHistory);
+  var history = app.session.itemHistory;
+  setTimeout(function updateEmptiesTimeout() {
+    for (var i = 0; i < empties.length; i++) {
+      if (history[empties[i]].value.status) {
+	// we have unknown update data
+	app.transformEmptyTimelineElement(empties[i], history[empties[i]]);
+	app.transformedTimelineElements[empties[i]] = Date.now();
+      }
+    }
+  }, 2000);
+};
+
+app.transformEmptyTimelineElement =
+function transformEmptyTimelineElement (emptyId, timelineElement) {
+  
+  var emptyElement = $('#' + emptyId);
+  var localUser = (timelineElement.creatorUsername == app.username);
+  var data = app.massageTimelineUpdate(timelineElement);
+  data.itemId = timelineElement.timelineId;
+  console.log('rendered timelineid: ', timelineElement.timelineId);
+  app.createMediaElement(data, localUser, emptyElement);
+  
+};
+
+app.transformedTimelineElements = {};
 
 app.massageTimelineUpdate = function massageTimelineUpdate (data) {
   var avatar;
@@ -657,7 +752,7 @@ app.createAvatarUpdateElement =
 function createAvatarUpdateElement(data) {
   // data = {avatar: 'hajshjahjsjahj', updated: 123456789}
 
-  var timestamp = app.formatDate(data.modTime);
+  var timestamp = app.formatDate(data.timestamp || data.updated);
   var html = '<div id="' + data.itemId
            + '" class="media attribution">'
 	   + '<a class="img">'
@@ -674,7 +769,8 @@ function createAvatarUpdateElement(data) {
   return $(html);
 };
 
-app.createMediaElement = function createMediaElement(data, localUser) {
+app.createMediaElement =
+function createMediaElement(data, localUser, existingNode) {
   var gps;
   if (data.location && data.location != 'undisclosed location') {
     // gps = app.obfuscateLocation(data.location);
@@ -715,9 +811,10 @@ app.createMediaElement = function createMediaElement(data, localUser) {
 
   console.log(status);
   console.log('data.itemId: ', data.itemId);
-  var html = '<div id="' + data.itemId
-           + '" class="media attribution ' + classId + ' ' + itemId + '">'
-	   + '<a class="img">'
+  var parentHtml = '<div id="' + data.itemId
+        + '" class="media attribution ' + classId + ' ' + itemId + '"></div>';
+
+  var html = '<a class="img">'
            + avatarMarkup
   	   + '  </a>'
            + '  <div class="bd media-metadata">'
@@ -734,10 +831,26 @@ app.createMediaElement = function createMediaElement(data, localUser) {
     html = html + imageHtml;
   }
   html = html
-    + '  </div>'
-    + '</div>';
-
-  return $(html);
+    + '  </div>';
+  if (existingNode) {
+    // updating the exisitng node
+    console.log('updating an existing node');
+    existingNode.addClass('media');
+    existingNode.addClass('attribution');
+    existingNode.addClass(classId);
+    existingNode.addClass(itemId);
+    var children = $(html);
+    existingNode.children().remove();
+    existingNode.append(children);
+    existingNode.removeClass('empty-timeline-element');
+    return;
+  } else {
+    console.log('creating a new node');
+    var parent = $(parentHtml);
+    var children = $(html);
+    parent.append(children);
+    return parent;
+  }
 };
 
 app.linkOutput = function linkOutput(autolinker, match) {
@@ -778,44 +891,23 @@ app.linkOutput = function linkOutput(autolinker, match) {
 app.shareStatus = function shareStatus (peerObj) {
   console.log('shareStatus()', arguments);
 
-  function shareAvatar(peer) {
+  app.session.items.status.share(peerObj, function (err) {
+    if (err) {
+      console.error(err, 'Cannot shareStatus!');
+      return;
+    }
     if (app.session.items.avatar) {
-      app.session.items.avatar.share(peer, function (err) {
+      app.session.items.avatar.share(peerObj, function (err) {
 	if (err) {
 	  console.error(err);
-	  console.error('cannot share avatar with ' + peer.username);
+	  console.error('cannot share avatar with ' + peerObj.username);
 	}
-	console.log('avatar shared with ' + peer.username);
+	console.log('avatar shared with ' + peerObj.username);
       });
+    } else {
+      console.error('app.session.items.avatar does not exist');
     }
-  }
-
-  if (typeof peerObj == 'string') {
-    // share status container with peer
-    app.session.getPeer(peerObj, function (err, peer) {
-      if (err) {
-        console.error('Cannot get peer!', err);
-        return;
-      }
-      app.session.items.status.share(peer, function (err) {
-        if (err) {
-          console.log(err);
-          return;
-        }
-	shareAvatar(peer);
-      });
-    });
-  } else if (typeof peerObj == 'object') {
-    app.session.items.status.share(peerObj, function (err) {
-      if (err) {
-        console.error(err, 'Cannot shareStatus!');
-        return;
-      }
-      shareAvatar(peerObj);
-    });
-  } else {
-    console.error('peerObject is wrong type!');
-  }
+  });
 };
 
 // app.revokeSharedStatus = function revokeSharedStatus(peer) {
@@ -1014,12 +1106,11 @@ app.escapeHtml = function escapeHtml(html) {
 };
 
 app.formatDate = function formatDate (timestamp) {
-  return new Date(parseInt(timestamp)).toString();
+  var d = new Date(parseInt(timestamp));
+  return d.toDateString() + ' ' + d.toTimeString();
 };
 
 // XXXddahl: TODO
-
-// makePictureAvatar(base64PngData)
 
 // Check for the user's current TZ and use it to display all dates
 
