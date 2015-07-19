@@ -137,7 +137,7 @@ var app = {
 
   APPNAME: 'Kloak',
 
-  URL: 'https://kloakstaging.crypton.io',
+  URL: 'https://zk.gs',
 
   VERSION: "0.0.2",
 
@@ -948,6 +948,10 @@ var app = {
   },
   
   verifyUser: function (username, fingerprint) {
+    if (username == app.username) {
+      app.alert('Cannot verify your own account', 'danger');
+      return;
+    }
     if (!fingerprint) {
       var error = 'Contact data was not extracted';
       app.alert(error, 'danger');
@@ -1279,6 +1283,9 @@ var app = {
       var names = Object.keys(contacts);
       app.contactNameMap = {};
       var contactNames = names.map(function (value) {
+	if (value == app.username) {
+	  return null;
+	}
 	var lcName = value.toLowerCase();
 	app.contactNameMap[lcName] = value;
 	return value.toLowerCase();
@@ -1289,16 +1296,29 @@ var app = {
 	var lcName = contactNames[i];
 	var name = app.contactNameMap[lcName];
 	var followingStatus;
+	if (!name) {
+	  continue;
+	}
 	if (!app._contacts[name].trustedAt) {
 	  followingStatus = ' <span class="following-not-complete"> Follow Back?</span>';
 	} else {
 	  followingStatus = ' <span class="following-complete"> Private Contact</span>';
 	}
 
-	
+	var userAvatar;
+	if (app.session.items._trusted_peers.value[contactNames[i]]) {
+	  var avatar = app.session.items._trusted_peers.value[contactNames[i]].avatar;
+	  if (avatar) {
+	    userAvatar = '<img class="user-avatar" src="' + avatar  + '" />';
+	  } else {
+	    userAvatar = '<i class="fa fa-user user-avatar user-avatar-generic"></i>';
+	  }
+	}
         var html = '<li class="contact-record" id="contact-'
               + app.contactNameMap[contactNames[i]]
-              + '"><span class="contact-name">'
+              + '">'
+	      + userAvatar
+	      + ' <span class="contact-name">'
               + app.contactNameMap[contactNames[i]]
 	      + '</span>'
 	      + followingStatus

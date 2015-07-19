@@ -104,7 +104,7 @@
 /* ====== media ====== */
 
 .media {
-    /* margin: 15px 10px 10px 10px; */
+    margin-top: 10px !important;
     border-bottom: 1px solid #d5d5d5;
 }
 
@@ -126,8 +126,9 @@
 }
 
 .media-avatar {
-    width: 60px;
+    width: 50px;
     margin-left: 10px;
+    margin-bottom: 5px;
     -webkit-border-radius: 5px;
     border: 1px solid #aaaaaa;;
 }
@@ -141,10 +142,11 @@
     font-weight: bold;
     color: #3f51b5;
     font-size: 70%;
+    margin-top: 5px;
 }
 
 .media-status {
-    font-size: 1.2em;
+    font-size: 1em;
 }
 
 .media-timestamp {
@@ -184,7 +186,7 @@
 }
 
 #status-update-wrapper {
-margin-top: 5px;
+    margin-top: 5px;
 }
 
 #my-avatar {
@@ -207,7 +209,7 @@ margin-top: 5px;
 }
 
 .feed-image {
-    border: 2 px solid #5d5d5d;
+    border: 1px solid #5d5d5d;
     margin-top: 0.5em;
     width: 97%;
 }

@@ -437,7 +437,7 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     var _username = timeline[i].creatorUsername;
     if (_username != app.username) {
       try {
-	var contact = app.session.items._trusted_peers[_username];
+	var contact = app.session.items._trusted_peers.value[_username];
 	if (contact) {
 	  if (!contact.avatarShared) {
 	    shareAvatarWith[_username] = null;
@@ -539,27 +539,39 @@ app.renderTimeline = function renderTimeline (timeline, append) {
   }
 
   var shareWith = Object.keys(shareAvatarWith);
-  
+  console.log('shareWith', shareWith);
   if (shareWith.length) {
+    console.log('shareAvatar()');
     app.shareAvatar(shareWith);
-  }
-  
+  }  
 };
 
 app.shareAvatar = function shareAvatar (avatarArr) {
+  console.log(avatarArr);
   for (var i = 0; i < avatarArr.length; i++) {
     app.session.getPeer(avatarArr[i], function (err, peer) {
       if (err) {
 	console.error(err);
 	return;
       }
+      console.log('got peer', peer);
+      console.log('sharing avatar: ');
       app.session.items.avatar.share(peer, function (err) {
 	if (err) {
 	  console.error(err);
 	  return;
 	}
-	app.session.items._trusted_peers[peer.username].avatarShared = Date.now();
-	// XXX: save the contacts on quit or logout
+	console.log('avatarShared');
+	app.session.items._trusted_peers.value[peer.username].avatarShared = Date.now();
+	if (i == avatarArr.length) {
+	  // XXX: save the contacts on quit or logout
+	  app.session.items._trusted_peers.save(function (err) {
+	    if (err) {
+	      console.error(err);
+	      return;
+	    }
+	  });
+	}
       });
     });
   }
@@ -591,7 +603,14 @@ app.updateEmptyTimelineElements = function updateEmptyTimelineElements () {
   var history = app.session.itemHistory;
   setTimeout(function updateEmptiesTimeout() {
     for (var i = 0; i < empties.length; i++) {
-      if (history[empties[i]].value.status) {
+      var status;
+      try {
+	status = history[empties[i]].value.status;
+      } catch (ex) {
+	console.warn('timelineItem has no status property: ', history[empties[i]]);
+	continue;
+      }
+      if (status) {
 	// we have unknown update data
 	app.transformEmptyTimelineElement(empties[i], history[empties[i]]);
 	app.transformedTimelineElements[empties[i]] = Date.now();
@@ -1050,37 +1069,46 @@ app.setMyLocation = function setMyLocation() {
     var lng = new Number(crd.longitude).toFixed(1);
     var geoIdx = lat + '__' + lng;
 
-    if (!app.getPlaceName) {
-      // load the geoPlaces script
-      $.ajaxSetup({
-	cache: true
-      });
-      console.log('loading geo-places...');
-      $.getScript( "js/geo-places.js", function( data, textStatus, jqxhr ) {
-	console.log( "geo-places is loaded" );
-	app.getPlaceName = function getPlaceName (geoIdx) {
-	  var placeArr = window.geoPlaces[geoIdx];
-	  if (placeArr) {
-	    return placeArr[0] + ' ' +  placeArr[2] + ' ' + placeArr[1];
-	  } else {
-	    return 'unknown';
-	  }
-	};
-	var name = app.getPlaceName(geoIdx);
-	app.setLocationName(name);
-      });
-    } else {
-      var name = app.getPlaceName(geoIdx);
-      app.setLocationName(name);
-    }
+    // if (!app.getPlaceName) {
+    //   // load the geoPlaces script
+    //   $.ajaxSetup({
+    // 	cache: true
+    //   });
+    //   console.log('loading geo-places...');
+    //   $.getScript( "js/geo-places.js", function( data, textStatus, jqxhr ) {
+    // 	console.log( "geo-places is loaded" );
+    // 	app.getPlaceName = function getPlaceName (geoIdx) {
+    // 	  var placeArr = window.geoPlaces[geoIdx];
+    // 	  if (placeArr) {
+    // 	    return placeArr[0] + ' ' +  placeArr[2] + ' ' + placeArr[1];
+    // 	  } else {
+    // 	    return 'unknown';
+    // 	  }
+    // 	};
+    // 	var name = app.getPlaceName(geoIdx);
+    // 	app.setLocationName(name);
+    //   });
+    // } else {
+    var name = app.getPlaceName(geoIdx);
+    app.setLocationName(name);
+    // }
   };
-
+  
   function error(err) {
     console.error('Cannot set location');
     console.error(err);
   };
 
   navigator.geolocation.getCurrentPosition(success, error, options);
+};
+
+app.getPlaceName = function getPlaceName (geoIdx) {
+  var placeArr = window.geoPlaces[geoIdx];
+  if (placeArr) {
+    return placeArr[0] + ' ' +  placeArr[2] + ' ' + placeArr[1];
+  } else {
+    return 'unknown';
+  }
 };
 
 app.setLocationName = function setLocationName (name) {

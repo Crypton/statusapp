@@ -311,9 +311,9 @@ input[type="password"]:focus {
 }
 
 #contacts-list li {
-    font-size: 1.2em;
+    font-size: 1em;
     border-bottom: 1px solid #ccc;
-    line-height: 50px;
+    line-height: 30px;
     padding: 0 20px;
     color: #444;
 }
@@ -602,4 +602,19 @@ ul .offline-ui-retry {
 
 body {
     background-color: whitesmoke !important;
+}
+
+.user-avatar-generic {
+    font-size: 2em;
+    margin-right: 10px;
+    margin-top: 5px;
+    padding-left: 3px;
+}
+
+.user-avatar {
+    margin-right: 10px;
+    width: 30px;
+    margin-bottom: 5px;
+    -webkit-border-radius: 5px;
+    border: 1px solid #aaaaaa;
 }
