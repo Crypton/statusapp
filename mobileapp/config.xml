@@ -9,9 +9,11 @@
   </author>
     <content src="index.html" />
     <access origin="https://zk.gs" />
+    <allow-navigation href="https://zk.gs/*" />
     <preference name="target-device" value="universal" />
     <preference name="BackupWebStorage" value="none" />
     <preference name="webviewbounce" value="false" />
     <preference name="orientation" value="portrait" /> 
     <preference name="SplashScreen" value="screen"/>
+    <preference name="android-minSdkVersion" value="14" />
 </widget>

@@ -123,7 +123,7 @@ h1 {
     padding-top: 5px;
     -webkit-transform: translate3d(-100%, 0, 0);
     -webkit-transition: all 0.1s ease;
-    margin-top: 56px;
+    margin-top: 76px;
     opacity: 0.91;
     margin-bottom: 15em;
     border: 1px solid #D1D1D1;
@@ -206,7 +206,7 @@ input[type="password"]:focus {
 #app {
     /*background-color: #CFD8DC;*/
     position: absolute;
-    top: 56px;
+    top: 76px;
     right: 0px;
     bottom: 0px;
     left: 0px;
@@ -216,9 +216,9 @@ input[type="password"]:focus {
 }
 
 #page-title {
-    display: block;
-    text-align: center;
-    font-size: 16px;
+    display: inline;
+    font-size: 1em;
+    margin-left: 0.3em;
 }
 
 #header {
@@ -226,11 +226,11 @@ input[type="password"]:focus {
     top: 0px;
     right: 0px;
     left: 0px;
-    height: 56px;
-    line-height: 56px;
+    height: 76px;
+    line-height: 76px;
     background-color: #3f51b5;
     box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.16), 0px 1px 2.5px 0px rgba(0, 0, 0, 0.26);
-    color: white;
+    color: whitesmoke;
     z-index: 10;
 	padding-top: 10px;
 }
@@ -254,7 +254,8 @@ input[type="password"]:focus {
 
 #tasks-btn.active {
     display: block;
-    position: absolute;
+    margin-left: -2.4em;
+    padding-right: 0 !important;
 }
 
 #account-name-label {
@@ -310,9 +311,9 @@ input[type="password"]:focus {
 }
 
 #contacts-list li {
-    font-size: 1.2em;
+    font-size: 1em;
     border-bottom: 1px solid #ccc;
-    line-height: 50px;
+    line-height: 30px;
     padding: 0 20px;
     color: #444;
 }
@@ -357,6 +358,7 @@ input[type="password"]:focus {
 #scan-select-buttons {
   margin-top: 20px;
   text-align: center;
+  margin-bottom: 1em;
 }
 
 #verify-user {
@@ -550,4 +552,69 @@ option-label {
 .following-not-complete {
     color: red;
     font-size: 80%;
+}
+
+#header-button-bar {
+    list-style-type: none;
+    display: none;
+}
+
+#header-button-bar li {
+    display: inline-block;
+}
+
+.header-btn {
+    font-size: 2em;
+    color: whitesmoke;
+    margin-right: 0.3em;
+}
+
+.header-bb-title {
+    width: 70%;
+}
+
+#logout-page-title {
+    font-size: 1.5em;
+    margin-left: 0.5em;
+}
+
+#confirm-delete-contact-wrapper {
+    display: none;
+    margin-bottom: 1em;
+}
+
+ul .offline-ui {
+  top: auto;
+  bottom: 0;
+  padding: 5px !important;
+}
+ul .offline-ui-retry {
+  line-height: 30px !important;
+}
+
+.logged-new-contact {
+    margin-top: 1em;
+}
+
+#contact-add-log {
+    list-style-type: none;
+}
+
+body {
+    background-color: whitesmoke !important;
+}
+
+.user-avatar-generic {
+    font-size: 2em;
+    margin-right: 10px;
+    margin-top: 5px;
+    padding-left: 3px;
+}
+
+.user-avatar {
+    margin-right: 10px;
+    width: 30px;
+    margin-bottom: 5px;
+    -webkit-border-radius: 5px;
+    border: 1px solid #aaaaaa;
 }

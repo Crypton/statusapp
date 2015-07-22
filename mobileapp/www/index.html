@@ -7,19 +7,37 @@
     <meta charset="utf-8" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: wss: data: gap: https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" />
     <link rel="stylesheet" type="text/css" href="css/index.css" />
     <link rel="stylesheet" type="text/css" href="css/stati.css" />
     <link rel="stylesheet" type="text/css" href="css/vendor/font-awesome.css" />
     <link rel="stylesheet" type="text/css" href="css/vendor/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/vendor/offline-theme-default.css" />
+    <link rel="stylesheet" type="text/css" href="css/vendor/offline-language-english.css" />
+    <link rel="stylesheet" type="text/css" href="css/vendor/offline-language-english-indicator.css" />
     <title>Kloak</title>
   </head>
   <body>
     <div class="overlay"></div>
     <div id="header">
-      <a href="#" id="tasks-btn">
-        <i id="main-menu-btn" class="fa fa-bars"></i>
-      </a>
-      <span id="page-title">Kloak</span>
+      <span id="logout-page-title">Kloak</span>
+      <ul id="header-button-bar">
+	<li>
+	  <a href="#" id="tasks-btn">
+            <i id="main-menu-btn" class="fa fa-bars"></i>
+	  </a>
+	</li>
+	<li class="header-bb-title">
+	  <span id="page-title">Kloak</span>
+	</li>
+	<li class="header-btn-wrap">
+	  <i id="header-btn-update" class="header-btn fa fa-comment"></i>
+	</li>
+	<li class="header-btn-wrap">
+	  <i id="header-btn-refresh" class="header-btn fa fa-refresh"></i>
+	</li>
+      </ul>
+      
       <div id="top-progress-wrapper">
 	<div id="feed-progress-wrapper"
 	     class="progress progress-striped active">
@@ -111,8 +129,8 @@
       
       <div id="feed" class="view">
 	
-	<div id="my-status-wrapper">
-	  
+	<div id="first-run-empty-feed-msg">
+	  <p>Your feed is empty. Say something or connect with contacts to fill your feed</p>
 	</div>
 	
 	<div id="my-feed-entries">
@@ -209,13 +227,13 @@
 	<div id="login-status">
 	  <span class="status"></span>
 	</div>
-	<div id="progress-wrapper"
-	     class="progress progress-striped active">
-	  <div class="progress-bar"  role="progressbar" 
-	       aria-valuenow="100" aria-valuemin="0" 
-	       aria-valuemax="100" style="width: 100%">
-	  </div>
-	</div>
+	<!-- <div id="progress-wrapper" -->
+	<!--      class="progress progress-striped active"> -->
+	<!--   <div class="progress-bar"  role="progressbar"  -->
+	<!--        aria-valuenow="100" aria-valuemin="0"  -->
+	<!--        aria-valuemax="100" style="width: 100%"> -->
+	<!--   </div> -->
+	<!-- </div> -->
       </div>
 
       <div id="scan-select" class="view">
@@ -272,11 +290,22 @@
 	<div id="contact-message">
 	</div>
 	
-	<div id="contact-details-buttons" 
-	     class="btn-group btn-group-lg">
+	<div id="contact-details-buttons" class="btn-group btn-group-lg">
 	  <button type="button"
 		  class="btn btn-success"
 		  id="contacts-detail-dismiss-btn">Done</button>
+	  <button type="button"
+		  class="btn btn-danger"
+		  id="contact-delete-btn">Delete Contact</button>
+	</div>
+	<div id="confirm-delete-contact-wrapper" class="btn-group btn-group-lg">
+	  <p>Are you sure you want to delete this contact and unshare your feed?</p>
+	  <button type="button"
+		  class="btn btn-success"
+		  id="contacts-detail-cancel-delete-btn">Cancel</button>
+	  <button type="button"
+		  class="btn btn-danger"
+		  id="contact-yes-delete-btn">Confirm Delete</button>
 	</div>
       </div>
 
@@ -306,14 +335,14 @@
 		  id="change-passphrase"
 		  class="btn btn-success">Change passphrase</button>
 	  </p>
-	  <p class="option option-text">
-	    Delete Account & All Data Created
-	  </p>
-	  <p class="option">
-	  <button disabled type="button"
-		  id="delete-account"
-		  class="btn btn-primary">Delete account</button>
-	  </p>
+	  <!-- <p class="option option-text"> -->
+	  <!--   Delete Account & All Data Created -->
+	  <!-- </p> -->
+	  <!-- <p class="option"> -->
+	  <!-- <button disabled type="button" -->
+	  <!-- 	  id="delete-account" -->
+	  <!-- 	  class="btn btn-primary">Delete account</button> -->
+	  <!-- </p> -->
 	  <!--  <p class="option option-text"> -->
 	  <!--   Self-destruct Account on: -->
 	  <!-- </p> -->
@@ -420,5 +449,7 @@
     <script type="text/javascript" src="js/vendor/jsqrcode/databr.js"></script>
     <!-- END QR Code Reader -->
     <script type="text/javascript" src="js/vendor/Autolinker.js"></script>
+    <script type="text/javascript" src="js/vendor/offline.min.js"></script>
+    <script async type="text/javascript" src="js/geo-places.js"></script>
   </body>
 </html>

@@ -12,7 +12,7 @@
 }
 
 #set-my-status-btn {
-    font-size: 4em;
+    font-size: 3em;
 }
 
 #take-a-photo-btn {
@@ -59,7 +59,6 @@
 }
 
 #feed {
-    margin-top: -0.5em;
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -105,7 +104,7 @@
 /* ====== media ====== */
 
 .media {
-    /* margin: 15px 10px 10px 10px; */
+    margin-top: 10px !important;
     border-bottom: 1px solid #d5d5d5;
 }
 
@@ -127,11 +126,11 @@
 }
 
 .media-avatar {
-    width: 40px;
-    height: 50px;
+    width: 50px;
     margin-left: 10px;
-    -webkit-border-radius: 20px;
-    border: 2px solid #d5d5d5;;
+    margin-bottom: 5px;
+    -webkit-border-radius: 5px;
+    border: 1px solid #aaaaaa;;
 }
 
 .media-metadata {
@@ -142,14 +141,19 @@
 .media-username {
     font-weight: bold;
     color: #3f51b5;
+    font-size: 70%;
+    margin-top: 5px;
 }
 
 .media-status {
-    margin-left: 0.5em;
-    font-size: 1.2em;
+    font-size: 1em;
 }
 
-.media-timestamp .media-location {
+.media-timestamp {
+    font-size: 70%;
+}
+
+.media-location {
     font-size: 70%;
 }
 
@@ -173,34 +177,30 @@
 .post-button {
     font-size: 3em;
     color: #000;
-    margin-right: 0.4em;
+    margin-right: 0.3em;
 }
 
 #button-row {
     float: right;
+    margin-right: 1em;
 }
 
-#status-update-wrapper {/* float: right; */
-margin-top: 5px;
-/* margin-right: 5px; */}
+#status-update-wrapper {
+    margin-top: 5px;
+}
 
-#my-avatar {width: 30px;
-height: 40px;
-margin-bottom: 20px;
-margin-right: 20px;}
+#my-avatar {
+    width: 50px;
+    margin-bottom: 25px;
+    margin-right: 15px;
+}
 
 #my-image-to-post {
     padding-top: 1em;
     text-align: center;
-    /* float: right; */
-}
-
-#stati {
-    /* padding-top: 1em; */
 }
 
 .status-block {
-    margin-top: 0.5em;
 }
 
 #post-button-cog {
@@ -209,7 +209,7 @@ margin-right: 20px;}
 }
 
 .feed-image {
-    border: 2 px solid #5d5d5d;
+    border: 1px solid #5d5d5d;
     margin-top: 0.5em;
     width: 97%;
 }
@@ -238,7 +238,7 @@ margin-right: 20px;}
     background-color: whitesmoke;
     height: 10px;
     display: none;
-    margin-top: -1em;
+    margin-top: -1.6em;
 }
 
 #first-run-empty-feed-btn {
@@ -253,6 +253,7 @@ margin-right: 20px;}
 
 #about-view {
     margin: 2em;
+    font-size: 118%
 }
 
 .app-logo {
@@ -261,4 +262,16 @@ margin-right: 20px;}
 
 .empty-timeline-element {
     display: none;
+}
+
+#header-button-update {
+    padding-right: 0.4em;
+}
+
+#first-run-empty-feed-msg {
+    display: none;
+    margin: 2em;
+    font-size: 1.1em;
+    padding: 1em;
+    border: 1px solid #d1d1d1;
 }

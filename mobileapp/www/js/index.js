@@ -37,13 +37,14 @@ function onDeviceReady() {
 }
 
 var app = {
-  initilize: function initialize() {
-    console.log('noop initialize');
-  },
   // Application Constructor
   init: function init() {
     console.log('app initializing!: ', arguments);
+
+    // Configure the endpoint:
     crypton.host = 'zk.gs';
+    // crypton.port = 443;
+    
     this.card =  new crypton.Card();
     this.bindEvents();
     $('#password-login').show();
@@ -96,6 +97,42 @@ var app = {
       // check if keychain is supported
       defaultLoginBehavior();
     }
+   // Offline
+    window.Offline.options = {
+      // Should we check the connection status immediatly on page load.
+      checkOnLoad: false,
+
+      // Should we monitor AJAX requests to help decide if we have a connection.
+      interceptRequests: true,
+
+      // Should we automatically retest periodically when the connection is
+      // down (set to false to disable).
+      reconnect: {
+        // How many seconds should we wait before rechecking.
+        initialDelay: 3
+      },
+
+      // Should we store and attempt to remake requests which fail while the
+      // connection is down.
+      requests: true,
+
+      // Should we show a snake game while the connection is down to keep
+      // the user entertained?
+      // It's not included in the normal build, you should bring in
+      // js/snake.js in addition to offline.min.js.
+      game: false,
+
+      // What the xhr checks
+      checks: {
+        xhr: {
+          url: ("https://" +
+                window.crypton.host +
+                (window.crypton.port ? (":" + window.crypton.port) : "") +
+                "/")
+        }
+      }
+    };
+    
   },
 
   APPNAME: 'Kloak',
@@ -158,6 +195,10 @@ var app = {
       }
     });
 
+    $('#password-generate').click(function (e) {
+      //e.scrollIntoView({block: "end", behavior: "smooth"});
+    });
+    
     $('#get-new-passphrase').click(function (e) {
       e.preventDefault();
       var pass = generatePassphrase();
@@ -202,6 +243,11 @@ var app = {
     });
     
     $('#my-contacts').click(function () {
+      app.hideMenu();
+      app.displayContacts();
+    });
+
+    $('#header-btn-contacts').click(function () {
       app.hideMenu();
       app.displayContacts();
     });
@@ -263,6 +309,64 @@ var app = {
       app.switchView('#contacts', 'Contacts');
     });
 
+    $('#contact-delete-btn').click(function () {
+      $('#contact-details-buttons').hide();
+      $('#confirm-delete-contact-wrapper').show();
+    });
+
+    $('#contacts-detail-cancel-delete-btn').click(function () {
+      $('#confirm-delete-contact-wrapper').hide();
+      $('#contact-details-buttons').show();
+    });
+
+    $('#contact-yes-delete-btn').click(function () {
+      $('#confirm-delete-contact-wrapper').hide();
+      $('#top-progress-wrapper').show();
+      // unshare status feed
+      var username = $('#page-title').text();
+      if (!username) {
+	console.error('Cannot delete and unshare without a username!');
+	$('#contact-details-buttons').show();
+	$('#top-progress-wrapper').hide();
+	return;
+      }
+      app.session.getPeer(username, function (err, peer) {
+	if (err) {
+	  console.error('Cannot get user data from server');
+	  $('#contact-details-buttons').show();
+	  $('#top-progress-wrapper').hide();
+	  return;
+	}
+	// XXXddahl: Move this into a 'cleanUpDeleteUser' function in subclass 
+	app.session.items.status.unshare(peer, function (err) {
+	  if (err) {
+	    console.error('Cannot unshare status from ' + peer.username);
+	    $('#contact-details-buttons').show();
+	    $('#top-progress-wrapper').hide();
+	    return;
+	  }
+	  // delete user from trusted contacts
+	  delete app.session.items._trusted_peers.value[peer.username];
+	  app.session.items._trusted_peers.save(function (err) {
+	    if (err) {
+	      console.error('Cannot delete ' + peer.username + ' from contacts');
+	      $('#contact-details-buttons').show();
+	      $('#top-progress-wrapper').hide();
+	      return;
+	    }
+	    // XXXddahl: send a message to the deleted peer
+	    //           in order to have them remove you as well? 
+
+	    // back to contacts screen
+	    app.alert('Contact ' + peer.username + ' deleted', 'info');
+	    app.displayContacts();
+	    $('#contact-details-buttons').show();
+	    $('#top-progress-wrapper').hide();
+	  });
+	});
+      });
+    });
+    
     if (app.setCustomEvents && typeof app.setCustomEvents == 'function') {
       app.setCustomEvents();
     }
@@ -339,6 +443,8 @@ var app = {
 
   logout: function logout () {
     app.session = null;
+    $('#header-button-bar').hide();
+    $('#logout-page-title').show();
     // cleanup function:
     if (typeof app.logoutCleanup == 'function') {
       app.logoutCleanup();
@@ -376,6 +482,7 @@ var app = {
     app.hideMenu();
     app.switchView('#account-login', app.APPNAME);
     $('#tasks-btn').removeClass('active');
+    $('#header-button-bar').hide();
     app.alert('You are logged out', 'info');
     $('#password-login').focus();
   },
@@ -397,15 +504,22 @@ var app = {
     if (app.isNodeWebKit) {
       return app.scanQRCode_desktop();
     }
-    cordova.plugins.barcodeScanner.scan(
-      function (result) {
-        var userObj = JSON.parse(result.text);
-        app.verifyUser(userObj.username, userObj.fingerprint);
-      },
-      function (error) {
-        app.alert("QR Scanning failed: " + error, 'danger');
-      }
-    );
+    try {
+      cordova.plugins.barcodeScanner.scan(
+	function (result) {
+          var userObj = JSON.parse(result.text);
+          app.verifyUser(userObj.username, userObj.fingerprint);
+	},
+	function (error) {
+          app.alert("QR Scanning failed: " + error, 'danger');
+	}
+      );
+    } catch (ex) {
+      // Sometimes this throws! Usually because the scanned data is blurry or cannot be read, etc
+      console.error(ex);
+      console.error(ex.stack);
+      app.alert("QR Scanning failed, try again - very slowly and very steady", 'danger');
+    }
   },
 
   avatarStream: null,
@@ -611,15 +725,17 @@ var app = {
   createAccount: function () {
     var user = $('#username-generate').val();
     var pass = $('#password-generate').val();
-
+    $('#top-progress-wrapper').show();
+    
     if (!user || !pass) {
       app.alert('Please enter a username and passphrase', 'danger');
+      $('#top-progress-wrapper').hide();
       return;
     }
 
     app.switchView('#login-progress', '');
     app.setLoginStatus('Creating Account...');
-
+    
     function callback (err) {
       console.error(err);
       app.switchView('#account-login', '');
@@ -627,6 +743,7 @@ var app = {
 
       if (err) {
         app.alert(err, 'danger');
+	$('#top-progress-wrapper').hide();
         return;
       }
       // set the passphrase into the keychain:
@@ -647,19 +764,13 @@ var app = {
   },
 
   beginRegistration: function beginRegistration() {
-    app.switchView('#generate-account', 'Create Account');
-    // check for username + pass values
-    var pass = $('#password-login').val();
-    var username = $('#username-login').val();
-    if (pass || username) {
-      $('#password-generate').val(pass);
-      $('#username-generate').val(username);
-    } else {
-      // generate a long password
-      var passphrase = generatePassphrase();
-      // display new form
-      $('#password-generate').val(passphrase);
-    }
+    
+    app.switchView('#generate-account', 'Create Account');    
+    // generate a long password
+    var passphrase = generatePassphrase();
+    // display new form
+    $('#password-generate').val(passphrase);
+    $('#username-generate').focus();
   },
 
   register: function (user, pass, callback) {
@@ -668,16 +779,20 @@ var app = {
 
     crypton.generateAccount(user, pass, function (err) {
       if (err) {
+	$('#top-progress-wrapper').hide();
 	console.error(err);
         app.switchView('#account-login', 'Account');
         return callback(err);
       }
-
+      $('#top-progress-wrapper').hide();
       app.login();
     });
   },
 
-  login: function () {
+  login: function _login () {
+
+    $('#my-feed-entries').children().remove();
+    
     var user = $('#username-login').val();
     var pass = $('#password-login').val();
 
@@ -692,6 +807,8 @@ var app = {
     }
 
     app.switchView('#login-progress', '');
+    $('#top-progress-wrapper').show();
+    
     $('.alert').remove();
 
     app.setLoginStatus('Logging in...');
@@ -701,6 +818,7 @@ var app = {
         app.alert(err, 'danger');
         app.switchView('#account-login', 'Account');
         app.clearLoginStatus();
+	$('#top-progress-wrapper').hide();
         return;
       }
 
@@ -721,7 +839,7 @@ var app = {
       }
       app.username = user;
       app.session = session;
-      app.setLoginStatus('Loading prefs and feed...');
+      app.setLoginStatus('Loading contacts and  preferences...');
 
       // Check for first run
       app.session.getOrCreateItem('_prefs_', function(err, prefsItem) {
@@ -731,11 +849,14 @@ var app = {
         if (err) {
           console.error(err);
           app.switchView('#account-login', 'Account');
+	  $('#top-progress-wrapper').hide();
           return;
         }
 
         $('#tasks-btn').addClass('active');
-
+	$('#logout-page-title').hide();
+	$('#header-button-bar').show();
+	
         app.username = app.session.account.username;
 
         if (!prefsItem.value.firstRun) {
@@ -785,9 +906,7 @@ var app = {
 
     if ($menu.hasClass('active')) {
       $menu.removeClass('active');
-      // $('.overlay').hide();
     } else {
-      // $('.overlay').show();
       $menu.addClass('active');
     }
   },
@@ -821,14 +940,18 @@ var app = {
     return this.card.createFingerprintArr(fingerprint).join(" ");
   },
 
-  logNewContct: function _logNewContact(username) {
-    var html = '<li class="logged-new-contact">Conatct "'
+  logNewContact: function _logNewContact(username) {
+    var html = '<li class="logged-new-contact">Contact "'
 	  + username + '" added to contacts'
 	  + '</li>';
     $('#contact-add-log').prepend($(html));
   },
   
   verifyUser: function (username, fingerprint) {
+    if (username == app.username) {
+      app.alert('Cannot verify your own account', 'danger');
+      return;
+    }
     if (!fingerprint) {
       var error = 'Contact data was not extracted';
       app.alert(error, 'danger');
@@ -857,7 +980,8 @@ var app = {
           } else {
             app.alert(username + ' is now a trusted contact', 'info');
 	    app.logNewContact(peer.username);
-            if (app.postPeerTrustCallback && typeof app.postPeerTrustCallback == 'function') {
+            if (typeof app.postPeerTrustCallback == 'function') {
+	      console.log('postPeerTrustCallback...');
               app.postPeerTrustCallback(peer);
             }
           }
@@ -1159,6 +1283,9 @@ var app = {
       var names = Object.keys(contacts);
       app.contactNameMap = {};
       var contactNames = names.map(function (value) {
+	if (value == app.username) {
+	  return null;
+	}
 	var lcName = value.toLowerCase();
 	app.contactNameMap[lcName] = value;
 	return value.toLowerCase();
@@ -1169,16 +1296,29 @@ var app = {
 	var lcName = contactNames[i];
 	var name = app.contactNameMap[lcName];
 	var followingStatus;
+	if (!name) {
+	  continue;
+	}
 	if (!app._contacts[name].trustedAt) {
 	  followingStatus = ' <span class="following-not-complete"> Follow Back?</span>';
 	} else {
 	  followingStatus = ' <span class="following-complete"> Private Contact</span>';
 	}
 
-	
+	var userAvatar;
+	if (app.session.items._trusted_peers.value[contactNames[i]]) {
+	  var avatar = app.session.items._trusted_peers.value[contactNames[i]].avatar;
+	  if (avatar) {
+	    userAvatar = '<img class="user-avatar" src="' + avatar  + '" />';
+	  } else {
+	    userAvatar = '<i class="fa fa-user user-avatar user-avatar-generic"></i>';
+	  }
+	}
         var html = '<li class="contact-record" id="contact-'
               + app.contactNameMap[contactNames[i]]
-              + '"><span class="contact-name">'
+              + '">'
+	      + userAvatar
+	      + ' <span class="contact-name">'
               + app.contactNameMap[contactNames[i]]
 	      + '</span>'
 	      + followingStatus
@@ -1202,7 +1342,7 @@ var app = {
     var canvas = app.card.createIdCard(fingerprint,
                                        name,
                                        app.APPNAME, app.URL);
-    $(canvas).css({ width: '300px', 'margin-top': '1em'});
+    $(canvas).css({ width: '300px' });
     $(canvas).attr({'class': 'contact-id'});
     $('#contact-details .contact-id').remove();
     $('#contact-details').prepend(canvas);

@@ -59,27 +59,10 @@ app.pauseEventHandler = function pauseEventHandler () {
   $('#top-progress-wrapper').hide();
 };
 
-app.setAvatar = function setAvatar() {
-  var avatarData = app.session.items.avatar.value.avatar;
-  if ($('#my-avatar')[0].src.indexOf('avatars') == -1) {
-    if (avatarData) {
-      $('#my-avatar')[0].src = avatarData;
-      $('#my-avatar').style({ width: '64px', height: '48px' });
-    }
-  }
-
-  if ($("#my-status-wrapper img")[0].src.indexOf('avatars') == -1) {
-    if (avatarData) {
-      $("#my-status-wrapper img")[0].src = avatarData;
-      // $('#my-avatar').style({ width: '64px', height: '48px' });
-    }
-  }
-};
-
 app.aboutView = function _aboutView () {
   var header = 'About Kloak';
   var logos = '<p><img class="app-logo" src="img/spideroak_logo.png" /> </p>';
-  var info = 'Kloak is an <strong>*experiment*</strong> in social networking that is un-dataminable. All data sent to the server is "end to end" encrypted and unreadable by the server operator. <br /> Kloak is in beta and <strong>should not be used to hide communications from well-equipped potential attackers</strong> <p><a onclick="window.open(\'https://github.com/Crypton/statusapp\', \'_system\')" class="media-link media-link-url">Kloak Source code and issue tracker</a> <br />Kloak is built with <a onclick="window.open(\'https://crypton.io\', \'_system\')" class="media-link media-link-url">Crypton</a> by <a onclick="window.open(\'https://spideroak.com\', \'_system\')" class="media-link media-link-url">SpiderOak</a></p>';
+  var info = 'Kloak is an <strong>*experiment*</strong> in social networking that is un-dataminable. All data sent to the server is "end to end" encrypted and unreadable by the server operator. <br /> Kloak is in beta and <strong>should not be used to hide communications from well-equipped potential attackers</strong> <p><a onclick="window.open(\'https://github.com/Crypton/statusapp\', \'_system\')" class="media-link media-link-url">Kloak issue tracker</a> <br />Kloak is built with <a onclick="window.open(\'https://crypton.io\', \'_system\')" class="media-link media-link-url">Crypton</a> by <a onclick="window.open(\'https://spideroak.com\', \'_system\')" class="media-link media-link-url">SpiderOak</a></p>';
 
   var html = '<div id="about-view"><h4>'
 	+ header
@@ -98,13 +81,16 @@ app.aboutView = function _aboutView () {
 app.setCustomEvents = function setCustomEvents () {
   $('#my-stati').click(function () {
     app.hideMenu();
-    // XXXddahl: reset status UI
-    // Get avatar if not present
-
     app.switchView('#stati', 'Update Status');
     $('#set-my-status-textarea').focus();
   });
 
+  $('#header-btn-update').click(function () {
+    app.hideMenu();
+    app.switchView('#stati', 'Update Status');
+    $('#set-my-status-textarea').focus();
+  });
+  
   $('#my-feed').click(function () {
     app.hideMenu();
     app.switchView('#feed', app.FEED_LABEL);
@@ -116,6 +102,12 @@ app.setCustomEvents = function setCustomEvents () {
     app.loadNewTimeline();
   });
 
+  $('#header-btn-refresh').click(function () {
+    app.hideMenu();
+    app.switchView('#feed', app.FEED_LABEL);
+    app.loadNewTimeline();
+  });
+  
   $('#refresh-feed').click(function () {
     app.hideMenu();
     app.switchView('#feed', app.FEED_LABEL);
@@ -281,9 +273,11 @@ app.customInitialization = function customInitialization() {
   // XXXddahl: need a indeterminate progress indicator
   app.createInitialItems(function (err) {
     if (err) {
+      $('#top-progress-wrapper').hide();
       return console.error(err);
     }
     console.log('Initial items fetched or created');
+    $('#top-progress-wrapper').hide();
     app.displayInitialView();
   });
 };
@@ -356,7 +350,9 @@ app.loadNewTimeline = function loadNewTimeline () {
     $('#top-progress-wrapper').hide();
     app.feedIsLoading = false;
     console.error('Cannot get afterId');
+    app.loadPastTimeline();
   }
+  app.updateEmptyTimelineElements();
 };
 
 app.statusNameHmac = function statusNameHmac() {
@@ -384,6 +380,11 @@ app.loadInitialTimeline = function loadInitialTimeline(callback) {
     if ($('.empty-timeline-element').length > 9) {
       app.loadPastTimeline();
     }
+    app.loadPastTimeline();
+    if (!$("#fetch-previous-items").is(":visible")) {
+      $("#fetch-previous-items").show();
+    }
+    app.updateEmptyTimelineElements();
   });
 };
 
@@ -419,6 +420,7 @@ app.loadPastTimeline = function loadPastTimeline () {
     app.feedIsLoading = false;
     console.error('cannot get beforeId');
   }
+  app.updateEmptyTimelineElements();
 };
 
 app.renderTimeline = function renderTimeline (timeline, append) {
@@ -426,9 +428,26 @@ app.renderTimeline = function renderTimeline (timeline, append) {
   if (!timeline.length) {
     return;
   }
+
+  var shareAvatarWith = {};
   
   for (var i = 0; i < timeline.length; i++) {
-    console.log(timeline[i]);
+    console.log('from: ', timeline[i].creatorUsername, 'to: ', app.username);
+    console.log('value: ', timeline[i].value);
+    var _username = timeline[i].creatorUsername;
+    if (_username != app.username) {
+      try {
+	var contact = app.session.items._trusted_peers.value[_username];
+	if (contact) {
+	  if (!contact.avatarShared) {
+	    shareAvatarWith[_username] = null;
+	  }
+	}
+      } catch (ex) {
+	console.error(ex);
+      }
+    }
+    
     var node;
     if (!timeline[i].value) {
       // this is some other kind of item, not a status update!
@@ -439,23 +458,17 @@ app.renderTimeline = function renderTimeline (timeline, append) {
       } else {
 	$('#my-feed-entries').prepend(node);
       }
+      console.warn('no value, not rendering...');
       continue;
     }
-    if (!timeline[i].value.status) {
-      // this is some other kind of item, not a status update!
-      // Ignore this for now, probably a 'trustedAt notification'
-      node = app.createEmptyElement(timeline[i]);
-      if (append) {
-	$('#my-feed-entries').append(node);
-      } else {
-	$('#my-feed-entries').prepend(node);
-      }
-      continue;
-    }
+
     if (timeline[i].value.avatar) {
       // this is some other kind of item, not a status update!
       // Ignore this for now, probably a 'trustedAt notification'
       console.log('avatar update object: ', timeline[i], timeline[i].value);
+      var data = timeline[i].value;
+      data.username = timeline[i].creatorUsername;
+      data.itemId = timeline[i].timelineId;
       node = app.createAvatarUpdateElement(data);
       if (append) {
 	$('#my-feed-entries').append(node);
@@ -476,15 +489,44 @@ app.renderTimeline = function renderTimeline (timeline, append) {
 							 fingerprint: null
 						       };
 	app.newContactDiscovered = true;
+      } else {
+	app.session.items._trusted_peers.value[user].avatar = timeline[i].value.avatar;
+	app.session.items._trusted_peers.value[user].avatarUpdated = Date.now();
+	app.session.items._trusted_peers.save(function (err) {
+	  if (err) {
+	    console.error(err);
+	  }
+	});
       }
       continue;
     }
+
+    if (!timeline[i].value.status) {
+      console.warn('Not a Status element');
+      // this is some other kind of item, not a status update!
+      // Ignore this for now, probably a 'trustedAt notification'
+      node = app.createEmptyElement(timeline[i]);
+      if (append) {
+	$('#my-feed-entries').append(node);
+      } else {
+	$('#my-feed-entries').prepend(node);
+      }
+      continue;
+    }
+    
     // Begin status update handling
+    console.log('Status Update! creating media node');
     var localUser = (timeline[i].creatorUsername == app.username);
     var data = app.massageTimelineUpdate(timeline[i]);
     data.itemId = timeline[i].timelineId;
     console.log('rendered timelineid: ', timeline[i].timelineId);
     node = app.createMediaElement(data, localUser);
+
+    // Make sure to hide the "empty feed message"
+    if ($("#first-run-empty-feed-msg").is(":visible")) {
+      $("#first-run-empty-feed-msg").hide();
+    }
+
     if (append) {
       $('#my-feed-entries').append(node);
     } else {
@@ -494,6 +536,44 @@ app.renderTimeline = function renderTimeline (timeline, append) {
   // display the more... button if it does not exist
   if (!$("#fetch-previous-items").is(":visible")) {
     $("#fetch-previous-items").show();
+  }
+
+  var shareWith = Object.keys(shareAvatarWith);
+  console.log('shareWith', shareWith);
+  if (shareWith.length) {
+    console.log('shareAvatar()');
+    app.shareAvatar(shareWith);
+  }  
+};
+
+app.shareAvatar = function shareAvatar (avatarArr) {
+  console.log(avatarArr);
+  for (var i = 0; i < avatarArr.length; i++) {
+    app.session.getPeer(avatarArr[i], function (err, peer) {
+      if (err) {
+	console.error(err);
+	return;
+      }
+      console.log('got peer', peer);
+      console.log('sharing avatar: ');
+      app.session.items.avatar.share(peer, function (err) {
+	if (err) {
+	  console.error(err);
+	  return;
+	}
+	console.log('avatarShared');
+	app.session.items._trusted_peers.value[peer.username].avatarShared = Date.now();
+	if (i == avatarArr.length) {
+	  // XXX: save the contacts on quit or logout
+	  app.session.items._trusted_peers.save(function (err) {
+	    if (err) {
+	      console.error(err);
+	      return;
+	    }
+	  });
+	}
+      });
+    });
   }
 };
 
@@ -507,6 +587,51 @@ app.createEmptyElement = function createEmptyElement(timelineItem) {
 app.hmacUser = function () {
   return crypton.hmac('', app.username);
 };
+
+// XXXddahl: not all timeline updates will be decrypted in bulk fetches by
+// the time the timeline is rendered, so we end up with extra
+// 'empty-timeline-element' entries.
+// We need to run a "post fetch check" a second or 2 after the TL is rendered
+// Object.observe sure will come in handy here!
+
+app.updateEmptyTimelineElements = function updateEmptyTimelineElements () {
+  var empties = [];
+  $('.empty-timeline-element').each(function (idx) {
+    empties.push($(this).attr('id'));
+  });
+  var items = Object.keys(app.session.itemHistory);
+  var history = app.session.itemHistory;
+  setTimeout(function updateEmptiesTimeout() {
+    for (var i = 0; i < empties.length; i++) {
+      var status;
+      try {
+	status = history[empties[i]].value.status;
+      } catch (ex) {
+	console.warn('timelineItem has no status property: ', history[empties[i]]);
+	continue;
+      }
+      if (status) {
+	// we have unknown update data
+	app.transformEmptyTimelineElement(empties[i], history[empties[i]]);
+	app.transformedTimelineElements[empties[i]] = Date.now();
+      }
+    }
+  }, 2000);
+};
+
+app.transformEmptyTimelineElement =
+function transformEmptyTimelineElement (emptyId, timelineElement) {
+  
+  var emptyElement = $('#' + emptyId);
+  var localUser = (timelineElement.creatorUsername == app.username);
+  var data = app.massageTimelineUpdate(timelineElement);
+  data.itemId = timelineElement.timelineId;
+  console.log('rendered timelineid: ', timelineElement.timelineId);
+  app.createMediaElement(data, localUser, emptyElement);
+  
+};
+
+app.transformedTimelineElements = {};
 
 app.massageTimelineUpdate = function massageTimelineUpdate (data) {
   var avatar;
@@ -527,7 +652,7 @@ app.massageTimelineUpdate = function massageTimelineUpdate (data) {
     username: data.creatorUsername,
     imageData: data.value.imageData,
     timestamp: data.modTime,
-    humaneTimestamp: humaneDate(new Date(data.modTime))
+    humaneTimestamp: app.formatDate(data.modTime)
   };
 };
 
@@ -545,8 +670,10 @@ app.setMyStatus = function setMyStatus() {
   // app.toggleSetStatusButton();
   // validate length of data to be sent
   var status = $('#set-my-status-textarea').val();
+  status = app.escapeHtml(status);
+  
   if (!status.length) {
-    return app.alert('Please enter a status update', 'warning');
+    return app.alert('Please enter a status update', 'danger');
   }
   if (status.length > 512) {
     return app.alert('Status update is too long, please shorten it', 'danger');
@@ -612,7 +739,7 @@ app.displayInitialView = function displayInitialView() {
     // Load the timeline
     app.loadInitialTimeline();
   } else {
-    $('#first-run-empty-feed-btn').show();
+    $('#first-run-empty-feed-msg').show();
   }
 };
 
@@ -644,7 +771,7 @@ app.createAvatarUpdateElement =
 function createAvatarUpdateElement(data) {
   // data = {avatar: 'hajshjahjsjahj', updated: 123456789}
 
-  var timestamp = humaneDate(new Date(data.modTime));
+  var timestamp = app.formatDate(data.timestamp || data.updated);
   var html = '<div id="' + data.itemId
            + '" class="media attribution">'
 	   + '<a class="img">'
@@ -661,7 +788,8 @@ function createAvatarUpdateElement(data) {
   return $(html);
 };
 
-app.createMediaElement = function createMediaElement(data, localUser) {
+app.createMediaElement =
+function createMediaElement(data, localUser, existingNode) {
   var gps;
   if (data.location && data.location != 'undisclosed location') {
     // gps = app.obfuscateLocation(data.location);
@@ -702,29 +830,46 @@ app.createMediaElement = function createMediaElement(data, localUser) {
 
   console.log(status);
   console.log('data.itemId: ', data.itemId);
-  var html = '<div id="' + data.itemId
-           + '" class="media attribution ' + classId + ' ' + itemId + '">'
-	   + '<a class="img">'
+  var parentHtml = '<div id="' + data.itemId
+        + '" class="media attribution ' + classId + ' ' + itemId + '"></div>';
+
+  var html = '<a class="img">'
            + avatarMarkup
   	   + '  </a>'
            + '  <div class="bd media-metadata">'
            + '    <div class="status-block">'
-	   + '    <span class="media-username">' + data.username + '</span>'
 	   + '    <span class="media-status">'
 	   + status
            + '</span></div>'
-	   + '    <span class="media-timestamp">'
-           + data.humaneTimestamp + '</span>'
-           + '    <span class="media-location">'
-           + gps + '</span>';
+	   + '<div class="media-username">' + data.username + '</div>'
+	   + '<div class="media-timestamp">'
+           + data.humaneTimestamp + '</div>'
+           + '    <div class="media-location">'
+           + gps + '</div>';
   if (imageHtml) {
     html = html + imageHtml;
   }
   html = html
-    + '  </div>'
-    + '</div>';
-
-  return $(html);
+    + '  </div>';
+  if (existingNode) {
+    // updating the exisitng node
+    console.log('updating an existing node');
+    existingNode.addClass('media');
+    existingNode.addClass('attribution');
+    existingNode.addClass(classId);
+    existingNode.addClass(itemId);
+    var children = $(html);
+    existingNode.children().remove();
+    existingNode.append(children);
+    existingNode.removeClass('empty-timeline-element');
+    return;
+  } else {
+    console.log('creating a new node');
+    var parent = $(parentHtml);
+    var children = $(html);
+    parent.append(children);
+    return parent;
+  }
 };
 
 app.linkOutput = function linkOutput(autolinker, match) {
@@ -762,78 +907,26 @@ app.linkOutput = function linkOutput(autolinker, match) {
   }
 };
 
-app.openDeviceBrowser = function openDeviceBrowser(link) {
-
-};
-
-app.loadAndViewMyStatus = function loadAndViewMyStatus () {
-  console.log('loadAndViewMyStatus()');
-  var location = app.session.items.status.value.location
-    || 'undisclosed location';
-  var statusData = { username: app.username,
-                     statusText: app.session.items.status.value.status,
-                     location: location,
-                     humaneTimestamp: humaneDate(new Date(app.session.items.status.value.timestamp)),
-		     timestamp: app.session.items.status.value.timestamp,
-		     imageData: app.session.items.status.value.imageData || '',
-		     avatar: app.avatarPath
-                   };
-
-  app.displayMyStatus(statusData);
-  app.clearLoginStatus();
-  app.switchView('#feed', app.FEED_LABEL);
-};
-
-app.displayMyStatus = function displayMyStatus (statusData) {
-  console.log('displayMyStatus()', arguments);
-  $('#my-status-wrapper').children().remove();
-  console.log(statusData);
-  var mediaElement = app.createMediaElement(statusData, true);
-  console.log(mediaElement);
-  $('#my-status-wrapper').append(mediaElement);
-};
-
-
 app.shareStatus = function shareStatus (peerObj) {
   console.log('shareStatus()', arguments);
 
-  function shareAvatar(peer) {
-    if (app.session.items.avatar.value.avatar) {
-      app.session.items.avatar.share(peer, function (err) {
+  app.session.items.status.share(peerObj, function (err) {
+    if (err) {
+      console.error(err, 'Cannot shareStatus!');
+      return;
+    }
+    if (app.session.items.avatar) {
+      app.session.items.avatar.share(peerObj, function (err) {
 	if (err) {
 	  console.error(err);
-	  console.error('cannot share avatar with ' + peer.username);
+	  console.error('cannot share avatar with ' + peerObj.username);
 	}
+	console.log('avatar shared with ' + peerObj.username);
       });
+    } else {
+      console.error('app.session.items.avatar does not exist');
     }
-  }
-
-  if (typeof peerObj == 'string') {
-    // share status container with peer
-    app.session.getPeer(peerObj, function (err, peer) {
-      if (err) {
-        console.error('Cannot get peer!', err);
-        return;
-      }
-      app.session.items.status.share(peer, function (err) {
-        if (err) {
-          console.log(err);
-          return;
-        }
-	shareAvatar(peer);
-      });
-    });
-  } else if (typeof peerObj == 'object') {
-    app.session.items.status.share(peerObj, function (err) {
-      if (err) {
-        console.error(err, 'Cannot shareStatus!');
-        return;
-      }
-      shareAvatar(peerObj);
-    });
-  } else {
-    console.error('peerObject is wrong type!');
-  }
+  });
 };
 
 // app.revokeSharedStatus = function revokeSharedStatus(peer) {
@@ -950,7 +1043,7 @@ app.updatePeerStatus = function updatePeerStatus(username, statusItem) {
 
   statusItem.username = username;
   statusItem.statusText = statusItem.status;
-  statusItem.humaneTimestamp = humaneDate(new Date(statusItem.timestamp));
+  statusItem.humaneTimestamp = app.formatDate(statusItem.timestamp);
   statusItem.avatar = app.session.items._trusted_peers.value[username].avatar;
 
   var statusNode = app.createMediaElement(statusItem);
@@ -976,37 +1069,46 @@ app.setMyLocation = function setMyLocation() {
     var lng = new Number(crd.longitude).toFixed(1);
     var geoIdx = lat + '__' + lng;
 
-    if (!app.getPlaceName) {
-      // load the geoPlaces script
-      $.ajaxSetup({
-	cache: true
-      });
-      console.log('loading geo-places...');
-      $.getScript( "js/geo-places.js", function( data, textStatus, jqxhr ) {
-	console.log( "geo-places is loaded" );
-	app.getPlaceName = function getPlaceName (geoIdx) {
-	  var placeArr = window.geoPlaces[geoIdx];
-	  if (placeArr) {
-	    return placeArr[0] + ' ' +  placeArr[2] + ' ' + placeArr[1];
-	  } else {
-	    return 'unknown';
-	  }
-	};
-	var name = app.getPlaceName(geoIdx);
-	app.setLocationName(name);
-      });
-    } else {
-      var name = app.getPlaceName(geoIdx);
-      app.setLocationName(name);
-    }
+    // if (!app.getPlaceName) {
+    //   // load the geoPlaces script
+    //   $.ajaxSetup({
+    // 	cache: true
+    //   });
+    //   console.log('loading geo-places...');
+    //   $.getScript( "js/geo-places.js", function( data, textStatus, jqxhr ) {
+    // 	console.log( "geo-places is loaded" );
+    // 	app.getPlaceName = function getPlaceName (geoIdx) {
+    // 	  var placeArr = window.geoPlaces[geoIdx];
+    // 	  if (placeArr) {
+    // 	    return placeArr[0] + ' ' +  placeArr[2] + ' ' + placeArr[1];
+    // 	  } else {
+    // 	    return 'unknown';
+    // 	  }
+    // 	};
+    // 	var name = app.getPlaceName(geoIdx);
+    // 	app.setLocationName(name);
+    //   });
+    // } else {
+    var name = app.getPlaceName(geoIdx);
+    app.setLocationName(name);
+    // }
   };
-
+  
   function error(err) {
     console.error('Cannot set location');
     console.error(err);
   };
 
   navigator.geolocation.getCurrentPosition(success, error, options);
+};
+
+app.getPlaceName = function getPlaceName (geoIdx) {
+  var placeArr = window.geoPlaces[geoIdx];
+  if (placeArr) {
+    return placeArr[0] + ' ' +  placeArr[2] + ' ' + placeArr[1];
+  } else {
+    return 'unknown';
+  }
 };
 
 app.setLocationName = function setLocationName (name) {
@@ -1022,9 +1124,21 @@ app.logoutCleanup = function logoutCleanup() {
   $('#my-feed-entries').children().remove();
 };
 
-// XXXddahl: TODO
+app.escapeHtml = function escapeHtml(html) {
+  return String(html)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+};
 
-// makePictureAvatar(base64PngData)
+app.formatDate = function formatDate (timestamp) {
+  var d = new Date(parseInt(timestamp));
+  return d.toDateString() + ' ' + d.toTimeString();
+};
+
+// XXXddahl: TODO
 
 // Check for the user's current TZ and use it to display all dates
 

@@ -36,7 +36,7 @@ crypton.version = '0.0.4';
  * ### MIN_PBKDF2_ROUNDS
  * Minimum number of PBKDF2 rounds
  */
-crypton.MIN_PBKDF2_ROUNDS = 1000;
+crypton.MIN_PBKDF2_ROUNDS = 10000;
 
 /**!
  * ### clientVersionMismatch
@@ -3144,7 +3144,7 @@ Diff.apply = function (delta, old) {
  * with a bridge API to said worker
 */
 !self.worker && window.addEventListener('load', function () {
-  return;
+  // return;
   var scriptEls = document.getElementsByTagName('script');
   var path;
 
