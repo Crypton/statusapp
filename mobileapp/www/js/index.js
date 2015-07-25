@@ -42,8 +42,8 @@ var app = {
     console.log('app initializing!: ', arguments);
 
     // Configure the endpoint:
-    crypton.host = 'zk.gs';
-    // crypton.port = 443;
+    crypton.host = 'kloakstaging.crypton.io';
+    crypton.port = 443;
     
     this.card =  new crypton.Card();
     this.bindEvents();
@@ -137,6 +137,8 @@ var app = {
 
   APPNAME: 'Kloak',
 
+  get contactCardLabel() { return app.APPNAME + ' contact card'; },
+  
   URL: 'https://zk.gs',
 
   VERSION: "0.0.2",
@@ -508,7 +510,7 @@ var app = {
       cordova.plugins.barcodeScanner.scan(
 	function (result) {
           var userObj = JSON.parse(result.text);
-          app.verifyUser(userObj.username, userObj.fingerprint);
+          app.verifyUser(userObj.u, userObj.f);
 	},
 	function (error) {
           app.alert("QR Scanning failed: " + error, 'danger');
@@ -642,7 +644,7 @@ var app = {
               return;
             }
             var userObj = JSON.parse(data);
-            app.verifyUser(userObj.username, userObj.fingerprint);
+            app.verifyUser(userObj.u, userObj.f);
           };
 
           try {
@@ -697,7 +699,7 @@ var app = {
       qrcode.callback = function (data) {
         // alert(data);
         var userObj = JSON.parse(data);
-        app.verifyUser(userObj.username, userObj.fingerprint);
+        app.verifyUser(userObj.u, userObj.f);
       };
 
       try {
@@ -1098,9 +1100,8 @@ var app = {
     app.switchView('#peer-fingerprint-id', 'Peer Fingerprint');
 
     var canvas =
-      app.card.createIdCard(fingerprint, username,
-                             app.APPNAME, app.URL);
-    $(canvas).css({ width: '300px'});
+      app.card.createIdCard(fingerprint, username, app.contactCardLabel);
+    $(canvas).css({ width: '290px'});
     $('#peer-fingerprint-id').append(canvas);
   },
 
@@ -1116,8 +1117,7 @@ var app = {
     $('#my-fingerprint-id').children().remove();
     // Re-create the ID card
     var canvas =
-      app.card.createIdCard(app.fingerprint, app.username,
-                            app.APPNAME, app.URL);
+      app.card.createIdCard(app.fingerprint, app.username, app.contactCardLabel);
     app.addPhotoToIdCard(canvas, true, function (err, idCard) {
       if (err) {
         return app.alert(err, 'danger');
@@ -1127,7 +1127,7 @@ var app = {
   },
 
   displayIdCard: function (idCard, callback) {
-    $(idCard).css({ width: '300px', 'margin-top': '1em'});
+    $(idCard).css({ width: '290px' });
     $('#my-fingerprint-id').append(idCard);
     var idCardTitle = app.username + ' ' + app.APPNAME + ' Contact Card';
     var html = '<button id="retake-id-picture" '
@@ -1159,8 +1159,7 @@ var app = {
 
     $('#my-fingerprint-id').children().remove();
     var canvas =
-      app.card.createIdCard(app.fingerprint, app.username,
-                             app.APPNAME, app.URL);
+      app.card.createIdCard(app.fingerprint, app.username, app.contactCardLabel);
     if (withPhoto) {
       // override = false here as sensible default?
       app.addPhotoToIdCard(canvas, false, function (err, idCard) {
@@ -1191,7 +1190,7 @@ var app = {
 	  img.setAttribute('width', 120);
 	  img.setAttribute('height', 160);
 	  img.onload = function() {
-            ctx.drawImage(img, 280, 10);
+            ctx.drawImage(img, 85, 325);
 	  };
 	  img.src = imageData;
           return idCard;
@@ -1339,9 +1338,7 @@ var app = {
     var contact = app._contacts[name];
     // display the contact's fingerprint ID card:
     var fingerprint = contact.fingerprint || '0000000000000000000000000000000000000000000000000000000000000000';
-    var canvas = app.card.createIdCard(fingerprint,
-                                       name,
-                                       app.APPNAME, app.URL);
+    var canvas = app.card.createIdCard(fingerprint, name, app.contactCardLabel);
     $(canvas).css({ width: '300px' });
     $(canvas).attr({'class': 'contact-id'});
     $('#contact-details .contact-id').remove();
