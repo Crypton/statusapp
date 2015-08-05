@@ -42,8 +42,8 @@ var app = {
     console.log('app initializing!: ', arguments);
 
     // Configure the endpoint:
-    crypton.host = 'kloakstaging.crypton.io';
-    crypton.port = 443;
+    crypton.host = app.host;
+    crypton.port = app.port || 1025;
     
     this.card =  new crypton.Card();
     this.bindEvents();
@@ -686,6 +686,23 @@ var app = {
     }
   },
 
+  getInitialAvatar: function getInitialAvatar (dataUrl) {
+    // 85, 325
+    // create canvas
+    var c = document.createElement('canvas');
+    // draw image data to canvas
+    var ctx = c.getContext('2d');
+    var img = new Image();
+    img.onload = function(){
+      ctx.drawImage(img, 0, 0);
+    };
+    img.src = dataUrl;
+
+    // XXX TODO: use smartcrop.crop()
+    
+    // get the photo from X=85, Y=325, W=120, H=160
+  },
+  
   getImage: function () {
     // Specific getImage function for QR parsing
     if (app.isNodeWebKit) {
@@ -693,11 +710,17 @@ var app = {
     }
 
     function onSuccess (dataURL) {
+
+      // TODO: create a canvas from the png data
+      //       extract the image from the ID card
+      //       Trim all of the white border?
+      //       Save this data as the avatar!
+      // app.getInitialAvatar(dataUrl);
+      
       var dataUrlPrefix = 'data:image/png;base64,';
       dataURL = dataUrlPrefix + dataURL;
       console.log(dataURL);
       qrcode.callback = function (data) {
-        // alert(data);
         var userObj = JSON.parse(data);
         app.verifyUser(userObj.u, userObj.f);
       };
@@ -1127,8 +1150,6 @@ var app = {
   },
 
   displayIdCard: function (idCard, callback) {
-    $(idCard).css({ width: '290px' });
-    $('#my-fingerprint-id').append(idCard);
     var idCardTitle = app.username + ' ' + app.APPNAME + ' Contact Card';
     var html = '<button id="retake-id-picture" '
              + 'class="btn btn-primary">Retake Photo</button>'
@@ -1136,6 +1157,9 @@ var app = {
              + 'class="btn btn-success">Share</button>';
     // XXXddahl: add a 'remove ID picture' button
     $('#my-fingerprint-id').append(html);
+    $(idCard).css({ width: '290px' });
+    $('#my-fingerprint-id').append(idCard);
+    
     $('#my-avatar')[0].src = app.session.items.avatar.value.avatar;
     $('#share-my-id-card').click(function () {
       if (app.isNodeWebKit) {
@@ -1175,6 +1199,18 @@ var app = {
 
   PHOTO_ITEM: 'avatar',
 
+  pasteAvatar: function pasteAvatar(imageData, idCard, x, y, w, h) {
+    var ctx = idCard.getContext('2d');
+    var img = new Image();
+    img.setAttribute('width', w || 120);
+    img.setAttribute('height', h || 160);
+    img.onload = function() {
+      ctx.drawImage(img, x || 20, y || 305);
+    };
+    img.src = imageData;
+    return idCard;
+  },
+  
   addPhotoToIdCard: function (idCard, override, callback) {
     // check for existing photo:
     app.session.getOrCreateItem(app.PHOTO_ITEM,
@@ -1184,13 +1220,13 @@ var app = {
         }
 
         // paste photo into ID:
-        function pastePhoto(imageData, idCard) {
+        function pastePhoto(imageData, idCard, x, y, w, h) {
           var ctx = idCard.getContext('2d');
 	  var img = new Image();
-	  img.setAttribute('width', 120);
-	  img.setAttribute('height', 160);
+	  img.setAttribute('width', w || 120);
+	  img.setAttribute('height', h || 160);
 	  img.onload = function() {
-            ctx.drawImage(img, 85, 325);
+	    ctx.drawImage(img, x, y);
 	  };
 	  img.src = imageData;
           return idCard;
@@ -1198,7 +1234,18 @@ var app = {
 
         if (!override && avatarItem.value.avatar) {
           // XXXddahl: try ??
-          var photoIdCard = pastePhoto(avatarItem.value.avatar, idCard);
+          var photoIdCard = pastePhoto(avatarItem.value.avatar, idCard, 20, 305);
+	  var iconCanvas = document.createElement('canvas');
+	  $(iconCanvas).attr({ width: 120, height: 160 });
+	  // add icon to a canvas
+	  var img = new Image();
+	  var tmpIconCanvas = document.createElement('canvas');
+	  $(tmpIconCanvas).attr({ width: 120, height: 160 });
+	  img.onload = function () {
+	    idCard.getContext('2d').drawImage(img, 160, 305);
+	  };
+	  img.src = 'img/icon.png';
+	  idCard.getContext('2d').fillText(app.APPNAME, 170, 415);
           return callback(null, idCard);
         }
 
@@ -1216,7 +1263,6 @@ var app = {
             // photo is saved to the server
             var photoIdCard =
               pastePhoto(avatarItem.value.avatar, idCard);
-            // console.log(photoIdCard);
             return callback(null, photoIdCard);
           });
         });
@@ -1339,7 +1385,12 @@ var app = {
     // display the contact's fingerprint ID card:
     var fingerprint = contact.fingerprint || '0000000000000000000000000000000000000000000000000000000000000000';
     var canvas = app.card.createIdCard(fingerprint, name, app.contactCardLabel);
-    $(canvas).css({ width: '300px' });
+    // look for avatar, if we have one, paste it
+    var avatar = app.session.items._trusted_peers.value[name].avatar;
+    if (avatar) {
+      app.pasteAvatar(avatar, canvas);
+    }
+    $(canvas).css({ width: '250px' });
     $(canvas).attr({'class': 'contact-id'});
     $('#contact-details .contact-id').remove();
     $('#contact-details').prepend(canvas);

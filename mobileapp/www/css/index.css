@@ -618,3 +618,13 @@ body {
     -webkit-border-radius: 5px;
     border: 1px solid #aaaaaa;
 }
+
+#retake-id-picture {
+    font-size: 12px !important;
+    margin-bottom: 0.5em;
+}
+
+#share-my-id-card {
+    font-size: 12px !important;
+    margin-bottom: 0.5em;
+}

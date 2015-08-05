@@ -18,7 +18,7 @@ app.setInitialAvatar = function setInitialAvatar () {
   return avatar;
 };
 
-app.sharingUrl = 'https://zk.gs/ZK/';
+app.sharingUrl = 'https://kloak.io/';
 
 app.sharingMessage = 'I would like to share messages with you privately via an app called "Kloak". \n\nThis message\'s attachment is my \'App Contact card\', which users exchange in order to establish a private connection. \n\nFor more information: https://zk.gs/ZK/';
 
@@ -313,7 +313,7 @@ app.createInitialItems = function createInitialItems (callback) {
         }
 
         if (avatar.value.avatar === undefined) {
-          avatar.value = { avatar: null };
+          avatar.value = { avatar: null, __timelineIgnore: true };
         }
         callback(null);
       });
@@ -463,6 +463,13 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     }
 
     if (timeline[i].value.avatar) {
+      node = app.createEmptyElement(timeline[i]);
+      if (append) {
+	$('#my-feed-entries').append(node);
+      } else {
+	$('#my-feed-entries').prepend(node);
+      }
+      continue; // XXXddahl: going to handle this differently
       // this is some other kind of item, not a status update!
       // Ignore this for now, probably a 'trustedAt notification'
       console.log('avatar update object: ', timeline[i], timeline[i].value);
@@ -492,6 +499,7 @@ app.renderTimeline = function renderTimeline (timeline, append) {
       } else {
 	app.session.items._trusted_peers.value[user].avatar = timeline[i].value.avatar;
 	app.session.items._trusted_peers.value[user].avatarUpdated = Date.now();
+	app.session.items._trusted_peers.value[user].__timelineIgnore = true;
 	app.session.items._trusted_peers.save(function (err) {
 	  if (err) {
 	    console.error(err);
@@ -563,6 +571,8 @@ app.shareAvatar = function shareAvatar (avatarArr) {
 	}
 	console.log('avatarShared');
 	app.session.items._trusted_peers.value[peer.username].avatarShared = Date.now();
+	app.session.items._trusted_peers.value[peer.username].__timelineIgnore = true;
+	
 	if (i == avatarArr.length) {
 	  // XXX: save the contacts on quit or logout
 	  app.session.items._trusted_peers.save(function (err) {
@@ -748,6 +758,7 @@ app.updateContactAvatar = function updateContactAvatar (username, value) {
     return console.error('Incorrect arguments, cannot update contact avatar');
   }
   app.session.items._trusted_peers.value[username].avatar = value.avatar;
+  app.session.items._trusted_peers.value[username].__timelineIgnore = true;
   app.session.items._trusted_peers.save(function (err) {
     if (err) {
       console.error(err, 'Cannot update avatar for ' + username);
