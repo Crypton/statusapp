@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="60px" height="78px" viewBox="0 0 60 78" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <!-- Generator: Sketch 3.3.3 (12072) - http://www.bohemiancoding.com/sketch -->
+    <title>share</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="share" sketch:type="MSArtboardGroup" transform="translate(-10.000000, -1.000000)" fill="#FFFFFF">
+            <g sketch:type="MSLayerGroup" transform="translate(10.000000, 0.000000)" id="shape">
+                <path d="M6,79 C2.692,79 0,76.308 0,73 L0,27 C0,23.692 2.692,21 6,21 L22,21 C23.104,21 24,21.896 24,23 C24,24.104 23.104,25 22,25 L6,25 C4.896,25 4,25.896 4,27 L4,73 C4,74.104 4.896,75 6,75 L54,75 C55.104,75 56,74.104 56,73 L56,27 C56,25.896 55.104,25 54,25 L38,25 C36.896,25 36,24.104 36,23 C36,21.896 36.896,21 38,21 L54,21 C57.308,21 60,23.692 60,27 L60,73 C60,76.308 57.308,79 54,79 L6,79 Z" sketch:type="MSShapeGroup"></path>
+                <path d="M43.412,13.584 L31.412,1.584 C30.632,0.804 29.364,0.804 28.584,1.584 L16.584,13.584 C15.804,14.364 15.804,15.632 16.584,16.412 C17.364,17.192 18.632,17.192 19.412,16.412 L28,7.828 L28,53 C28,54.104 28.896,55 30,55 C31.104,55 32,54.104 32,53 L32,7.828 L40.588,16.412 C40.98,16.804 41.492,16.996 42,16.996 C42.508,16.996 43.024,16.8 43.412,16.412 C44.192,15.632 44.192,14.364 43.412,13.584 L43.412,13.584 Z" sketch:type="MSShapeGroup"></path>
+            </g>
+        </g>
+    </g>
+</svg>
