@@ -1356,7 +1356,7 @@ var app = {
 	  if (avatar) {
 	    userAvatar = '<img class="user-avatar" src="' + avatar  + '" />';
 	  } else {
-	    userAvatar = '<i class="fa fa-user user-avatar user-avatar-generic"></i>';
+	    userAvatar = '<img class="user-avatar-generic" src="svg/contact.svg" />';
 	  }
 	}
         var html = '<li class="contact-record" id="contact-'

@@ -183,6 +183,12 @@
 #button-row {
     float: right;
     margin-right: 1em;
+    margin-bottom: 10px;
+}
+
+#button-row img {
+    margin-right: 0.5em;
+    height: 50px;
 }
 
 #status-update-wrapper {
@@ -190,9 +196,9 @@
 }
 
 #my-avatar {
-    width: 50px;
-    margin-bottom: 25px;
+    width: 40px;
     margin-right: 15px;
+    -webkit-border-radius: 5px;
 }
 
 #my-image-to-post {
@@ -264,8 +270,14 @@
     display: none;
 }
 
-#header-button-update {
-    padding-right: 0.4em;
+#header-btn-update {
+    margin-right: 0.5em;
+    height: 30px;
+}
+
+#header-btn-refresh {
+    margin-right: 0.3em;
+    height: 30px;
 }
 
 #first-run-empty-feed-msg {

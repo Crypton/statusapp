@@ -279,15 +279,15 @@ input[type="password"]:focus {
     color: #000000 !important;
 }
 
-.main-btn i {
-    width: 40px;
-    font-size: 1.1em;
-    padding-left: 7px;
+.main-btn img {
+    width: 35px;
+    margin-right: 1em;
     opacity: 0.9;
 }
 
 #main-menu-btn {
-    font-size: 1.4em;
+    height: 25px;
+    margin-right: 0.3em;
 }
 
 #find-user-form {
@@ -330,9 +330,7 @@ input[type="password"]:focus {
     position: absolute;
     bottom: 0;
     right: 0;
-    margin: 20px;
-    border-radius: 50px !important;
-    padding: 19px 25px !important;
+    margin: 10px;
 }
 
 #compose-message {
@@ -570,7 +568,7 @@ option-label {
 }
 
 .header-bb-title {
-    width: 70%;
+    width: 65%;
 }
 
 #logout-page-title {
@@ -605,10 +603,10 @@ body {
 }
 
 .user-avatar-generic {
-    font-size: 2em;
+    height: 35px;
     margin-right: 10px;
     margin-top: 5px;
-    padding-left: 3px;
+    margin-bottom: 5px;
 }
 
 .user-avatar {

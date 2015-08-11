@@ -1,7 +1,4 @@
 <!DOCTYPE html>
-<!--
-    // TODO: LICENSE
--->
 <html>
   <head>
     <meta charset="utf-8" />
@@ -24,17 +21,17 @@
       <ul id="header-button-bar">
 	<li>
 	  <a href="#" id="tasks-btn">
-            <i id="main-menu-btn" class="fa fa-bars"></i>
+	    <img id="main-menu-btn" src="svg/menu.svg" />
 	  </a>
 	</li>
 	<li class="header-bb-title">
 	  <span id="page-title">Kloak</span>
 	</li>
 	<li class="header-btn-wrap">
-	  <i id="header-btn-update" class="header-btn fa fa-comment"></i>
+	  <img id="header-btn-update" src="svg/post.svg" />
 	</li>
 	<li class="header-btn-wrap">
-	  <i id="header-btn-refresh" class="header-btn fa fa-refresh"></i>
+	  <img id="header-btn-refresh" src="svg/sync.svg" />
 	</li>
       </ul>
       
@@ -55,45 +52,51 @@
       <ul id="top-menu" class="menu nav nav-stacked">
 	<li class="main-btn" id="my-stati">
 	  <a href="#">
-	    <i class="fa fa-comment"></i> <span>Update Status</span>
+	    <img src="svg/post-dark.svg" />
+	    <span>Update Status</span>
 	  </a>
 	</li>
 	<li class="main-btn" id="my-feed">
 	  <a href="#">
-	    <!-- <span id="num-messages" class="badge pull-right">0</span> -->
-	    <i class="fa fa-list"></i> <span>Feed</span>
+	    <img src="svg/sync-dark.svg" />
+	    <span>Feed</span>
 	  </a>
 	</li>
-	<li class="main-btn" id="refresh-feed">
-	  <a href="#">
-	    <i class="fa fa-refresh"></i> <span>Refresh Feed</span>
-	  </a>
-	</li>
+	<!-- <li class="main-btn" id="refresh-feed"> -->
+	<!--   <a href="#"> -->
+	<!--     <i class="fa fa-refresh"></i> <span>Refresh Feed</span> -->
+	<!--   </a> -->
+	<!-- </li> -->
 	<li class="main-btn" id="my-contacts">
 	  <a href="#">
-	    <i class="fa fa-users"></i> Contacts
+	    <img src="svg/contacts.svg" />
+	    <!-- <i class="fa fa-users"></i> --> Contacts
 	  </a>
 	</li>
 	<li class="main-btn" id="my-fingerprint">
 	  <a href="#">
-	    <i class="fa fa-user"></i> My Contact Card
+	    <img src="svg/contact.svg" />
+	    <!-- <i class="fa fa-user"></i> --> My Contact Card
 	  </a>
 	</li>
 	<li class="main-btn" id="my-options">
 	  <a href="#">
-	    <i class="fa fa-cog"></i> Options
+	    <img src="svg/setting.svg" />
+	    <!-- <i class="fa fa-cog"></i> --> Options
 	  </a>
 	</li>
 	<li class="main-btn" id="about">
 	  <a href="#">
-	    <i class="fa fa-info-circle"></i> About
+	    <img src="svg/info.svg" />
+	    <!-- <i class="fa fa-info-circle"></i> --> About
 	  </a>
 	</li>
-	<li class="main-btn" id="logout">
-	  <a href="#">
-	    <i class="fa fa-sign-out"></i> Logout
-	  </a>
-	</li>
+	<!-- <li class="main-btn" id="logout"> -->
+	<!--   <a href="#"> -->
+	<!--     <img src="svg/logout.svg" /> -->
+	<!--     <\!-- <i class="fa fa-sign-out"></i> -\-> Logout -->
+	<!--   </a> -->
+	<!-- </li> -->
       </ul>
 
       <div id="stati" class="view">
@@ -105,14 +108,10 @@
 	  <br />
 	  <div id="button-row">
 	    <img id="my-avatar" src="img/avatars/franklin-4.png">
-	    <i id="take-a-photo-btn"
-	       class="fa fa-camera-retro post-button"></i>
-	    <i id="pick-an-image-btn"
-	       class="fa fa-file-image-o post-button"></i>
-	    <i id="include-gps-btn"
-	       class="fa fa-globe post-button"></i>
-	    <i id="set-my-status-btn"
-	       class="fa fa-paper-plane post-button"></i>
+	    <img id="take-a-photo-btn" src="svg/camera.svg" />
+	    <img id="pick-an-image-btn" src="svg/media.svg" />
+	    <img id="include-gps-btn" src="svg/location.svg" />
+	    <img id="set-my-status-btn" src="svg/send.svg" />
 	  </div>
 	  <div id="my-geoloc"></div>
 	  <div id="my-image-to-post"></div>
@@ -280,9 +279,10 @@
 	  <ul id="contacts-list" class="nav nav-pills nav-stacked">
 	  </ul>
 	</div>
-	<button class="btn btn-success" id="add-contact-button">
-	  <i class="fa fa-plus"></i>
-	</button>
+	<img id="add-contact-button" src="svg/add.svg" />
+	  
+	<!-- <button class="btn btn-success" id="add-contact-button"> -->
+	  <!-- <i class="fa fa-plus"></i> -->
       </div>
 
       <div id="contact-details" class="view">
