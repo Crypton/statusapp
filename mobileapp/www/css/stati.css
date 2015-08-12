@@ -251,8 +251,8 @@
     display: none;
 }
 
-.media-link-url { color: green !important; }
-.media-link-email { color: green !important; }
+.media-link-url { color: gray !important; }
+.media-link-email { color: gray !important; }
 .media-link-phone { color: red !important; }
 .media-link-twitter { color: blue !important; }
 .media-link-hashtag { color: purple !important; }

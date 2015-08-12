@@ -186,17 +186,26 @@ input[type="password"]:focus {
     border-radius: 2px !important;
     box-shadow: 1px 2px 2px #ddd;
     text-transform: uppercase;
-    font-size: 1.2em !important;
+    font-size: 1em !important;
     margin: 0 10px;
     padding: 10px 20px !important;
 }
 
 .btn-primary {
-    background-color: #5677fc !important;
+    color: #fff !important;
+    background-color: rgb(103, 83, 211) !important;
+    border-color: rgb(103, 83, 211) !important;
+    -webkit-border-radius: 5px !important;
 }
 
 .btn-success {
-    background-color: #259b24 !important;
+    background-color: rgb(108, 176, 246) !important;
+    border-color: rgb(108, 176, 246) !important;
+    -webkit-border-radius: 5px !important;
+}
+
+.btn-danger {
+    -webkit-border-radius: 5px !important;
 }
 
 #login-status {
@@ -228,7 +237,8 @@ input[type="password"]:focus {
     left: 0px;
     height: 76px;
     line-height: 76px;
-    background-color: #3f51b5;
+    background-color: rgb(103, 83, 211);
+    /* background-color: #3f51b5; */
     box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.16), 0px 1px 2.5px 0px rgba(0, 0, 0, 0.26);
     color: whitesmoke;
     z-index: 10;
@@ -311,7 +321,7 @@ input[type="password"]:focus {
 }
 
 #contacts-list li {
-    font-size: 1em;
+    font-size: 1.2em;
     border-bottom: 1px solid #ccc;
     line-height: 30px;
     padding: 0 20px;
@@ -331,6 +341,7 @@ input[type="password"]:focus {
     bottom: 0;
     right: 0;
     margin: 10px;
+    height: 35px;
 }
 
 #compose-message {
@@ -434,7 +445,7 @@ input[type="password"]:focus {
 .progress-bar {
     -webkit-animation: progress-bar-stripes-alternate 0.8s linear infinite !important;
     background-image: linear-gradient(90deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent) !important;
-    background-color: #259b24 !important;
+    background-color: rgb(145, 45, 244) !important;
     background-size: 50% !important;
 }
 
@@ -543,7 +554,7 @@ option-label {
 }
 
 .following-complete {
-    color: green;
+    color: gray;
     font-size: 80%;
 }
 
@@ -568,7 +579,7 @@ option-label {
 }
 
 .header-bb-title {
-    width: 65%;
+    width: 60%;
 }
 
 #logout-page-title {

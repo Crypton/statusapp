@@ -1242,7 +1242,7 @@ var app = {
 	  var tmpIconCanvas = document.createElement('canvas');
 	  $(tmpIconCanvas).attr({ width: 120, height: 160 });
 	  img.onload = function () {
-	    idCard.getContext('2d').drawImage(img, 160, 305);
+	    idCard.getContext('2d').drawImage(img, 150, 305);
 	  };
 	  img.src = 'img/icon.png';
 	  idCard.getContext('2d').fillText(app.APPNAME, 170, 415);
