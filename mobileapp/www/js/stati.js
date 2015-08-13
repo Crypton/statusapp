@@ -79,6 +79,8 @@ app.aboutView = function _aboutView () {
 };
 
 app.setCustomEvents = function setCustomEvents () {
+  app.tz = jstz.determine();
+
   $('#my-stati').click(function () {
     app.hideMenu();
     app.switchView('#stati', 'Update Status');
@@ -661,8 +663,8 @@ app.massageTimelineUpdate = function massageTimelineUpdate (data) {
     statusText: data.value.status,
     username: data.creatorUsername,
     imageData: data.value.imageData,
-    timestamp: data.modTime,
-    humaneTimestamp: app.formatDate(data.modTime)
+    timestamp: data.value.timestamp,
+    humaneTimestamp: app.formatDate(data.value.timestamp, data.value.tz)
   };
 };
 
@@ -694,7 +696,6 @@ app.setMyStatus = function setMyStatus() {
   if ($('#my-image-to-post').children().length) {
     imageData = $('#my-image-to-post').children()[0].src;
   }
-  // XXX: need to parse out all HTML and entityify it
    var updateObj= {
      status: status,
      location: $('#my-geoloc').text(),
@@ -709,6 +710,7 @@ app.setMyStatus = function setMyStatus() {
   app.session.items.status.value.location = updateObj.location;
   app.session.items.status.value.timestamp = updateObj.timestamp;
   app.session.items.status.value.imageData = updateObj.imageData;
+  app.session.items.status.value.tz = app.tz.name();
 
   app.session.items.status.save(function (err) {
     if (err) {
@@ -782,7 +784,7 @@ app.createAvatarUpdateElement =
 function createAvatarUpdateElement(data) {
   // data = {avatar: 'hajshjahjsjahj', updated: 123456789}
 
-  var timestamp = app.formatDate(data.timestamp || data.updated);
+  var timestamp = app.formatDate(data.timestamp || data.updated, data.tz);
   var html = '<div id="' + data.itemId
            + '" class="media attribution">'
 	   + '<a class="img">'
@@ -1054,7 +1056,8 @@ app.updatePeerStatus = function updatePeerStatus(username, statusItem) {
 
   statusItem.username = username;
   statusItem.statusText = statusItem.status;
-  statusItem.humaneTimestamp = app.formatDate(statusItem.timestamp);
+  statusItem.humaneTimestamp =
+    app.formatDate(statusItem.timestamp, statusItem.tz);
   statusItem.avatar = app.session.items._trusted_peers.value[username].avatar;
 
   var statusNode = app.createMediaElement(statusItem);
@@ -1144,19 +1147,12 @@ app.escapeHtml = function escapeHtml(html) {
     .replace(/>/g, '&gt;');
 };
 
-app.formatDate = function formatDate (timestamp) {
-  var utcSeconds = parseInt(timestamp) / 1000;
-  var d = new Date(0);
-  d.setUTCSeconds(utcSeconds);
+app.formatDate = function formatDate (timestamp, zone) {
+  var date;
 
-  // Format like: 2:30 PM, Aug 01 2015
-  var hour = d.getHours();
-  var minutes = d.getMinutes();
-  var month = app.strings.en_US.months[d.getMonth()];
-  var day = d.getDate();
-  var year = d.getFullYear();
+  date =  moment.tz(parseInt(timestamp), zone || 'Europe/London');
 
-  return moment(parseInt(timestamp)).format('h:mm a, MMM Do YYYY');
+  return date.clone().tz(app.tz.name()).format('h:mm a, MMM Do YYYY z');
 };
 
 // XXXddahl: TODO
