@@ -130,7 +130,7 @@
     margin-left: 10px;
     margin-bottom: 5px;
     -webkit-border-radius: 5px;
-    border: 1px solid #aaaaaa;;
+    border: 1px solid #aaaaaa;
 }
 
 .media-metadata {
@@ -140,8 +140,8 @@
 
 .media-username {
     font-weight: bold;
-    color: #3f51b5;
-    font-size: 70%;
+    color: rgb(107, 72, 219);
+    font-size: 1em;
     margin-top: 5px;
 }
 
@@ -155,6 +155,7 @@
 
 .media-location {
     font-size: 70%;
+    font-weight: bold;
 }
 
 .media-avatar-update {
@@ -172,6 +173,10 @@
 #my-status-wrapper {
     margin-top: 20px;
     
+}
+
+.post-img {
+    -webkit-border-radius: 5px;
 }
 
 .post-button {
@@ -215,9 +220,10 @@
 }
 
 .feed-image {
-    border: 1px solid #5d5d5d;
+    border: 1px solid #aaaaaa;
     margin-top: 0.5em;
     width: 97%;
+    -webkit-border-radius: 5px;
 }
 
 .ired {

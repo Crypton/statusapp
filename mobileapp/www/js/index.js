@@ -1346,9 +1346,9 @@ var app = {
 	}
 	if (!app._contacts[name].trustedAt) {
 	  followingStatus = ' <span class="following-not-complete"> Follow Back?</span>';
-	} else {
-	  followingStatus = ' <span class="following-complete"> Private Contact</span>';
-	}
+	}//  else {
+	//   followingStatus = ' <span class="following-complete"> Private Contact</span>';
+	// }
 
 	var userAvatar;
 	if (app.session.items._trusted_peers.value[contactNames[i]]) {

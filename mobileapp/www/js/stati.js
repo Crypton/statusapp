@@ -806,7 +806,7 @@ function createMediaElement(data, localUser, existingNode) {
     // gps = app.obfuscateLocation(data.location);
     gps = data.location;
   } else {
-    gps = 'undisclosed location';
+    gps = 'undisclosed';
   }
   var avatarMarkup;
   if (!data.avatar) {
@@ -849,14 +849,14 @@ function createMediaElement(data, localUser, existingNode) {
   	   + '  </a>'
            + '  <div class="bd media-metadata">'
            + '    <div class="status-block">'
+  	   + '    <div class="media-username">' + data.username + '</div>'
 	   + '    <span class="media-status">'
 	   + status
            + '</span></div>'
-	   + '<div class="media-username">' + data.username + '</div>'
-	   + '<div class="media-timestamp">'
-           + data.humaneTimestamp + '</div>'
-           + '    <div class="media-location">'
-           + gps + '</div>';
+	   + '<span class="media-timestamp">'
+           + data.humaneTimestamp + '</span>'
+           + '    <span class="media-location">'
+           + gps + '</span>';
   if (imageHtml) {
     html = html + imageHtml;
   }
@@ -1145,12 +1145,39 @@ app.escapeHtml = function escapeHtml(html) {
 };
 
 app.formatDate = function formatDate (timestamp) {
-  var d = new Date(parseInt(timestamp));
-  return d.toDateString() + ' ' + d.toTimeString();
+  var utcSeconds = parseInt(timestamp) / 1000;
+  var d = new Date(0);
+  d.setUTCSeconds(utcSeconds);
+
+  // Format like: 2:30 PM, Aug 01 2015
+  var hour = d.getHours();
+  var minutes = d.getMinutes();
+  var month = app.strings.en_US.months[d.getMonth()];
+  var day = d.getDate();
+  var year = d.getFullYear();
+
+  return moment(parseInt(timestamp)).format('h:mm a, MMM Do YYYY');
 };
 
 // XXXddahl: TODO
 
-// Check for the user's current TZ and use it to display all dates
-
 // Add a "mood" checkbox with a color picker:)
+
+app.strings = {
+  en_US: {
+    months: {
+      0: 'Jan',
+      1: 'Feb',
+      2: 'Mar',
+      3: 'Apr',
+      4: 'May',
+      5: 'Jun',
+      6: 'Jul',
+      7: 'Aug',
+      8: 'Sep',
+      9: 'Oct',
+      10: 'Nov',
+      11: 'Dec'
+    }
+  }
+};
