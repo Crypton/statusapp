@@ -28,6 +28,9 @@
 	  <span id="page-title">Kloak</span>
 	</li>
 	<li class="header-btn-wrap">
+	  <img id="my-fingerprint-top-menu" src="svg/card-white.svg" />
+	</li>
+	<li class="header-btn-wrap">
 	  <img id="header-btn-update" src="svg/post.svg" />
 	</li>
 	<li class="header-btn-wrap">
@@ -50,12 +53,12 @@
       <div id="alerts"></div>
 
       <ul id="top-menu" class="menu nav nav-stacked">
-	<li class="main-btn" id="my-stati">
-	  <a href="#">
-	    <img src="svg/post-dark.svg" />
-	    <span>Update Status</span>
-	  </a>
-	</li>
+	<!-- <li class="main-btn" id="my-stati"> -->
+	<!--   <a href="#"> -->
+	<!--     <img src="svg/post-dark.svg" /> -->
+	<!--     <span>Update Status</span> -->
+	<!--   </a> -->
+	<!-- </li> -->
 	<li class="main-btn" id="my-feed">
 	  <a href="#">
 	    <img src="svg/sync-dark.svg" />
@@ -70,27 +73,28 @@
 	<li class="main-btn" id="my-contacts">
 	  <a href="#">
 	    <img src="svg/contacts.svg" />
-	    <!-- <i class="fa fa-users"></i> --> Contacts
+	    Contacts
 	  </a>
 	</li>
-	<li class="main-btn" id="my-fingerprint">
-	  <a href="#">
-	    <img src="svg/contact.svg" />
-	    <!-- <i class="fa fa-user"></i> --> My Contact Card
-	  </a>
-	</li>
+	<!-- <li class="main-btn" id="my-fingerprint"> -->
+	<!--   <a href="#"> -->
+	<!--     <img src="svg/contact.svg" /> -->
+	<!--     My Contact Card -->
+	<!--   </a> -->
+	<!-- </li> -->
 	<li class="main-btn" id="my-options">
 	  <a href="#">
 	    <img src="svg/setting.svg" />
-	    <!-- <i class="fa fa-cog"></i> --> Options
+	    Options
 	  </a>
 	</li>
-	<li class="main-btn" id="about">
-	  <a href="#">
-	    <img src="svg/info.svg" />
-	    <!-- <i class="fa fa-info-circle"></i> --> About
-	  </a>
-	</li>
+	<!-- <li class="main-btn" id="about"> -->
+	<!--   <a href="#"> -->
+	<!--     <img src="svg/info.svg" /> -->
+	<!--     About -->
+	<!--   </a> -->
+	<!-- </li> -->
+
 	<!-- <li class="main-btn" id="logout"> -->
 	<!--   <a href="#"> -->
 	<!--     <img src="svg/logout.svg" /> -->
@@ -237,10 +241,9 @@
 
       <div id="scan-select" class="view">
 	<p>
-	  To add a contact, you must first have them send you
-	  their Contact Card. Depending on the method it is sent,
-	  you may either scan the QR Code or load the Contact Card image from
-	  your image library.
+	  To add a contact, you must first have your contact send you
+	  their 'Contact Card'. You may either scan the QR Code or load
+	  the Contact Card image from your image library.
 	</p>
 	<div id="scan-select-buttons">
 	  <button type="button" 
@@ -279,7 +282,10 @@
 	  <ul id="contacts-list" class="nav nav-pills nav-stacked">
 	  </ul>
 	</div>
-	<img id="add-contact-button" src="svg/add.svg" />
+	<div id="add-contact-button-row">
+	  <img id="my-fingerprint" src="svg/card.svg" />
+	  <img id="add-contact-button" src="svg/add.svg" />
+	</div>
       </div>
 
       <div id="contact-details" class="view">
@@ -332,7 +338,15 @@
 		  id="change-passphrase"
 		  class="btn btn-success">Change passphrase</button>
 	  </p>
-	  <!-- <p class="option option-text"> -->
+	  <p class="option">
+	  <p class="option option-text">
+	    About
+	  </p>
+	  <a href="#" id="about">
+	    <img src="svg/info.svg" />
+	  </a>
+	  </p>
+	  <!-- <p class="option option-text"> 148 46 244
 	  <!--   Delete Account & All Data Created -->
 	  <!-- </p> -->
 	  <!-- <p class="option"> -->
@@ -349,7 +363,13 @@
 	</div>
       </div>
       
-      <div id="my-fingerprint-id" class="view">
+      <div id="my-fingerprint-id-wrapper" class="view">
+	<div id="my-fingerprint-id">
+	</div>
+	<div id="contact-card-menu">
+	  <img class="card-btns" id="retake-id-picture" src="svg/camera.svg" />
+	  <img class="card-btns" id="share-my-id-card" src="svg/share.svg" />
+	</div>
       </div>
 
       <div id="peer-fingerprint-id" class="view">

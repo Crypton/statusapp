@@ -265,7 +265,13 @@ var app = {
 
     $('#my-fingerprint').click(function () {
       app.hideMenu();
-      app.switchView('#my-fingerprint-id', 'My Contact Card');
+      app.switchView('#my-fingerprint-id-wrapper', 'My Contact Card');
+      app.displayMyFingerprint(true);
+    });
+
+    $('#my-fingerprint-top-menu').click(function () {
+      app.hideMenu();
+      app.switchView('#my-fingerprint-id-wrapper', 'My Contact Card');
       app.displayMyFingerprint(true);
     });
 
@@ -376,7 +382,7 @@ var app = {
     $('#create-id-card').click(function () {
       app.firstRunCreateIdCard( function () {
         $('#tasks-btn').addClass('active');
-        app.switchView('#my-fingerprint-id', 'My Contact Card');
+        app.switchView('#my-fingerprint-id-wrapper', 'My Contact Card');
 	// need to set this here in order to call the firstRunComplete function properly
 	app.firstRunIsNow = false;
         app.firstRunComplete();
@@ -1150,13 +1156,13 @@ var app = {
   },
 
   displayIdCard: function (idCard, callback) {
-    var idCardTitle = app.username + ' ' + app.APPNAME + ' Contact Card';
-    var html = '<button id="retake-id-picture" '
-             + 'class="btn btn-primary">Retake Photo</button>'
-             + '<button id="share-my-id-card" '
-             + 'class="btn btn-success">Share</button>';
-    // XXXddahl: add a 'remove ID picture' button
-    $('#my-fingerprint-id').append(html);
+    // var idCardTitle = app.username + ' ' + app.APPNAME + ' Contact Card';
+    // var html = '<button id="retake-id-picture" '
+    //          + 'class="btn btn-primary">Retake Photo</button>'
+    //          + '<button id="share-my-id-card" '
+    //          + 'class="btn btn-success">Share</button>';
+    // // XXXddahl: add a 'remove ID picture' button
+    // $('#my-fingerprint-id').append(html);
     $(idCard).css({ width: '290px' });
     $('#my-fingerprint-id').append(idCard);
     
@@ -1176,7 +1182,7 @@ var app = {
     if (callback) {
       callback();
     }
-    app.switchView('#my-fingerprint-id', 'My Contact Card');
+    app.switchView('#my-fingerprint-id-wrapper', 'My Contact Card');
   },
 
   displayMyFingerprint: function (withPhoto) {
@@ -1366,7 +1372,7 @@ var app = {
 	      + ' <span class="contact-name">'
               + app.contactNameMap[contactNames[i]]
 	      + '</span>'
-	      + followingStatus
+	      + followingStatus || ''
               + '</li>';
         $('#contacts-list').append($(html));
       }
