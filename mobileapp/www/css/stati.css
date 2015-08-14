@@ -64,6 +64,7 @@
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    margin-top: 0 !important;
 }
 
 #my-status {

@@ -387,17 +387,6 @@ var app = {
 	app.firstRunIsNow = false;
         app.firstRunComplete();
       });
-    });;
-
-    $('#find-someone').keyup(
-      function (event) {
-        var keycode = (event.keyCode ? event.keyCode : event.which);
-        if (event.target == $('#find-someone')[0]) {
-          if(keycode == '13'){
-            $('#find-someone-btn').focus();
-            app.findSomeone();
-          }
-        }
     });
   },
 
@@ -915,7 +904,7 @@ var app = {
     app.switchView('#first-run', 'Welcome');
   },
 
-  firstRunComplete: function () {
+  firstRunComplete: function firstRunComplete () {
     app.session.getOrCreateItem('_prefs_',
     function (err, prefsItem) {
       if (err) {
@@ -926,9 +915,9 @@ var app = {
       if (!prefsItem.value['firstRun']) {
         prefsItem.value = { 'firstRun': Date.now() };
       }
+      app.displayMyFingerprint(true);
       // Load and display all feed data:
       app.displayInitialView();
-
     });
   },
 
@@ -1136,12 +1125,12 @@ var app = {
 
   // XXXddahl: We need to cache the user's ID Card with photo for the session
 
-  firstRunCreateIdCard: function (callback) {
+  firstRunCreateIdCard: function firstRunCreateIdCard (callback) {
     // XXXddahl: this is a hack for now
     app.retakeIdPicture(true, callback);
   },
 
-  retakeIdPicture: function (firstRun, callback) {
+  retakeIdPicture: function retakeIdPicture (firstRun, callback) {
     // remove ID card
     $('#my-fingerprint-id').children().remove();
     // Re-create the ID card
@@ -1151,18 +1140,15 @@ var app = {
       if (err) {
         return app.alert(err, 'danger');
       }
-      app.displayIdCard(idCard, callback);
+      if (firstRun) {
+	app.displayMyFingerprint(true);
+      } else {
+	app.displayIdCard(idCard, callback);
+      }
     });
   },
 
   displayIdCard: function (idCard, callback) {
-    // var idCardTitle = app.username + ' ' + app.APPNAME + ' Contact Card';
-    // var html = '<button id="retake-id-picture" '
-    //          + 'class="btn btn-primary">Retake Photo</button>'
-    //          + '<button id="share-my-id-card" '
-    //          + 'class="btn btn-success">Share</button>';
-    // // XXXddahl: add a 'remove ID picture' button
-    // $('#my-fingerprint-id').append(html);
     $(idCard).css({ width: '290px' });
     $('#my-fingerprint-id').append(idCard);
     
@@ -1185,7 +1171,7 @@ var app = {
     app.switchView('#my-fingerprint-id-wrapper', 'My Contact Card');
   },
 
-  displayMyFingerprint: function (withPhoto) {
+  displayMyFingerprint: function displayMyFingerprint (withPhoto) {
 
     $('#my-fingerprint-id').children().remove();
     var canvas =
@@ -1217,7 +1203,7 @@ var app = {
     return idCard;
   },
   
-  addPhotoToIdCard: function (idCard, override, callback) {
+  addPhotoToIdCard: function addPhotoToIdCard (idCard, override, callback) {
     // check for existing photo:
     app.session.getOrCreateItem(app.PHOTO_ITEM,
       function (err, avatarItem) {
