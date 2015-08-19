@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #set-my-status-textarea {
     width: 95%;
     margin: 0.5em;
@@ -194,8 +198,8 @@
 }
 
 #button-row img {
-    height: 45px;
-    margin-right: 10px;
+    height: 40px;
+    margin-right: 7px;
 }
 
 #status-update-wrapper {
@@ -278,7 +282,7 @@
 }
 
 #header-btn-update {
-    margin-right: 0.5em;
+    margin-right: 0.3em;
     height: 30px;
 }
 
