@@ -587,14 +587,14 @@ var app = {
     var width = 120;
     var height = 160;
     var quality = 50;
-    var cameraDirection = cameraDirectionOptions.FRONT;
+    var cameraDirection = cameraDirectionOptions.BACK;
     var pictureSourceType = navigator.camera.PictureSourceType.CAMERA;
     // navigator.camera.PictureSourceType.SAVEDPHOTOALBUM
     if (options) {
       width = options.width || 320;
       height = options.height || 240;
       quality = options.quality || 50;
-      cameraDirection = options.cameraDirection || cameraDirectionOptions.FRONT;
+      cameraDirection = options.cameraDirection || cameraDirectionOptions.BACK;
       pictureSourceType = options.pictureSourceType || navigator.camera.PictureSourceType.CAMERA;
     }
 

@@ -1,19 +1,16 @@
-/* Crypton Client, Copyright 2013 SpiderOak, Inc.
+/* Crypton Client, Copyright 2013, 2014, 2015 SpiderOak, Inc.
  *
  * This file is part of Crypton Client.
  *
- * Crypton Client is free software: you can redistribute it and/or modify it
- * under the terms of the Affero GNU General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Crypton Client is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  See the Affero GNU General Public
- * License for more details.
- *
- * You should have received a copy of the Affero GNU General Public License
- * along with Crypton Client.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
 */
 
 var crypton = {};
@@ -506,22 +503,19 @@ crypton.authorize = function (username, passphrase, callback, options) {
   });
 };
 })();
-/* Crypton Client, Copyright 2013 SpiderOak, Inc.
+/* Crypton Client, Copyright 2013, 2014, 2015 SpiderOak, Inc.
  *
  * This file is part of Crypton Client.
  *
- * Crypton Client is free software: you can redistribute it and/or modify it
- * under the terms of the Affero GNU General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Crypton Client is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  See the Affero GNU General Public
- * License for more details.
- *
- * You should have received a copy of the Affero GNU General Public License
- * along with Crypton Client.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
 */
 
 (function() {
@@ -949,22 +943,19 @@ Account.prototype.wrapAllKeys = function (wrappingKey, privateKeys, session) {
 };
 
 })();
-/* Crypton Client, Copyright 2013 SpiderOak, Inc.
+/* Crypton Client, Copyright 2013, 2014, 2015 SpiderOak, Inc.
  *
  * This file is part of Crypton Client.
  *
- * Crypton Client is free software: you can redistribute it and/or modify it
- * under the terms of the Affero GNU General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Crypton Client is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  See the Affero GNU General Public
- * License for more details.
- *
- * You should have received a copy of the Affero GNU General Public License
- * along with Crypton Client.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
 */
 
 (function () {
@@ -1856,22 +1847,19 @@ Session.prototype.emit = function (eventName, data) {
 };
 
 })();
-/* Crypton Client, Copyright 2013 SpiderOak, Inc.
+/* Crypton Client, Copyright 2013, 2014, 2015 SpiderOak, Inc.
  *
  * This file is part of Crypton Client.
  *
- * Crypton Client is free software: you can redistribute it and/or modify it
- * under the terms of the Affero GNU General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Crypton Client is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  See the Affero GNU General Public
- * License for more details.
- *
- * You should have received a copy of the Affero GNU General Public License
- * along with Crypton Client.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
 */
 
 (function () {
@@ -2350,22 +2338,19 @@ Container.prototype.unwatch = function () {
 };
 
 })();
-/* Crypton Client, Copyright 2013 SpiderOak, Inc.
+/* Crypton Client, Copyright 2013, 2014, 2015 SpiderOak, Inc.
  *
  * This file is part of Crypton Client.
  *
- * Crypton Client is free software: you can redistribute it and/or modify it
- * under the terms of the Affero GNU General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Crypton Client is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  See the Affero GNU General Public
- * License for more details.
- *
- * You should have received a copy of the Affero GNU General Public License
- * along with Crypton Client.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
 */
 
 (function () {
@@ -2583,22 +2568,19 @@ Transaction.prototype.verifyChunk = function (chunk) {
 };
 
 })();
-/* Crypton Client, Copyright 2013 SpiderOak, Inc.
+/* Crypton Client, Copyright 2013, 2014, 2015 SpiderOak, Inc.
  *
  * This file is part of Crypton Client.
  *
- * Crypton Client is free software: you can redistribute it and/or modify it
- * under the terms of the Affero GNU General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Crypton Client is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  See the Affero GNU General Public
- * License for more details.
- *
- * You should have received a copy of the Affero GNU General Public License
- * along with Crypton Client.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
 */
 
 (function () {
@@ -2793,22 +2775,19 @@ Peer.prototype.trust = function (callback) {
 };
 
 })();
-/* Crypton Client, Copyright 2013 SpiderOak, Inc.
+/* Crypton Client, Copyright 2013, 2014, 2015 SpiderOak, Inc.
  *
  * This file is part of Crypton Client.
  *
- * Crypton Client is free software: you can redistribute it and/or modify it
- * under the terms of the Affero GNU General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Crypton Client is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  See the Affero GNU General Public
- * License for more details.
- *
- * You should have received a copy of the Affero GNU General Public License
- * along with Crypton Client.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
 */
 
 (function() {
@@ -2893,22 +2872,19 @@ Message.prototype.send = function (callback) {
 };
 
 })();
-/* Crypton Client, Copyright 2013 SpiderOak, Inc.
+/* Crypton Client, Copyright 2013, 2014, 2015 SpiderOak, Inc.
  *
  * This file is part of Crypton Client.
  *
- * Crypton Client is free software: you can redistribute it and/or modify it
- * under the terms of the Affero GNU General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Crypton Client is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  See the Affero GNU General Public
- * License for more details.
- *
- * You should have received a copy of the Affero GNU General Public License
- * along with Crypton Client.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
 */
 
 (function() {
@@ -3066,22 +3042,19 @@ Inbox.prototype.parseRawMessages = function () {
 };
 
 })();
-/* Crypton Client, Copyright 2013 SpiderOak, Inc.
+/* Crypton Client, Copyright 2013, 2014, 2015 SpiderOak, Inc.
  *
  * This file is part of Crypton Client.
  *
- * Crypton Client is free software: you can redistribute it and/or modify it
- * under the terms of the Affero GNU General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Crypton Client is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  See the Affero GNU General Public
- * License for more details.
- *
- * You should have received a copy of the Affero GNU General Public License
- * along with Crypton Client.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
 */
 
 (function () {
@@ -3120,22 +3093,19 @@ Diff.apply = function (delta, old) {
 
 })();
 
-/* Crypton Client, Copyright 2013 SpiderOak, Inc.
+/* Crypton Client, Copyright 2013, 2014, 2015 SpiderOak, Inc.
  *
  * This file is part of Crypton Client.
  *
- * Crypton Client is free software: you can redistribute it and/or modify it
- * under the terms of the Affero GNU General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Crypton Client is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  See the Affero GNU General Public
- * License for more details.
- *
- * You should have received a copy of the Affero GNU General Public License
- * along with Crypton Client.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
 */
 
 (function() {
@@ -3417,23 +3387,19 @@ work.decryptRecord = function (options, callback) {
 };
 
 })();
-
-/* Crypton Client, Copyright 2014 SpiderOak, Inc.
+/* Crypton Client, Copyright 2013, 2014, 2015 SpiderOak, Inc.
  *
  * This file is part of Crypton Client.
  *
- * Crypton Client is free software: you can redistribute it and/or modify it
- * under the terms of the Affero GNU General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Crypton Client is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  See the Affero GNU General Public
- * License for more details.
- *
- * You should have received a copy of the Affero GNU General Public License
- * along with Crypton Client.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
 */
 
 (function() {
@@ -3629,22 +3595,19 @@ Card.prototype.generateQRCodeInput = function (fingerprint, username, applicatio
 
 
 }());
-/* Crypton Client, Copyright 2015 SpiderOak, Inc.
+/* Crypton Client, Copyright 2013, 2014, 2015 SpiderOak, Inc.
  *
  * This file is part of Crypton Client.
  *
- * Crypton Client is free software: you can redistribute it and/or modify it
- * under the terms of the Affero GNU General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Crypton Client is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  See the Affero GNU General Public
- * License for more details.
- *
- * You should have received a copy of the Affero GNU General Public License
- * along with Crypton Client.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
 */
 
 (function() {
@@ -4152,22 +4115,19 @@ Item.prototype.lastUpdate = function (callback) {
 };
 
 })();
-/* Crypton Client, Copyright 2015 SpiderOak, Inc.
+/* Crypton Client, Copyright 2013, 2014, 2015 SpiderOak, Inc.
  *
  * This file is part of Crypton Client.
  *
- * Crypton Client is free software: you can redistribute it and/or modify it
- * under the terms of the Affero GNU General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Crypton Client is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  See the Affero GNU General Public
- * License for more details.
- *
- * You should have received a copy of the Affero GNU General Public License
- * along with Crypton Client.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
 */
 
 (function() {
@@ -4299,22 +4259,19 @@ function decryptTimelineItem (creatorName, sessionKey) {
 };
 
 })();
-/* Crypton Client, Copyright 2015 SpiderOak, Inc.
+/* Crypton Client, Copyright 2013, 2014, 2015 SpiderOak, Inc.
  *
  * This file is part of Crypton Client.
  *
- * Crypton Client is free software: you can redistribute it and/or modify it
- * under the terms of the Affero GNU General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Crypton Client is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  See the Affero GNU General Public
- * License for more details.
- *
- * You should have received a copy of the Affero GNU General Public License
- * along with Crypton Client.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
 */
 
 (function() {

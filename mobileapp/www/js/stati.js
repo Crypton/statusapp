@@ -536,7 +536,11 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     data.itemId = timeline[i].timelineId;
     console.log('rendered timelineid: ', timeline[i].timelineId);
     node = app.createMediaElement(data, localUser);
+    if (!localUser && timeline[i].value.avatarMeta) {
+      app.handleAvatar(timeline[i].creatorUsername, timeline[i].value.avatarMeta);
+    }
 
+    
     // Make sure to hide the "empty feed message"
     if ($("#first-run-empty-feed-msg").is(":visible")) {
       $("#first-run-empty-feed-msg").hide();
@@ -559,6 +563,72 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     console.log('shareAvatar()');
     app.shareAvatar(shareWith);
   }  
+};
+
+app.handleAvatar = function handleAvatar(peerName, avatarMeta) {
+  // check if the avatar data is up to date
+  if (app.session.items._trusted_peers.value[peerName]) {
+    var avatarMetaName = peerName + '-avatar-meta';
+    if (app.session.items[avatarMetaName]) {
+      if (avatarMeta.updated > app.session.items[avatarMetaName].value.updated) {
+	// update the avatarMeta!
+	app.session.items[avatarMetaName].value.updated = avatarMeta.updated;
+	app.session.getOrCreateItem(avatarMetaName, function (err, item) {
+	  if (err) {
+	    console.error(err);
+	    return;
+	  }
+
+	  app.session.getPeer(peerName, function (err, peer) {
+	    if (err) {
+	      console.error(err);
+	      return;
+	    }
+	    app.session.getSharedItem(avatarMeta.nameHmac, peer,
+	    function (err, sharedItem) {
+	      if (err) {
+		console.error(err);
+		return;
+	      }
+	      item.value = {
+		updated: avatarMeta.updated,
+		nameHmac: avatarMeta.nameHmac,
+		avatar: sharedItem.value.avatar
+	      };
+	      
+	    });
+	  });
+	});
+      }
+    } else {
+      // add meta to the object
+      app.session.getOrCreateItem(avatarMetaName, function (err, item) {
+	if (err) {
+	  console.error(err);
+	  return;
+	}
+	app.session.getPeer(peerName, function (err, peer) {
+	  if (err) {
+	    console.error(err);
+	    return;
+	  }
+	  app.session.getSharedItem(avatarMeta.nameHmac, peer,
+	  function (err, sharedItem) {
+	    if (err) {
+	      console.error(err);
+	      return;
+	    }
+	    item.value = {
+	      updated: avatarMeta.updated,
+	      nameHmac: avatarMeta.nameHmac,
+	      avatar: sharedItem.value.avatar
+	    };
+	    // XXX: update all avatars in the feed?
+	  });
+	});
+      });
+    }
+  }
 };
 
 app.shareAvatar = function shareAvatar (avatarArr) {
@@ -705,7 +775,11 @@ app.setMyStatus = function setMyStatus() {
      status: status,
      location: $('#my-geoloc').text(),
      timestamp: Date.now(),
-     imageData: null
+     imageData: null,
+     avatarMeta: {
+       nameHmac: app.session.items.avatar.nameHmac,
+       updated: app.session.items.avatar.value.updated
+     }
    };
   if (imageData) {
     updateObj.imageData = imageData;
@@ -716,7 +790,8 @@ app.setMyStatus = function setMyStatus() {
   app.session.items.status.value.timestamp = updateObj.timestamp;
   app.session.items.status.value.imageData = updateObj.imageData;
   app.session.items.status.value.tz = app.tz.name();
-
+  app.session.items.status.value.avatarMeta = updateObj.avatarMeta;
+  
   app.session.items.status.save(function (err) {
     if (err) {
       app.toggleSetStatusProgress();
@@ -815,6 +890,12 @@ function createMediaElement(data, localUser, existingNode) {
   } else {
     gps = 'undisclosed';
   }
+
+  var avatarMetaName = data.username + '-avatar-meta';
+  if (app.session.items[avatarMetaName]) {
+    data.avatar = app.session.items[avatarMetaName].value.avatar;
+  }
+  
   var avatarMarkup;
   if (!data.avatar) {
     // Make a stand-in avatar
@@ -1063,8 +1144,14 @@ app.updatePeerStatus = function updatePeerStatus(username, statusItem) {
   statusItem.statusText = statusItem.status;
   statusItem.humaneTimestamp =
     app.formatDate(statusItem.timestamp, statusItem.tz);
-  statusItem.avatar = app.session.items._trusted_peers.value[username].avatar;
 
+  var avatarMetaName = username + '-avatar-meta';
+  if (app.session.items[avatarMetaName]) {
+    statusItem.avatar = app.session.items[avatarMetaName].value.avatar;
+  } else if (app.session.items._trusted_peers.value[username]) {
+    statusItem.avatar = app.session.items._trusted_peers.value[username].avatar;
+  }
+  
   var statusNode = app.createMediaElement(statusItem);
   $('#my-feed-entries').prepend(statusNode);
 };
