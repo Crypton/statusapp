@@ -1,22 +1,8 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 // This file is the application specific code and includes all implemented functions expected by index.js
-
-app.localAvatarsPath = 'img/avatars/';
-
-app.localAvatars = ['franklin-1.png', 'franklin-2.png', 'franklin-3.png',
-		    'franklin-4.png', 'franklin-5.png', 'franklin-6.png'];
-
-app.randomAvatar = function randomAvatar() {
-  var randomnumber = Math.floor(Math.random()*5);
-  var avatarPath = app.localAvatarsPath + app.localAvatars[randomnumber];
-  return avatarPath;
-};
-
-app.setInitialAvatar = function setInitialAvatar () {
-  var avatar = app.randomAvatar();
-  app.avatarPath = avatar;
-  localStorage.setItem('avatarPath', avatar);
-  return avatar;
-};
 
 app.sharingUrl = 'https://zk.gs/ZK/';
 
@@ -242,12 +228,6 @@ app.saveLocalProfile = function saveLocalProfile() {
 
 app.customInitialization = function customInitialization() {
   console.log('customInitialization()');
-  // check for existing avatar
-  if (!localStorage.getItem('avatarPath')) {
-    app.setInitialAvatar();
-  } else {
-    app.avatarPath = localStorage.getItem('avatarPath');
-  }
 
   app.setupClientProfile();
   // Profile setup
