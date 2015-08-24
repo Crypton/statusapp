@@ -1,4 +1,9 @@
-// This file is the application specific code and includes all implemented functions expected by index.js
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+// This file is the application specific code and includes all
+// implemented functions expected by index.js
 
 app.localAvatarsPath = 'img/avatars/';
 
@@ -18,7 +23,7 @@ app.setInitialAvatar = function setInitialAvatar () {
   return avatar;
 };
 
-app.sharingUrl = 'https://zk.gs/ZK/';
+app.sharingUrl = 'https://kloak.io/';
 
 app.sharingMessage = 'I would like to share messages with you privately via an app called "Kloak". \n\nThis message\'s attachment is my \'App Contact card\', which users exchange in order to establish a private connection. \n\nFor more information: https://zk.gs/ZK/';
 
@@ -79,6 +84,8 @@ app.aboutView = function _aboutView () {
 };
 
 app.setCustomEvents = function setCustomEvents () {
+  app.tz = jstz.determine();
+
   $('#my-stati').click(function () {
     app.hideMenu();
     app.switchView('#stati', 'Update Status');
@@ -313,7 +320,7 @@ app.createInitialItems = function createInitialItems (callback) {
         }
 
         if (avatar.value.avatar === undefined) {
-          avatar.value = { avatar: null };
+          avatar.value = { avatar: null, __timelineIgnore: true };
         }
         callback(null);
       });
@@ -388,6 +395,22 @@ app.loadInitialTimeline = function loadInitialTimeline(callback) {
   });
 };
 
+app.deferUpdateFeedAvatars = function deferUpdateFeedAvatars(ms) {
+  var timeout;
+  if (!ms) {
+    timeout = 0;
+  } else {
+    timeout = parseInt(ms);
+    if (typeof timeout != 'number') {
+      timeout = 0;
+    }
+  }
+  
+  setTimeout(function () {
+    app.updateFeedAvatars();
+  }, timeout);
+};
+
 app.loadPastTimeline = function loadPastTimeline () {
   if (app.feedIsLoading) {
     return;
@@ -429,7 +452,7 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     return;
   }
 
-  var shareAvatarWith = {};
+  // var shareAvatarWith = {};
   
   for (var i = 0; i < timeline.length; i++) {
     console.log('from: ', timeline[i].creatorUsername, 'to: ', app.username);
@@ -438,11 +461,11 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     if (_username != app.username) {
       try {
 	var contact = app.session.items._trusted_peers.value[_username];
-	if (contact) {
-	  if (!contact.avatarShared) {
-	    shareAvatarWith[_username] = null;
-	  }
-	}
+	// if (contact) {
+	  // if (!contact.avatarShared) {
+	  //   shareAvatarWith[_username] = null;
+	  // }
+	// }
       } catch (ex) {
 	console.error(ex);
       }
@@ -463,6 +486,13 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     }
 
     if (timeline[i].value.avatar) {
+      node = app.createEmptyElement(timeline[i]);
+      if (append) {
+	$('#my-feed-entries').append(node);
+      } else {
+	$('#my-feed-entries').prepend(node);
+      }
+      continue; // XXXddahl: going to handle this differently
       // this is some other kind of item, not a status update!
       // Ignore this for now, probably a 'trustedAt notification'
       console.log('avatar update object: ', timeline[i], timeline[i].value);
@@ -492,6 +522,7 @@ app.renderTimeline = function renderTimeline (timeline, append) {
       } else {
 	app.session.items._trusted_peers.value[user].avatar = timeline[i].value.avatar;
 	app.session.items._trusted_peers.value[user].avatarUpdated = Date.now();
+	app.session.items._trusted_peers.value[user].__timelineIgnore = true;
 	app.session.items._trusted_peers.save(function (err) {
 	  if (err) {
 	    console.error(err);
@@ -521,7 +552,11 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     data.itemId = timeline[i].timelineId;
     console.log('rendered timelineid: ', timeline[i].timelineId);
     node = app.createMediaElement(data, localUser);
+    if (!localUser && timeline[i].value.avatarMeta) {
+      app.handleAvatar(timeline[i].creatorUsername, timeline[i].value.avatarMeta);
+    }
 
+    
     // Make sure to hide the "empty feed message"
     if ($("#first-run-empty-feed-msg").is(":visible")) {
       $("#first-run-empty-feed-msg").hide();
@@ -538,12 +573,95 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     $("#fetch-previous-items").show();
   }
 
-  var shareWith = Object.keys(shareAvatarWith);
-  console.log('shareWith', shareWith);
-  if (shareWith.length) {
-    console.log('shareAvatar()');
-    app.shareAvatar(shareWith);
-  }  
+  // var shareWith = Object.keys(shareAvatarWith);
+  // console.log('shareWith', shareWith);
+  // if (shareWith.length) {
+  //   console.log('shareAvatar()');
+  //   app.shareAvatar(shareWith);
+  // }  
+};
+
+app.handleAvatar = function handleAvatar(peerName, avatarMeta) {
+  // check if the avatar data is up to date
+  if (app.session.items._trusted_peers.value[peerName]) {
+    var avatarMetaName = peerName + '-avatar-meta';
+    if (app.session.items[avatarMetaName]) {
+      if (avatarMeta.updated > app.session.items[avatarMetaName].value.updated) {
+	// update the avatarMeta!
+	app.session.items[avatarMetaName].value.updated = avatarMeta.updated;
+	app.session.getOrCreateItem(avatarMetaName, function (err, item) {
+	  if (err) {
+	    console.error(err);
+	    return;
+	  }
+
+	  app.session.getPeer(peerName, function (err, peer) {
+	    if (err) {
+	      console.error(err);
+	      return;
+	    }
+	    app.session.getSharedItem(avatarMeta.nameHmac, peer,
+	    function (err, sharedItem) {
+	      if (err) {
+		console.error(err);
+		return;
+	      }
+	      item.value = {
+		updated: avatarMeta.updated,
+		nameHmac: avatarMeta.nameHmac,
+		avatar: sharedItem.value.avatar
+	      };
+	      
+	    });
+	  });
+	});
+      }
+    } else {
+      // add meta to the object
+      app.session.getOrCreateItem(avatarMetaName, function (err, item) {
+	if (err) {
+	  console.error(err);
+	  return;
+	}
+	app.session.getPeer(peerName, function (err, peer) {
+	  if (err) {
+	    console.error(err);
+	    return;
+	  }
+	  app.session.getSharedItem(avatarMeta.nameHmac, peer,
+	  function (err, sharedItem) {
+	    if (err) {
+	      console.error(err);
+	      return;
+	    }
+	    item.value = {
+	      updated: avatarMeta.updated,
+	      nameHmac: avatarMeta.nameHmac,
+	      avatar: sharedItem.value.avatar
+	    };
+	    // XXX: update all avatars in the feed?
+	  });
+	});
+      });
+    }
+  }
+};
+
+app.updateFeedAvatars = function updateFeedAvatars () {
+  var genericAvatars = $('.media-generic-avatar');
+  genericAvatars.map(function () {
+    var username = this.dataset.username;
+    var avatarMetaName = username + '-avatar-meta';
+    if (app.session.items[avatarMetaName]) {
+      var html = '<img class="media-avatar" src="'
+	    + app.session.items[avatarMetaName].value.avatar
+	    + '"/>';
+      var node = $(html);
+      var parent = $(this.parentNode);
+      parent.children().remove();
+      parent.append(node);
+    }
+  });
 };
 
 app.shareAvatar = function shareAvatar (avatarArr) {
@@ -563,6 +681,8 @@ app.shareAvatar = function shareAvatar (avatarArr) {
 	}
 	console.log('avatarShared');
 	app.session.items._trusted_peers.value[peer.username].avatarShared = Date.now();
+	app.session.items._trusted_peers.value[peer.username].__timelineIgnore = true;
+	
 	if (i == avatarArr.length) {
 	  // XXX: save the contacts on quit or logout
 	  app.session.items._trusted_peers.save(function (err) {
@@ -615,6 +735,9 @@ app.updateEmptyTimelineElements = function updateEmptyTimelineElements () {
 	app.transformEmptyTimelineElement(empties[i], history[empties[i]]);
 	app.transformedTimelineElements[empties[i]] = Date.now();
       }
+      if (i == (empties.length -1)) {
+	app.deferUpdateFeedAvatars();
+      }
     }
   }, 2000);
 };
@@ -651,8 +774,8 @@ app.massageTimelineUpdate = function massageTimelineUpdate (data) {
     statusText: data.value.status,
     username: data.creatorUsername,
     imageData: data.value.imageData,
-    timestamp: data.modTime,
-    humaneTimestamp: app.formatDate(data.modTime)
+    timestamp: data.value.timestamp,
+    humaneTimestamp: app.formatDate(data.value.timestamp, data.value.tz)
   };
 };
 
@@ -684,12 +807,15 @@ app.setMyStatus = function setMyStatus() {
   if ($('#my-image-to-post').children().length) {
     imageData = $('#my-image-to-post').children()[0].src;
   }
-  // XXX: need to parse out all HTML and entityify it
    var updateObj= {
      status: status,
      location: $('#my-geoloc').text(),
      timestamp: Date.now(),
-     imageData: null
+     imageData: null,
+     avatarMeta: {
+       nameHmac: app.session.items.avatar.nameHmac,
+       updated: app.session.items.avatar.value.updated
+     }
    };
   if (imageData) {
     updateObj.imageData = imageData;
@@ -699,7 +825,9 @@ app.setMyStatus = function setMyStatus() {
   app.session.items.status.value.location = updateObj.location;
   app.session.items.status.value.timestamp = updateObj.timestamp;
   app.session.items.status.value.imageData = updateObj.imageData;
-
+  app.session.items.status.value.tz = app.tz.name();
+  app.session.items.status.value.avatarMeta = updateObj.avatarMeta;
+  
   app.session.items.status.save(function (err) {
     if (err) {
       app.toggleSetStatusProgress();
@@ -748,6 +876,7 @@ app.updateContactAvatar = function updateContactAvatar (username, value) {
     return console.error('Incorrect arguments, cannot update contact avatar');
   }
   app.session.items._trusted_peers.value[username].avatar = value.avatar;
+  app.session.items._trusted_peers.value[username].__timelineIgnore = true;
   app.session.items._trusted_peers.save(function (err) {
     if (err) {
       console.error(err, 'Cannot update avatar for ' + username);
@@ -771,7 +900,7 @@ app.createAvatarUpdateElement =
 function createAvatarUpdateElement(data) {
   // data = {avatar: 'hajshjahjsjahj', updated: 123456789}
 
-  var timestamp = app.formatDate(data.timestamp || data.updated);
+  var timestamp = app.formatDate(data.timestamp || data.updated, data.tz);
   var html = '<div id="' + data.itemId
            + '" class="media attribution">'
 	   + '<a class="img">'
@@ -795,12 +924,19 @@ function createMediaElement(data, localUser, existingNode) {
     // gps = app.obfuscateLocation(data.location);
     gps = data.location;
   } else {
-    gps = 'undisclosed location';
+    gps = 'undisclosed';
   }
+
+  var avatarMetaName = data.username + '-avatar-meta';
+  if (app.session.items[avatarMetaName]) {
+    data.avatar = app.session.items[avatarMetaName].value.avatar;
+  }
+  
   var avatarMarkup;
   if (!data.avatar) {
     // Make a stand-in avatar
-    avatarMarkup = '<span class="media-generic-avatar">'
+    avatarMarkup = '<span class="media-generic-avatar" '
+      + 'data-username="' + data.username + '">'
       + data.username[0].toUpperCase()
       + '</span>';
   } else {
@@ -810,7 +946,7 @@ function createMediaElement(data, localUser, existingNode) {
     } else {
       avatarData  = data.avatar;
     }
-    avatarMarkup = '<img class="media-avatar" src="' + avatarData + '" alt="" />';
+    avatarMarkup = '<img class="media-avatar" src="' + avatarData + '"/>';
   }
 
   var imageHtml;
@@ -838,14 +974,14 @@ function createMediaElement(data, localUser, existingNode) {
   	   + '  </a>'
            + '  <div class="bd media-metadata">'
            + '    <div class="status-block">'
+  	   + '    <div class="media-username">' + data.username + '</div>'
 	   + '    <span class="media-status">'
 	   + status
            + '</span></div>'
-	   + '<div class="media-username">' + data.username + '</div>'
-	   + '<div class="media-timestamp">'
-           + data.humaneTimestamp + '</div>'
-           + '    <div class="media-location">'
-           + gps + '</div>';
+	   + '<span class="media-timestamp">'
+           + data.humaneTimestamp + '</span>'
+           + '    <span class="media-location">'
+           + gps + '</span>';
   if (imageHtml) {
     html = html + imageHtml;
   }
@@ -1043,9 +1179,16 @@ app.updatePeerStatus = function updatePeerStatus(username, statusItem) {
 
   statusItem.username = username;
   statusItem.statusText = statusItem.status;
-  statusItem.humaneTimestamp = app.formatDate(statusItem.timestamp);
-  statusItem.avatar = app.session.items._trusted_peers.value[username].avatar;
+  statusItem.humaneTimestamp =
+    app.formatDate(statusItem.timestamp, statusItem.tz);
 
+  var avatarMetaName = username + '-avatar-meta';
+  if (app.session.items[avatarMetaName]) {
+    statusItem.avatar = app.session.items[avatarMetaName].value.avatar;
+  } else if (app.session.items._trusted_peers.value[username]) {
+    statusItem.avatar = app.session.items._trusted_peers.value[username].avatar;
+  }
+  
   var statusNode = app.createMediaElement(statusItem);
   $('#my-feed-entries').prepend(statusNode);
 };
@@ -1133,13 +1276,33 @@ app.escapeHtml = function escapeHtml(html) {
     .replace(/>/g, '&gt;');
 };
 
-app.formatDate = function formatDate (timestamp) {
-  var d = new Date(parseInt(timestamp));
-  return d.toDateString() + ' ' + d.toTimeString();
+app.formatDate = function formatDate (timestamp, zone) {
+  var date;
+
+  date =  moment.tz(parseInt(timestamp), zone || 'Europe/London');
+
+  return date.clone().tz(app.tz.name()).format('h:mm a, MMM Do YYYY z');
 };
 
 // XXXddahl: TODO
 
-// Check for the user's current TZ and use it to display all dates
-
 // Add a "mood" checkbox with a color picker:)
+
+app.strings = {
+  en_US: {
+    months: {
+      0: 'Jan',
+      1: 'Feb',
+      2: 'Mar',
+      3: 'Apr',
+      4: 'May',
+      5: 'Jun',
+      6: 'Jul',
+      7: 'Aug',
+      8: 'Sep',
+      9: 'Oct',
+      10: 'Nov',
+      11: 'Dec'
+    }
+  }
+};

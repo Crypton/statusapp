@@ -1,14 +1,20 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #set-my-status-textarea {
     width: 95%;
     margin: 0.5em;
-    font-size: 1.3em;
-    height: 200px;
-    /* min-height: 200px; */
+    font-size: 1.2em;
+    height: 180px;
     font-style: normal;
     padding: 0.3em;
-    border-radius: 4px;
+    border-radius: 5px;
     box-shadow: 1px 2px 2px #ddd;
     float: right;
+}
+#set-my-status-form {
+    margin-top: -1.3em;
 }
 
 #set-my-status-btn {
@@ -62,6 +68,7 @@
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    margin-top: 0 !important;
 }
 
 #my-status {
@@ -130,7 +137,7 @@
     margin-left: 10px;
     margin-bottom: 5px;
     -webkit-border-radius: 5px;
-    border: 1px solid #aaaaaa;;
+    border: 1px solid #aaaaaa;
 }
 
 .media-metadata {
@@ -140,8 +147,8 @@
 
 .media-username {
     font-weight: bold;
-    color: #3f51b5;
-    font-size: 70%;
+    color: rgb(107, 72, 219);
+    font-size: 1em;
     margin-top: 5px;
 }
 
@@ -155,6 +162,7 @@
 
 .media-location {
     font-size: 70%;
+    font-weight: bold;
 }
 
 .media-avatar-update {
@@ -174,6 +182,10 @@
     
 }
 
+.post-img {
+    -webkit-border-radius: 5px;
+}
+
 .post-button {
     font-size: 3em;
     color: #000;
@@ -181,8 +193,13 @@
 }
 
 #button-row {
-    float: right;
-    margin-right: 1em;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#button-row img {
+    height: 40px;
+    margin-right: 7px;
 }
 
 #status-update-wrapper {
@@ -190,9 +207,8 @@
 }
 
 #my-avatar {
-    width: 50px;
-    margin-bottom: 25px;
-    margin-right: 15px;
+    height: 45px;
+    -webkit-border-radius: 5px;
 }
 
 #my-image-to-post {
@@ -209,9 +225,10 @@
 }
 
 .feed-image {
-    border: 1px solid #5d5d5d;
+    border: 1px solid #aaaaaa;
     margin-top: 0.5em;
     width: 97%;
+    -webkit-border-radius: 5px;
 }
 
 .ired {
@@ -245,8 +262,8 @@
     display: none;
 }
 
-.media-link-url { color: green !important; }
-.media-link-email { color: green !important; }
+.media-link-url { color: gray !important; }
+.media-link-email { color: gray !important; }
 .media-link-phone { color: red !important; }
 .media-link-twitter { color: blue !important; }
 .media-link-hashtag { color: purple !important; }
@@ -264,8 +281,14 @@
     display: none;
 }
 
-#header-button-update {
-    padding-right: 0.4em;
+#header-btn-update {
+    margin-right: 0.3em;
+    height: 30px;
+}
+
+#header-btn-refresh {
+    margin-right: 0.3em;
+    height: 30px;
 }
 
 #first-run-empty-feed-msg {

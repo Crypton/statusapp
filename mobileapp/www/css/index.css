@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 @font-face {
     font-family: Roboto;
     src: url(fonts/Roboto-Regular.ttf);
@@ -116,8 +120,8 @@ h1 {
     position: fixed;
     top: 0;
     left: 0;
-    width: 80%;
-    height: 80%;
+    width: 60%;
+    height: 40%;
     bottom: 0;
     z-index: 20;
     padding-top: 5px;
@@ -186,17 +190,26 @@ input[type="password"]:focus {
     border-radius: 2px !important;
     box-shadow: 1px 2px 2px #ddd;
     text-transform: uppercase;
-    font-size: 1.2em !important;
+    font-size: 1em !important;
     margin: 0 10px;
     padding: 10px 20px !important;
 }
 
 .btn-primary {
-    background-color: #5677fc !important;
+    color: #fff !important;
+    background-color: rgb(103, 83, 211) !important;
+    border-color: rgb(103, 83, 211) !important;
+    -webkit-border-radius: 5px !important;
 }
 
 .btn-success {
-    background-color: #259b24 !important;
+    background-color: rgb(108, 176, 246) !important;
+    border-color: rgb(108, 176, 246) !important;
+    -webkit-border-radius: 5px !important;
+}
+
+.btn-danger {
+    -webkit-border-radius: 5px !important;
 }
 
 #login-status {
@@ -228,7 +241,8 @@ input[type="password"]:focus {
     left: 0px;
     height: 76px;
     line-height: 76px;
-    background-color: #3f51b5;
+    background-color: rgb(103, 83, 211);
+    /* background-color: #3f51b5; */
     box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.16), 0px 1px 2.5px 0px rgba(0, 0, 0, 0.26);
     color: whitesmoke;
     z-index: 10;
@@ -279,15 +293,15 @@ input[type="password"]:focus {
     color: #000000 !important;
 }
 
-.main-btn i {
-    width: 40px;
-    font-size: 1.1em;
-    padding-left: 7px;
+.main-btn img {
+    width: 35px;
+    margin-right: 1em;
     opacity: 0.9;
 }
 
 #main-menu-btn {
-    font-size: 1.4em;
+    height: 25px;
+    margin-right: 0.3em;
 }
 
 #find-user-form {
@@ -304,6 +318,7 @@ input[type="password"]:focus {
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
+    border-bottom: 2px solid #aaaaaa;
 }
 
 #contacts-list {
@@ -311,7 +326,7 @@ input[type="password"]:focus {
 }
 
 #contacts-list li {
-    font-size: 1em;
+    font-size: 1.2em;
     border-bottom: 1px solid #ccc;
     line-height: 30px;
     padding: 0 20px;
@@ -326,13 +341,17 @@ input[type="password"]:focus {
     margin: 15px 0;
 }
 
-#add-contact-button {
+#add-contact-button-row {
     position: absolute;
     bottom: 0;
     right: 0;
-    margin: 20px;
-    border-radius: 50px !important;
-    padding: 19px 25px !important;
+    margin: 10px;
+    height: 35px;
+}
+
+#add-contact-button-row img {
+    margin-left: 10px;
+    height: 40px;
 }
 
 #compose-message {
@@ -341,6 +360,8 @@ input[type="password"]:focus {
 
 #my-fingerprint-id {
     text-align: center;
+    height: 90%;
+    overflow: scroll;
 }
 
 #my-fingerprint-id canvas {
@@ -436,7 +457,7 @@ input[type="password"]:focus {
 .progress-bar {
     -webkit-animation: progress-bar-stripes-alternate 0.8s linear infinite !important;
     background-image: linear-gradient(90deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent) !important;
-    background-color: #259b24 !important;
+    background-color: rgb(145, 45, 244) !important;
     background-size: 50% !important;
 }
 
@@ -523,6 +544,15 @@ a {
     padding-bottom: 0.5em;
 }
 
+#about img {
+    height: 50px;
+    margin-left: 10px;
+}
+
+.option a {
+    text-transform: uppercase;
+}
+
 .option-text {
     font-weight: bold;
     margin: 0 10px;
@@ -545,7 +575,7 @@ option-label {
 }
 
 .following-complete {
-    color: green;
+    color: gray;
     font-size: 80%;
 }
 
@@ -570,7 +600,7 @@ option-label {
 }
 
 .header-bb-title {
-    width: 70%;
+    width: 50%;
 }
 
 #logout-page-title {
@@ -605,10 +635,10 @@ body {
 }
 
 .user-avatar-generic {
-    font-size: 2em;
+    height: 35px;
     margin-right: 10px;
     margin-top: 5px;
-    padding-left: 3px;
+    margin-bottom: 5px;
 }
 
 .user-avatar {
@@ -617,4 +647,40 @@ body {
     margin-bottom: 5px;
     -webkit-border-radius: 5px;
     border: 1px solid #aaaaaa;
+}
+
+#retake-id-picture {
+    font-size: 12px !important;
+    margin-bottom: 0.5em;
+}
+
+#share-my-id-card {
+    font-size: 12px !important;
+    margin-bottom: 0.5em;
+}
+
+.card-btns {
+    height: 40px;
+}
+
+#my-fingerprint-top-menu {
+    height: 30px;
+    margin-right: 0.4em;
+}
+
+#contact-card-menu {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: #eee;
+    width: 100%;
+    height: 60px;
+    padding-top: 0.5em;
+    padding-left: 60%;
+}
+
+#contact-card-menu img {
+    margin-right: 1em;
+    margin-left: 0.5em;
+    margin-bottom: 1em;
 }

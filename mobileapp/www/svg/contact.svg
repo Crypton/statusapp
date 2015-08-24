@@ -5,7 +5,7 @@
     <desc>Created with Sketch.</desc>
     <defs></defs>
     <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
-        <g id="contact" sketch:type="MSArtboardGroup" transform="translate(-2.000000, 0.000000)" fill="#FFFFFF">
+        <g id="contact" sketch:type="MSArtboardGroup" transform="translate(-2.000000, 0.000000)" fill="#6753D3">
             <g sketch:type="MSLayerGroup" transform="translate(2.000000, 0.000000)" id="shape">
                 <path d="M38,44 C25.868,44 16,34.132 16,22 C16,9.868 25.868,0 38,0 C50.132,0 60,9.868 60,22 C60,34.132 50.132,44 38,44 L38,44 Z M38,4 C28.076,4 20,12.076 20,22 C20,31.924 28.076,40 38,40 C47.924,40 56,31.924 56,22 C56,12.076 47.924,4 38,4 L38,4 Z" sketch:type="MSShapeGroup"></path>
                 <path d="M70,80 L6,80 C2.692,80 0,77.308 0,74 C0,73.728 0.056,67.26 4.9,60.8 C7.72,57.04 11.58,54.052 16.376,51.924 C22.232,49.32 29.508,48 38,48 C46.492,48 53.768,49.32 59.624,51.924 C64.42,54.056 68.28,57.04 71.1,60.8 C75.944,67.26 76,73.728 76,74 C76,77.308 73.308,80 70,80 L70,80 Z M38,52 C24.052,52 13.76,55.812 8.236,63.024 C4.096,68.428 4.004,73.952 4,74.008 C4,75.104 4.896,76 6,76 L70,76 C71.104,76 72,75.104 72,74 C72,73.952 71.908,68.428 67.764,63.024 C62.236,55.812 51.944,52 38,52 L38,52 Z" sketch:type="MSShapeGroup"></path>

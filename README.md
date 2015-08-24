@@ -43,3 +43,8 @@ $ > cordova-icon
 and
 
 $ > cordova-splash  
+
+
+LICENSE
+-------
+See LICENSE file

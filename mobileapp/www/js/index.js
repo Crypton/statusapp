@@ -1,6 +1,6 @@
-/*
- * TODO LICENSE
- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 document.addEventListener("deviceready", onDeviceReady, false);
 
@@ -42,8 +42,8 @@ var app = {
     console.log('app initializing!: ', arguments);
 
     // Configure the endpoint:
-    crypton.host = 'zk.gs';
-    // crypton.port = 443;
+    crypton.host = app.host;
+    crypton.port = app.port || 1025;
     
     this.card =  new crypton.Card();
     this.bindEvents();
@@ -137,6 +137,8 @@ var app = {
 
   APPNAME: 'Kloak',
 
+  get contactCardLabel() { return app.APPNAME + ' contact card'; },
+  
   URL: 'https://zk.gs',
 
   VERSION: "0.0.2",
@@ -263,7 +265,13 @@ var app = {
 
     $('#my-fingerprint').click(function () {
       app.hideMenu();
-      app.switchView('#my-fingerprint-id', 'My Contact Card');
+      app.switchView('#my-fingerprint-id-wrapper', 'My Contact Card');
+      app.displayMyFingerprint(true);
+    });
+
+    $('#my-fingerprint-top-menu').click(function () {
+      app.hideMenu();
+      app.switchView('#my-fingerprint-id-wrapper', 'My Contact Card');
       app.displayMyFingerprint(true);
     });
 
@@ -374,22 +382,11 @@ var app = {
     $('#create-id-card').click(function () {
       app.firstRunCreateIdCard( function () {
         $('#tasks-btn').addClass('active');
-        app.switchView('#my-fingerprint-id', 'My Contact Card');
+        app.switchView('#my-fingerprint-id-wrapper', 'My Contact Card');
 	// need to set this here in order to call the firstRunComplete function properly
 	app.firstRunIsNow = false;
         app.firstRunComplete();
       });
-    });;
-
-    $('#find-someone').keyup(
-      function (event) {
-        var keycode = (event.keyCode ? event.keyCode : event.which);
-        if (event.target == $('#find-someone')[0]) {
-          if(keycode == '13'){
-            $('#find-someone-btn').focus();
-            app.findSomeone();
-          }
-        }
     });
   },
 
@@ -508,7 +505,7 @@ var app = {
       cordova.plugins.barcodeScanner.scan(
 	function (result) {
           var userObj = JSON.parse(result.text);
-          app.verifyUser(userObj.username, userObj.fingerprint);
+          app.verifyUser(userObj.u, userObj.f);
 	},
 	function (error) {
           app.alert("QR Scanning failed: " + error, 'danger');
@@ -590,14 +587,14 @@ var app = {
     var width = 120;
     var height = 160;
     var quality = 50;
-    var cameraDirection = cameraDirectionOptions.FRONT;
+    var cameraDirection = cameraDirectionOptions.BACK;
     var pictureSourceType = navigator.camera.PictureSourceType.CAMERA;
     // navigator.camera.PictureSourceType.SAVEDPHOTOALBUM
     if (options) {
       width = options.width || 320;
       height = options.height || 240;
       quality = options.quality || 50;
-      cameraDirection = options.cameraDirection || cameraDirectionOptions.FRONT;
+      cameraDirection = options.cameraDirection || cameraDirectionOptions.BACK;
       pictureSourceType = options.pictureSourceType || navigator.camera.PictureSourceType.CAMERA;
     }
 
@@ -642,7 +639,7 @@ var app = {
               return;
             }
             var userObj = JSON.parse(data);
-            app.verifyUser(userObj.username, userObj.fingerprint);
+            app.verifyUser(userObj.u, userObj.f);
           };
 
           try {
@@ -684,6 +681,23 @@ var app = {
     }
   },
 
+  getInitialAvatar: function getInitialAvatar (dataUrl) {
+    // 85, 325
+    // create canvas
+    var c = document.createElement('canvas');
+    // draw image data to canvas
+    var ctx = c.getContext('2d');
+    var img = new Image();
+    img.onload = function(){
+      ctx.drawImage(img, 0, 0);
+    };
+    img.src = dataUrl;
+
+    // XXX TODO: use smartcrop.crop()
+    
+    // get the photo from X=85, Y=325, W=120, H=160
+  },
+  
   getImage: function () {
     // Specific getImage function for QR parsing
     if (app.isNodeWebKit) {
@@ -691,13 +705,19 @@ var app = {
     }
 
     function onSuccess (dataURL) {
+
+      // TODO: create a canvas from the png data
+      //       extract the image from the ID card
+      //       Trim all of the white border?
+      //       Save this data as the avatar!
+      // app.getInitialAvatar(dataUrl);
+      
       var dataUrlPrefix = 'data:image/png;base64,';
       dataURL = dataUrlPrefix + dataURL;
       console.log(dataURL);
       qrcode.callback = function (data) {
-        // alert(data);
         var userObj = JSON.parse(data);
-        app.verifyUser(userObj.username, userObj.fingerprint);
+        app.verifyUser(userObj.u, userObj.f);
       };
 
       try {
@@ -884,7 +904,7 @@ var app = {
     app.switchView('#first-run', 'Welcome');
   },
 
-  firstRunComplete: function () {
+  firstRunComplete: function firstRunComplete () {
     app.session.getOrCreateItem('_prefs_',
     function (err, prefsItem) {
       if (err) {
@@ -895,9 +915,9 @@ var app = {
       if (!prefsItem.value['firstRun']) {
         prefsItem.value = { 'firstRun': Date.now() };
       }
+      app.displayMyFingerprint(true);
       // Load and display all feed data:
       app.displayInitialView();
-
     });
   },
 
@@ -1098,44 +1118,40 @@ var app = {
     app.switchView('#peer-fingerprint-id', 'Peer Fingerprint');
 
     var canvas =
-      app.card.createIdCard(fingerprint, username,
-                             app.APPNAME, app.URL);
-    $(canvas).css({ width: '300px'});
+      app.card.createIdCard(fingerprint, username, app.contactCardLabel);
+    $(canvas).css({ width: '290px'});
     $('#peer-fingerprint-id').append(canvas);
   },
 
   // XXXddahl: We need to cache the user's ID Card with photo for the session
 
-  firstRunCreateIdCard: function (callback) {
+  firstRunCreateIdCard: function firstRunCreateIdCard (callback) {
     // XXXddahl: this is a hack for now
     app.retakeIdPicture(true, callback);
   },
 
-  retakeIdPicture: function (firstRun, callback) {
+  retakeIdPicture: function retakeIdPicture (firstRun, callback) {
     // remove ID card
     $('#my-fingerprint-id').children().remove();
     // Re-create the ID card
     var canvas =
-      app.card.createIdCard(app.fingerprint, app.username,
-                            app.APPNAME, app.URL);
+      app.card.createIdCard(app.fingerprint, app.username, app.contactCardLabel);
     app.addPhotoToIdCard(canvas, true, function (err, idCard) {
       if (err) {
         return app.alert(err, 'danger');
       }
-      app.displayIdCard(idCard, callback);
+      if (firstRun) {
+	app.displayMyFingerprint(true);
+      } else {
+	app.displayIdCard(idCard, callback);
+      }
     });
   },
 
   displayIdCard: function (idCard, callback) {
-    $(idCard).css({ width: '300px', 'margin-top': '1em'});
+    $(idCard).css({ width: '290px' });
     $('#my-fingerprint-id').append(idCard);
-    var idCardTitle = app.username + ' ' + app.APPNAME + ' Contact Card';
-    var html = '<button id="retake-id-picture" '
-             + 'class="btn btn-primary">Retake Photo</button>'
-             + '<button id="share-my-id-card" '
-             + 'class="btn btn-success">Share</button>';
-    // XXXddahl: add a 'remove ID picture' button
-    $('#my-fingerprint-id').append(html);
+    
     $('#my-avatar')[0].src = app.session.items.avatar.value.avatar;
     $('#share-my-id-card').click(function () {
       if (app.isNodeWebKit) {
@@ -1152,15 +1168,14 @@ var app = {
     if (callback) {
       callback();
     }
-    app.switchView('#my-fingerprint-id', 'My Contact Card');
+    app.switchView('#my-fingerprint-id-wrapper', 'My Contact Card');
   },
 
-  displayMyFingerprint: function (withPhoto) {
+  displayMyFingerprint: function displayMyFingerprint (withPhoto) {
 
     $('#my-fingerprint-id').children().remove();
     var canvas =
-      app.card.createIdCard(app.fingerprint, app.username,
-                             app.APPNAME, app.URL);
+      app.card.createIdCard(app.fingerprint, app.username, app.contactCardLabel);
     if (withPhoto) {
       // override = false here as sensible default?
       app.addPhotoToIdCard(canvas, false, function (err, idCard) {
@@ -1176,7 +1191,19 @@ var app = {
 
   PHOTO_ITEM: 'avatar',
 
-  addPhotoToIdCard: function (idCard, override, callback) {
+  pasteAvatar: function pasteAvatar(imageData, idCard, x, y, w, h) {
+    var ctx = idCard.getContext('2d');
+    var img = new Image();
+    img.setAttribute('width', w || 120);
+    img.setAttribute('height', h || 160);
+    img.onload = function() {
+      ctx.drawImage(img, x || 20, y || 305);
+    };
+    img.src = imageData;
+    return idCard;
+  },
+  
+  addPhotoToIdCard: function addPhotoToIdCard (idCard, override, callback) {
     // check for existing photo:
     app.session.getOrCreateItem(app.PHOTO_ITEM,
       function (err, avatarItem) {
@@ -1185,13 +1212,13 @@ var app = {
         }
 
         // paste photo into ID:
-        function pastePhoto(imageData, idCard) {
+        function pastePhoto(imageData, idCard, x, y, w, h) {
           var ctx = idCard.getContext('2d');
 	  var img = new Image();
-	  img.setAttribute('width', 120);
-	  img.setAttribute('height', 160);
+	  img.setAttribute('width', w || 120);
+	  img.setAttribute('height', h || 160);
 	  img.onload = function() {
-            ctx.drawImage(img, 280, 10);
+	    ctx.drawImage(img, x, y);
 	  };
 	  img.src = imageData;
           return idCard;
@@ -1199,7 +1226,18 @@ var app = {
 
         if (!override && avatarItem.value.avatar) {
           // XXXddahl: try ??
-          var photoIdCard = pastePhoto(avatarItem.value.avatar, idCard);
+          var photoIdCard = pastePhoto(avatarItem.value.avatar, idCard, 20, 305);
+	  var iconCanvas = document.createElement('canvas');
+	  $(iconCanvas).attr({ width: 120, height: 160 });
+	  // add icon to a canvas
+	  var img = new Image();
+	  var tmpIconCanvas = document.createElement('canvas');
+	  $(tmpIconCanvas).attr({ width: 120, height: 160 });
+	  img.onload = function () {
+	    idCard.getContext('2d').drawImage(img, 150, 305);
+	  };
+	  img.src = 'img/icon.png';
+	  idCard.getContext('2d').fillText(app.APPNAME, 170, 415);
           return callback(null, idCard);
         }
 
@@ -1217,7 +1255,6 @@ var app = {
             // photo is saved to the server
             var photoIdCard =
               pastePhoto(avatarItem.value.avatar, idCard);
-            // console.log(photoIdCard);
             return callback(null, photoIdCard);
           });
         });
@@ -1291,7 +1328,6 @@ var app = {
 	return value.toLowerCase();
       }).sort();
 
-
       for (var i = 0; i < contactNames.length; i++) {
 	var lcName = contactNames[i];
 	var name = app.contactNameMap[lcName];
@@ -1301,17 +1337,22 @@ var app = {
 	}
 	if (!app._contacts[name].trustedAt) {
 	  followingStatus = ' <span class="following-not-complete"> Follow Back?</span>';
-	} else {
-	  followingStatus = ' <span class="following-complete"> Private Contact</span>';
 	}
 
 	var userAvatar;
 	if (app.session.items._trusted_peers.value[contactNames[i]]) {
 	  var avatar = app.session.items._trusted_peers.value[contactNames[i]].avatar;
-	  if (avatar) {
-	    userAvatar = '<img class="user-avatar" src="' + avatar  + '" />';
+	  if (!avatar) {
+	    var avatarMetaName = contactNames[i] + '-avatar-meta';
+	    if (app.session.items[avatarMetaName]) {
+	      var _avatar = app.session.items[avatarMetaName].value.avatar;
+	      userAvatar = '<img class="user-avatar" src="' + _avatar  + '" />';
+	    }
+	  }
+	  if (!avatar) {
+	    userAvatar = '<img class="user-avatar-generic" src="svg/contact.svg" />';
 	  } else {
-	    userAvatar = '<i class="fa fa-user user-avatar user-avatar-generic"></i>';
+	    userAvatar = '<img class="user-avatar" src="' + avatar + '" />';
 	  }
 	}
         var html = '<li class="contact-record" id="contact-'
@@ -1321,7 +1362,7 @@ var app = {
 	      + ' <span class="contact-name">'
               + app.contactNameMap[contactNames[i]]
 	      + '</span>'
-	      + followingStatus
+	      + followingStatus || ''
               + '</li>';
         $('#contacts-list').append($(html));
       }
@@ -1339,10 +1380,13 @@ var app = {
     var contact = app._contacts[name];
     // display the contact's fingerprint ID card:
     var fingerprint = contact.fingerprint || '0000000000000000000000000000000000000000000000000000000000000000';
-    var canvas = app.card.createIdCard(fingerprint,
-                                       name,
-                                       app.APPNAME, app.URL);
-    $(canvas).css({ width: '300px' });
+    var canvas = app.card.createIdCard(fingerprint, name, app.contactCardLabel);
+    // look for avatar, if we have one, paste it
+    var avatar = app.session.items._trusted_peers.value[name].avatar;
+    if (avatar) {
+      app.pasteAvatar(avatar, canvas);
+    }
+    $(canvas).css({ width: '250px' });
     $(canvas).attr({'class': 'contact-id'});
     $('#contact-details .contact-id').remove();
     $('#contact-details').prepend(canvas);

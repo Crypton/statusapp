@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<!--
-    // TODO: LICENSE
--->
 <html>
   <head>
+
+    <!-- This Source Code Form is subject to the terms of the Mozilla Public
+	 - License, v. 2.0. If a copy of the MPL was not distributed with this
+	 - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
     <meta charset="utf-8" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: wss: data: gap: https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: wss: data: gap: android-webview-video-poster: https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" />
     <link rel="stylesheet" type="text/css" href="css/index.css" />
     <link rel="stylesheet" type="text/css" href="css/stati.css" />
     <link rel="stylesheet" type="text/css" href="css/vendor/font-awesome.css" />
@@ -24,17 +26,20 @@
       <ul id="header-button-bar">
 	<li>
 	  <a href="#" id="tasks-btn">
-            <i id="main-menu-btn" class="fa fa-bars"></i>
+	    <img id="main-menu-btn" src="svg/menu.svg" />
 	  </a>
 	</li>
 	<li class="header-bb-title">
 	  <span id="page-title">Kloak</span>
 	</li>
 	<li class="header-btn-wrap">
-	  <i id="header-btn-update" class="header-btn fa fa-comment"></i>
+	  <img id="my-fingerprint-top-menu" src="svg/card-white.svg" />
 	</li>
 	<li class="header-btn-wrap">
-	  <i id="header-btn-refresh" class="header-btn fa fa-refresh"></i>
+	  <img id="header-btn-update" src="svg/post.svg" />
+	</li>
+	<li class="header-btn-wrap">
+	  <img id="header-btn-refresh" src="svg/sync.svg" />
 	</li>
       </ul>
       
@@ -53,47 +58,54 @@
       <div id="alerts"></div>
 
       <ul id="top-menu" class="menu nav nav-stacked">
-	<li class="main-btn" id="my-stati">
-	  <a href="#">
-	    <i class="fa fa-comment"></i> <span>Update Status</span>
-	  </a>
-	</li>
+	<!-- <li class="main-btn" id="my-stati"> -->
+	<!--   <a href="#"> -->
+	<!--     <img src="svg/post-dark.svg" /> -->
+	<!--     <span>Update Status</span> -->
+	<!--   </a> -->
+	<!-- </li> -->
 	<li class="main-btn" id="my-feed">
 	  <a href="#">
-	    <!-- <span id="num-messages" class="badge pull-right">0</span> -->
-	    <i class="fa fa-list"></i> <span>Feed</span>
+	    <img src="svg/sync-dark.svg" />
+	    <span>Feed</span>
 	  </a>
 	</li>
-	<li class="main-btn" id="refresh-feed">
-	  <a href="#">
-	    <i class="fa fa-refresh"></i> <span>Refresh Feed</span>
-	  </a>
-	</li>
+	<!-- <li class="main-btn" id="refresh-feed"> -->
+	<!--   <a href="#"> -->
+	<!--     <i class="fa fa-refresh"></i> <span>Refresh Feed</span> -->
+	<!--   </a> -->
+	<!-- </li> -->
 	<li class="main-btn" id="my-contacts">
 	  <a href="#">
-	    <i class="fa fa-users"></i> Contacts
+	    <img src="svg/contacts.svg" />
+	    Contacts
 	  </a>
 	</li>
-	<li class="main-btn" id="my-fingerprint">
-	  <a href="#">
-	    <i class="fa fa-user"></i> My Contact Card
-	  </a>
-	</li>
+	<!-- <li class="main-btn" id="my-fingerprint"> -->
+	<!--   <a href="#"> -->
+	<!--     <img src="svg/contact.svg" /> -->
+	<!--     My Contact Card -->
+	<!--   </a> -->
+	<!-- </li> -->
 	<li class="main-btn" id="my-options">
 	  <a href="#">
-	    <i class="fa fa-cog"></i> Options
+	    <img src="svg/setting.svg" />
+	    Options
 	  </a>
 	</li>
-	<li class="main-btn" id="about">
-	  <a href="#">
-	    <i class="fa fa-info-circle"></i> About
-	  </a>
-	</li>
-	<li class="main-btn" id="logout">
-	  <a href="#">
-	    <i class="fa fa-sign-out"></i> Logout
-	  </a>
-	</li>
+	<!-- <li class="main-btn" id="about"> -->
+	<!--   <a href="#"> -->
+	<!--     <img src="svg/info.svg" /> -->
+	<!--     About -->
+	<!--   </a> -->
+	<!-- </li> -->
+
+	<!-- <li class="main-btn" id="logout"> -->
+	<!--   <a href="#"> -->
+	<!--     <img src="svg/logout.svg" /> -->
+	<!--     <\!-- <i class="fa fa-sign-out"></i> -\-> Logout -->
+	<!--   </a> -->
+	<!-- </li> -->
       </ul>
 
       <div id="stati" class="view">
@@ -105,14 +117,10 @@
 	  <br />
 	  <div id="button-row">
 	    <img id="my-avatar" src="img/avatars/franklin-4.png">
-	    <i id="take-a-photo-btn"
-	       class="fa fa-camera-retro post-button"></i>
-	    <i id="pick-an-image-btn"
-	       class="fa fa-file-image-o post-button"></i>
-	    <i id="include-gps-btn"
-	       class="fa fa-globe post-button"></i>
-	    <i id="set-my-status-btn"
-	       class="fa fa-paper-plane post-button"></i>
+	    <img id="take-a-photo-btn" src="svg/camera.svg" />
+	    <img id="pick-an-image-btn" src="svg/media.svg" />
+	    <img id="include-gps-btn" src="svg/location.svg" />
+	    <img id="set-my-status-btn" src="svg/send.svg" />
 	  </div>
 	  <div id="my-geoloc"></div>
 	  <div id="my-image-to-post"></div>
@@ -238,10 +246,9 @@
 
       <div id="scan-select" class="view">
 	<p>
-	  To add a contact, you must first have them send you
-	  their Contact Card. Depending on the method it is sent,
-	  you may either scan the QR Code or load the Contact Card image from
-	  your image library.
+	  To add a contact, you must first have your contact send you
+	  their 'Contact Card'. You may either scan the QR Code or load
+	  the Contact Card image from your image library.
 	</p>
 	<div id="scan-select-buttons">
 	  <button type="button" 
@@ -280,9 +287,10 @@
 	  <ul id="contacts-list" class="nav nav-pills nav-stacked">
 	  </ul>
 	</div>
-	<button class="btn btn-success" id="add-contact-button">
-	  <i class="fa fa-plus"></i>
-	</button>
+	<div id="add-contact-button-row">
+	  <img id="my-fingerprint" src="svg/card-black.svg" />
+	  <img id="add-contact-button" src="svg/add.svg" />
+	</div>
       </div>
 
       <div id="contact-details" class="view">
@@ -335,7 +343,15 @@
 		  id="change-passphrase"
 		  class="btn btn-success">Change passphrase</button>
 	  </p>
-	  <!-- <p class="option option-text"> -->
+	  <p class="option">
+	  <p class="option option-text">
+	    About
+	  </p>
+	  <a href="#" id="about">
+	    <img src="svg/info.svg" />
+	  </a>
+	  </p>
+	  <!-- <p class="option option-text"> 148 46 244
 	  <!--   Delete Account & All Data Created -->
 	  <!-- </p> -->
 	  <!-- <p class="option"> -->
@@ -352,7 +368,13 @@
 	</div>
       </div>
       
-      <div id="my-fingerprint-id" class="view">
+      <div id="my-fingerprint-id-wrapper" class="view">
+	<div id="my-fingerprint-id">
+	</div>
+	<div id="contact-card-menu">
+	  <img class="card-btns" id="retake-id-picture" src="svg/camera.svg" />
+	  <img class="card-btns" id="share-my-id-card" src="svg/share.svg" />
+	</div>
       </div>
 
       <div id="peer-fingerprint-id" class="view">
@@ -365,15 +387,18 @@
 	<h3>Initial Setup</h3>
 	<p><strong>Congratulations! You've signed up for Kloak.</strong></p>
 	<p>
-	  Now that you have an account, you need to create an <strong>ID Card</strong>, which identifies you to other users you would like to communicate with.
+	  Now that you have an account, you need to create your <strong>Contact Card</strong>, which identifies you to other users you would like to communicate with.
 	</p>
 	<p>
-	  Once you share this <strong>Contact Card</strong> with another user, and you have received theirs, you can privately communicate.
+	  Once you share your <strong>Contact Card</strong> with another user, and you have received theirs, you can privately communicate.
+	</p>
+	<p>
+	  The first step is taking a photo for your contact card
 	</p>
 	<br />
 	<p class="text-center">
 	  <button class="btn btn-success" 
-		  id="create-id-card">Create Contact Card</button>
+		  id="create-id-card">Take Contact Card Photo</button>
 	</p>
       </div>
 
@@ -422,6 +447,7 @@
     <script type="text/javascript" src="js/crypton.js"></script>
     <script type="text/javascript" src="js/index.js"></script>
     <script type="text/javascript" src="js/stati.js"></script>
+    <script type="text/javascript" src="js/configuration.js"></script>
     <script type="text/javascript" src="js/day-of-year.js"></script>
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/vendor/humane.js"></script>
@@ -451,5 +477,8 @@
     <script type="text/javascript" src="js/vendor/Autolinker.js"></script>
     <script type="text/javascript" src="js/vendor/offline.min.js"></script>
     <script async type="text/javascript" src="js/geo-places.js"></script>
+    <script type="text/javascript" src="js/vendor/moment-with-locales.min.js"></script>
+    <script type="text/javascript" src="js/vendor/moment-timezone-with-data-2010-2020.min.js"></script>
+    <script type="text/javascript" src="js/vendor/jstz.min.js"></script>
   </body>
 </html>
