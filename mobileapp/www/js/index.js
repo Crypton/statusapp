@@ -1409,9 +1409,16 @@ var app = {
     function (err, trustedPeers) {
       if (err) {
 	console.error(err);
-	return callback(err);
+	callback(err);
+	return;
       }
-      return callback(null, trustedPeers.value);
+      if (!trustedPeers.value.__timelineIgnore) {
+	trustedPeers.value.__timelineIgnore = true;
+	trustedPeers.save(function (err) {
+	  console.error(err);
+	});
+      }
+      callback(null, trustedPeers.value);
     });
   },
 

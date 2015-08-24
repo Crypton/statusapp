@@ -13,7 +13,6 @@ app.sharingTitle = 'Just started using Kloak...';
 
 app.ITEMS = {
   firstRun: 'firstRun',
-  feed: 'feed',
   status: 'status',
   avatar: 'avatar'
 };
@@ -266,40 +265,34 @@ app.customInitialization = function customInitialization() {
 };
 
 app.createInitialItems = function createInitialItems (callback) {
-  app.session.getOrCreateItem(app.ITEMS.feed, function (err, feed) {
+
+  app.session.getOrCreateItem(app.ITEMS.status, function (err, status) {
     if (err) {
       callback(err);
       return console.error(err);
     }
-
-    if (!feed.value.feedHmacs) {
-      feed.value = { feedHmacs: {}, lastUpdated: Date.now() };
+    
+    if (!status.value.status) {
+      status.value = {
+	status: 'Hello World!',
+        timestamp: Date.now(),
+        location: null
+      };
     }
 
-    app.session.getOrCreateItem(app.ITEMS.status, function (err, status) {
+    app.session.getOrCreateItem(app.ITEMS.avatar, function (err, avatar) {
       if (err) {
         callback(err);
         return console.error(err);
       }
-
-      if (!status.value.status) {
-        status.value = { status: 'Hello World!',
-                         timestamp: Date.now(),
-                         location: null
-                       };
+      
+      if (avatar.value.avatar === undefined) {
+        avatar.value = {
+	  avatar: null,
+	  __timelineIgnore: true
+	};
       }
-
-      app.session.getOrCreateItem(app.ITEMS.avatar, function (err, avatar) {
-        if (err) {
-          callback(err);
-          return console.error(err);
-        }
-
-        if (avatar.value.avatar === undefined) {
-          avatar.value = { avatar: null, __timelineIgnore: true };
-        }
-        callback(null);
-      });
+      callback(null);
     });
   });
 };
