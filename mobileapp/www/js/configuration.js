@@ -7,5 +7,7 @@
   app.host = 'kloakstaging.crypton.io';
   app.port = 443;
   app.URL = 'https://kloak.io';
-  
+  app.kloak_version = '0.3.0';
+  app.build = Date.now();
+ 
 })();
