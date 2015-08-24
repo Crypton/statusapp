@@ -1328,7 +1328,6 @@ var app = {
 	return value.toLowerCase();
       }).sort();
 
-
       for (var i = 0; i < contactNames.length; i++) {
 	var lcName = contactNames[i];
 	var name = app.contactNameMap[lcName];
@@ -1338,17 +1337,22 @@ var app = {
 	}
 	if (!app._contacts[name].trustedAt) {
 	  followingStatus = ' <span class="following-not-complete"> Follow Back?</span>';
-	}//  else {
-	//   followingStatus = ' <span class="following-complete"> Private Contact</span>';
-	// }
+	}
 
 	var userAvatar;
 	if (app.session.items._trusted_peers.value[contactNames[i]]) {
 	  var avatar = app.session.items._trusted_peers.value[contactNames[i]].avatar;
-	  if (avatar) {
-	    userAvatar = '<img class="user-avatar" src="' + avatar  + '" />';
-	  } else {
+	  if (!avatar) {
+	    var avatarMetaName = contactNames[i] + '-avatar-meta';
+	    if (app.session.items[avatarMetaName]) {
+	      var _avatar = app.session.items[avatarMetaName].value.avatar;
+	      userAvatar = '<img class="user-avatar" src="' + _avatar  + '" />';
+	    }
+	  }
+	  if (!avatar) {
 	    userAvatar = '<img class="user-avatar-generic" src="svg/contact.svg" />';
+	  } else {
+	    userAvatar = '<img class="user-avatar" src="' + avatar + '" />';
 	  }
 	}
         var html = '<li class="contact-record" id="contact-'

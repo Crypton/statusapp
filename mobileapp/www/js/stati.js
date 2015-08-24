@@ -395,6 +395,22 @@ app.loadInitialTimeline = function loadInitialTimeline(callback) {
   });
 };
 
+app.deferUpdateFeedAvatars = function deferUpdateFeedAvatars(ms) {
+  var timeout;
+  if (!ms) {
+    timeout = 0;
+  } else {
+    timeout = parseInt(ms);
+    if (typeof timeout != 'number') {
+      timeout = 0;
+    }
+  }
+  
+  setTimeout(function () {
+    app.updateFeedAvatars();
+  }, timeout);
+};
+
 app.loadPastTimeline = function loadPastTimeline () {
   if (app.feedIsLoading) {
     return;
@@ -436,7 +452,7 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     return;
   }
 
-  var shareAvatarWith = {};
+  // var shareAvatarWith = {};
   
   for (var i = 0; i < timeline.length; i++) {
     console.log('from: ', timeline[i].creatorUsername, 'to: ', app.username);
@@ -445,11 +461,11 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     if (_username != app.username) {
       try {
 	var contact = app.session.items._trusted_peers.value[_username];
-	if (contact) {
-	  if (!contact.avatarShared) {
-	    shareAvatarWith[_username] = null;
-	  }
-	}
+	// if (contact) {
+	  // if (!contact.avatarShared) {
+	  //   shareAvatarWith[_username] = null;
+	  // }
+	// }
       } catch (ex) {
 	console.error(ex);
       }
@@ -557,12 +573,12 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     $("#fetch-previous-items").show();
   }
 
-  var shareWith = Object.keys(shareAvatarWith);
-  console.log('shareWith', shareWith);
-  if (shareWith.length) {
-    console.log('shareAvatar()');
-    app.shareAvatar(shareWith);
-  }  
+  // var shareWith = Object.keys(shareAvatarWith);
+  // console.log('shareWith', shareWith);
+  // if (shareWith.length) {
+  //   console.log('shareAvatar()');
+  //   app.shareAvatar(shareWith);
+  // }  
 };
 
 app.handleAvatar = function handleAvatar(peerName, avatarMeta) {
@@ -629,6 +645,23 @@ app.handleAvatar = function handleAvatar(peerName, avatarMeta) {
       });
     }
   }
+};
+
+app.updateFeedAvatars = function updateFeedAvatars () {
+  var genericAvatars = $('.media-generic-avatar');
+  genericAvatars.map(function () {
+    var username = this.dataset.username;
+    var avatarMetaName = username + '-avatar-meta';
+    if (app.session.items[avatarMetaName]) {
+      var html = '<img class="media-avatar" src="'
+	    + app.session.items[avatarMetaName].value.avatar
+	    + '"/>';
+      var node = $(html);
+      var parent = $(this.parentNode);
+      parent.children().remove();
+      parent.append(node);
+    }
+  });
 };
 
 app.shareAvatar = function shareAvatar (avatarArr) {
@@ -701,6 +734,9 @@ app.updateEmptyTimelineElements = function updateEmptyTimelineElements () {
 	// we have unknown update data
 	app.transformEmptyTimelineElement(empties[i], history[empties[i]]);
 	app.transformedTimelineElements[empties[i]] = Date.now();
+      }
+      if (i == (empties.length -1)) {
+	app.deferUpdateFeedAvatars();
       }
     }
   }, 2000);
@@ -899,7 +935,8 @@ function createMediaElement(data, localUser, existingNode) {
   var avatarMarkup;
   if (!data.avatar) {
     // Make a stand-in avatar
-    avatarMarkup = '<span class="media-generic-avatar">'
+    avatarMarkup = '<span class="media-generic-avatar" '
+      + 'data-username="' + data.username + '">'
       + data.username[0].toUpperCase()
       + '</span>';
   } else {
@@ -909,7 +946,7 @@ function createMediaElement(data, localUser, existingNode) {
     } else {
       avatarData  = data.avatar;
     }
-    avatarMarkup = '<img class="media-avatar" src="' + avatarData + '" alt="" />';
+    avatarMarkup = '<img class="media-avatar" src="' + avatarData + '"/>';
   }
 
   var imageHtml;
