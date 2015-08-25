@@ -7,14 +7,6 @@
 document.addEventListener("deviceready", onDeviceReady, false);
 
 function onDeviceReady() {
-  // Check for ios device
-  var deviceType = (navigator.userAgent.match(/iPhone/i)) == "iPhone" ? "iPhone" : (navigator.userAgent.match(/iPad/i)) == "iPad" ? "iPad" : "null";
-  
-  if (deviceType == "null") {
-    cordova.exec(null, null, "SplashScreen", "hide", []);
-  } else {
-    cordova.exec(null, null, "SplashScreen", "show", []);
-  }
   // Now safe to use device APIs
   app.init();
 
