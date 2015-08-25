@@ -1337,6 +1337,7 @@ var app = {
 	if (!name) {
 	  continue;
 	}
+
 	if (!app._contacts[name].trustedAt) {
 	  followingStatus = ' <span class="following-not-complete"> Follow Back?</span>';
 	}
@@ -1411,12 +1412,6 @@ var app = {
 	console.error(err);
 	callback(err);
 	return;
-      }
-      if (!trustedPeers.value.__timelineIgnore) {
-	trustedPeers.value.__timelineIgnore = true;
-	trustedPeers.save(function (err) {
-	  console.error(err);
-	});
       }
       callback(null, trustedPeers.value);
     });

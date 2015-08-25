@@ -1129,7 +1129,7 @@ Session.prototype.removeItem = function removeItem (itemNameHmac, callback) {
  * @param {Function} callback
  */
 Session.prototype.getOrCreateItem =
-function getOrCreateItem (itemName,  callback) {
+  function getOrCreateItem (itemName, callback) {
 
   if (!itemName) {
     return callback('itemName is required');
@@ -3910,16 +3910,13 @@ Item.prototype.wrapItem = function item_wrapItem () {
     itemValue = '{}';
     this._value = {};
   }
-  var tlIgnoreFlag = false;
-  if (this._value.__timeline_ignore) {
-    tlIgnoreFlag = true;
+  var timelineVisibleFlag = 'f';
+  if (this._value.__meta) {
+    if (this._value.__meta.timelineVisible) {
+      timelineVisibleFlag = 't';
+    }
   }
-
-  var metaFlags = null;
-  if (this._value.__meta_flags) {
-    metaFlags = this._value.__meta_flags;
-  }
-  
+ 
   var rawPayloadCiphertext =
     sjcl.encrypt(this.sessionKey, itemValue, crypton.cipherOptions);
   var payloadCiphertextHash = sjcl.hash.sha256.hash(rawPayloadCiphertext);
@@ -3941,8 +3938,7 @@ Item.prototype.wrapItem = function item_wrapItem () {
     itemNameHmac: itemNameHmac,
     payloadCiphertext: JSON.stringify(payloadCiphertext),
     wrappedSessionKey: JSON.stringify(sessionKeyCiphertext),
-    __timelineIgnore: tlIgnoreFlag,
-    __metaFlags: metaFlags // XXX ddahl: For future use
+    timelineVisible: timelineVisibleFlag
   };
 
   return payload;
@@ -4173,10 +4169,7 @@ function decryptHistoryItem (creator, sessionKey) {
 
   var rawData = this.rawData;
   var cipherItem = rawData.ciphertext;
-  if (cipherItem.__timelineIgnore) {
-    // This item is not to be shown in the timeline
-    return null;
-  }
+
   var wrappedSessionKey = JSON.parse(rawData.wrappedSessionKey);
 
   // check if this key is already in memory

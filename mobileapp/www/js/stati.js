@@ -157,101 +157,10 @@ app.pickAnImage = function pickAnImage () {
   });
 };
 
-app.createNewLocalProfile = function () {
-  var user = crypton.hmac('', app.username);
-  var profile = {};
-  profile[user] = {
-    tlOptions: {
-      lastItemRead: 0,
-      limit: 5,
-      offset: 0
-    },
-    historyOptions: {
-      lastItemRead: 0,
-      limit: 5,
-      offset: 0
-    }
-  };
-  app.saveProfile(profile);
-  return profile;
-}
-
-app.addNewLocalProfile = function (profile) {
-  var user = crypton.hmac('', app.username);
-  profile[user] = {
-    tlOptions: {
-      lastItemRead: 0,
-      limit: 5,
-      offset: 0
-    },
-    historyOptions: {
-      lastItemRead: 0,
-      limit: 5,
-      offset: 0
-    }
-  };
-  app.saveProfile(profile);
-  return profile;
-};
-
-app.saveProfile = function saveProfile (profileObj) {
-  var str = JSON.stringify(profileObj);
-  localStorage.setItem('_profile_', str);
-};
-
-app.setupClientProfile = function setupClientProfile () {
-
-  var strProfile = localStorage.getItem('_profile_');
-  if (!strProfile) {
-    var profile = app.createNewLocalProfile();
-    localStorage.setItem('_profile_', JSON.stringify(profile));
-  } else {
-    var profileObj = JSON.parse(strProfile);
-    var user = crypton.hmac('', app.username);
-    if (!profileObj[user]) {
-      // Need to add this username to the profile obj
-      app.addNewLocalProfile(profileObj);
-    }
-  }
-};
-
-app.getCurrentProfile = function getCurrentProfile () {
-  var user = crypton.hmac('', app.username);
-  this._profile = JSON.parse(localStorage.getItem('_profile_'));
-  return this._profile[user];
-};
-
-app.saveLocalProfile = function saveLocalProfile() {
-  var profiles = JSON.parse(localStorage.getItem('_profile_'));
-  var user = crypton.hmac('', app.username);
-  profiles[user] = this._profile[user];
-  localStorage.setItem('_profile_', JSON.stringify(profiles));
-}
-
 app.customInitialization = function customInitialization() {
   console.log('customInitialization()');
-
-  app.setupClientProfile();
-  // Profile setup
   var that = this;
-  if (!app.currentProfile) {
-    Object.defineProperty(app, 'currentProfile', {
-      get: function() {
-        return app.getCurrentProfile();
-      },
-
-      set: function(value) {
-        var user = crypton.hmac('', app.username);
-        if (value.lastItemRead && value.offset && value.limit) {
-          that._profile[user] = value;
-          app.saveLocalProfile();
-        } else {
-          console.error('Error setting local profile data');
-        }
-      }
-    });
-  }
-
+  
   // XXXddahl: need a indeterminate progress indicator
   app.createInitialItems(function (err) {
     if (err) {
@@ -271,13 +180,21 @@ app.createInitialItems = function createInitialItems (callback) {
       callback(err);
       return console.error(err);
     }
-    
+    var callbackFired;
     if (!status.value.status) {
-      status.value = {
-	status: 'Hello World!',
-        timestamp: Date.now(),
-        location: null
-      };
+      console.log('creating status Item');
+      status.value.status = 'Hello World!';
+      status.value.timestamp = Date.now();
+      status.value.location = null;
+      status.value.__meta = { timelineVisible: 't' };
+      
+      status.save(function (err) {
+	if (err) {
+	  console.error(err);
+	}
+	callbackFired = true;
+	callback(null);
+      });
     }
 
     app.session.getOrCreateItem(app.ITEMS.avatar, function (err, avatar) {
@@ -288,16 +205,17 @@ app.createInitialItems = function createInitialItems (callback) {
       
       if (avatar.value.avatar === undefined) {
         avatar.value = {
-	  avatar: null,
-	  __timelineIgnore: true
+	  avatar: null
 	};
       }
-      callback(null);
+      if (!callbackFired) {
+	callback(null);
+      }
     });
   });
 };
 
-app.tlOptions = { lastItemRead: 0, offset: 0, limit: 5 };
+// app.tlOptions = { lastItemRead: 0, offset: 0, limit: 5 };
 
 app.feedIsLoading = false;
 
@@ -420,8 +338,6 @@ app.renderTimeline = function renderTimeline (timeline, append) {
   if (!timeline.length) {
     return;
   }
-
-  // var shareAvatarWith = {};
   
   for (var i = 0; i < timeline.length; i++) {
     console.log('from: ', timeline[i].creatorUsername, 'to: ', app.username);
@@ -430,11 +346,6 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     if (_username != app.username) {
       try {
 	var contact = app.session.items._trusted_peers.value[_username];
-	// if (contact) {
-	  // if (!contact.avatarShared) {
-	  //   shareAvatarWith[_username] = null;
-	  // }
-	// }
       } catch (ex) {
 	console.error(ex);
       }
@@ -481,7 +392,7 @@ app.renderTimeline = function renderTimeline (timeline, append) {
         // Let's tell the user about this 1 way connection
         console.warn('User ', user, ' is not trusted - one way connection');
 	console.warn('User ', user, ' is not trusted - Adding this peer to contacts as *untrusted*');
-	// add this usser to contacts as an untrusted user
+	// add this user to contacts as an untrusted user
 	app.session.items._trusted_peers.value[user] = { avatar: null,
 						         trustedAt: null,
 							 avatarUpdated: null,
@@ -491,7 +402,6 @@ app.renderTimeline = function renderTimeline (timeline, append) {
       } else {
 	app.session.items._trusted_peers.value[user].avatar = timeline[i].value.avatar;
 	app.session.items._trusted_peers.value[user].avatarUpdated = Date.now();
-	app.session.items._trusted_peers.value[user].__timelineIgnore = true;
 	app.session.items._trusted_peers.save(function (err) {
 	  if (err) {
 	    console.error(err);
@@ -541,13 +451,6 @@ app.renderTimeline = function renderTimeline (timeline, append) {
   if (!$("#fetch-previous-items").is(":visible")) {
     $("#fetch-previous-items").show();
   }
-
-  // var shareWith = Object.keys(shareAvatarWith);
-  // console.log('shareWith', shareWith);
-  // if (shareWith.length) {
-  //   console.log('shareAvatar()');
-  //   app.shareAvatar(shareWith);
-  // }  
 };
 
 app.handleAvatar = function handleAvatar(peerName, avatarMeta) {
@@ -650,7 +553,6 @@ app.shareAvatar = function shareAvatar (avatarArr) {
 	}
 	console.log('avatarShared');
 	app.session.items._trusted_peers.value[peer.username].avatarShared = Date.now();
-	app.session.items._trusted_peers.value[peer.username].__timelineIgnore = true;
 	
 	if (i == avatarArr.length) {
 	  // XXX: save the contacts on quit or logout
@@ -784,7 +686,8 @@ app.setMyStatus = function setMyStatus() {
      avatarMeta: {
        nameHmac: app.session.items.avatar.nameHmac,
        updated: app.session.items.avatar.value.updated
-     }
+     },
+     __meta: { timelineVisible: 't' }
    };
   if (imageData) {
     updateObj.imageData = imageData;
@@ -796,6 +699,7 @@ app.setMyStatus = function setMyStatus() {
   app.session.items.status.value.imageData = updateObj.imageData;
   app.session.items.status.value.tz = app.tz.name();
   app.session.items.status.value.avatarMeta = updateObj.avatarMeta;
+  app.session.items.status.value.__meta = updateObj.__meta;
   
   app.session.items.status.save(function (err) {
     if (err) {
@@ -836,7 +740,9 @@ app.displayInitialView = function displayInitialView() {
     // Load the timeline
     app.loadInitialTimeline();
   } else {
-    $('#first-run-empty-feed-msg').show();
+    setTimeout(function () {
+      app.loadInitialTimeline();
+    }, 1000);
   }
 };
 
@@ -845,7 +751,6 @@ app.updateContactAvatar = function updateContactAvatar (username, value) {
     return console.error('Incorrect arguments, cannot update contact avatar');
   }
   app.session.items._trusted_peers.value[username].avatar = value.avatar;
-  app.session.items._trusted_peers.value[username].__timelineIgnore = true;
   app.session.items._trusted_peers.save(function (err) {
     if (err) {
       console.error(err, 'Cannot update avatar for ' + username);
@@ -1041,66 +946,70 @@ app.shareStatus = function shareStatus (peerObj) {
 app.handleMessage = function handleMessage (message) {
   // just add the shared container hmac + username to the feed container
   console.log('handleMessage();', arguments);
-  if (message.headers.notification != 'sharedItem') {
-    return;
-  }
 
-  var itemNameHmac = message.payload.itemNameHmac;
-  var username = message.payload.from;
-  // cache the hmac sent to us!
-  var newFeedHmac = {
-    fromUser: username,
-    itemNameHmac: itemNameHmac,
-    timestamp: Date.now()
-  };
+  // XXXddahl: we no longer use the 'feed' item or depend on web sockets for the sharing of
+  //           status messages. Need to re-tool this for DMs or avatars
+  
+  // if (message.headers.notification != 'sharedItem') {
+  //   return;
+  // }
 
-  if (app.session.items.feed.value.feedHmacs[itemNameHmac]) {
-    app.session.getPeer(username, function (err, peer) {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      // We need to load and watch this container
-      app.session.getSharedItem(itemNameHmac, peer, function (err, statusItem) {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        // delete this inbox message
-        app.deleteInboxMessage(message.messageId);
-	// If this is an avatar, save to contacts
-	if (statusItem.value.avatar) {
-	  app.updateContactAvatar(username, statusItem.value);
-	  // XXXddahl: Update timeline with a "new avatar message??"
-	} else {
-          // create status item, prepend to the top of the list
-          app.updatePeerStatus(username, statusItem.value);
-        }
-      });
-    });
-  } else {
-    app.session.items.feed.value.feedHmacs[itemNameHmac] = newFeedHmac;
-    app.session.items.feed.save(function saveCallback (err) {
-      if (err) {
-        console.error(err);
-      }
-      app.session.getPeer(username, function (err, peer) {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        // We need to load and watch this container
-        app.session.getSharedItem(itemNameHmac, peer, function (err, statusItem) {
-          if (err) {
-            console.error(err);
-            return;
-          }
-          // delete this inbox message
-          app.deleteInboxMessage(message.messageId);
-        });
-      });
-    });
-  }
+  // var itemNameHmac = message.payload.itemNameHmac;
+  // var username = message.payload.from;
+  // // cache the hmac sent to us!
+  // var newFeedHmac = {
+  //   fromUser: username,
+  //   itemNameHmac: itemNameHmac,
+  //   timestamp: Date.now()
+  // };
+
+  // if (app.session.items.feed.value.feedHmacs[itemNameHmac]) {
+  //   app.session.getPeer(username, function (err, peer) {
+  //     if (err) {
+  //       console.error(err);
+  //       return;
+  //     }
+  //     // We need to load and watch this container
+  //     app.session.getSharedItem(itemNameHmac, peer, function (err, statusItem) {
+  //       if (err) {
+  //         console.error(err);
+  //         return;
+  //       }
+  //       // delete this inbox message
+  //       app.deleteInboxMessage(message.messageId);
+  // 	// If this is an avatar, save to contacts
+  // 	if (statusItem.value.avatar) {
+  // 	  app.updateContactAvatar(username, statusItem.value);
+  // 	  // XXXddahl: Update timeline with a "new avatar message??"
+  // 	} else {
+  //         // create status item, prepend to the top of the list
+  //         app.updatePeerStatus(username, statusItem.value);
+  //       }
+  //     });
+  //   });
+  // } else {
+  //   app.session.items.feed.value.feedHmacs[itemNameHmac] = newFeedHmac;
+  //   app.session.items.feed.save(function saveCallback (err) {
+  //     if (err) {
+  //       console.error(err);
+  //     }
+  //     app.session.getPeer(username, function (err, peer) {
+  //       if (err) {
+  //         console.error(err);
+  //         return;
+  //       }
+  //       // We need to load and watch this container
+  //       app.session.getSharedItem(itemNameHmac, peer, function (err, statusItem) {
+  //         if (err) {
+  //           console.error(err);
+  //           return;
+  //         }
+  //         // delete this inbox message
+  //         app.deleteInboxMessage(message.messageId);
+  //       });
+  //     });
+  //   });
+  // }
 };
 
 app.deleteInboxMessage = function (messageId) {
@@ -1136,32 +1045,6 @@ app.purgeInboxMessage = function purgeInboxMessage (id) {
   delete app.session.inbox.messages[id];
 };
 
-app.updatePeerStatus = function updatePeerStatus(username, statusItem) {
-  console.log('updatePeerStatus()', arguments);
-  var klass = '.' + username + '-' + statusItem.timestamp;
-  console.log('klass: ', klass);
-  var checkDupes = $(klass);
-  if (checkDupes.length > 0) {
-    // Lets not prepend a duplicate status update:)
-    return;
-  }
-
-  statusItem.username = username;
-  statusItem.statusText = statusItem.status;
-  statusItem.humaneTimestamp =
-    app.formatDate(statusItem.timestamp, statusItem.tz);
-
-  var avatarMetaName = username + '-avatar-meta';
-  if (app.session.items[avatarMetaName]) {
-    statusItem.avatar = app.session.items[avatarMetaName].value.avatar;
-  } else if (app.session.items._trusted_peers.value[username]) {
-    statusItem.avatar = app.session.items._trusted_peers.value[username].avatar;
-  }
-  
-  var statusNode = app.createMediaElement(statusItem);
-  $('#my-feed-entries').prepend(statusNode);
-};
-
 app.setMyLocation = function setMyLocation() {
   // set location data to the location div
   var accuracy = true;
@@ -1181,29 +1064,8 @@ app.setMyLocation = function setMyLocation() {
     var lng = new Number(crd.longitude).toFixed(1);
     var geoIdx = lat + '__' + lng;
 
-    // if (!app.getPlaceName) {
-    //   // load the geoPlaces script
-    //   $.ajaxSetup({
-    // 	cache: true
-    //   });
-    //   console.log('loading geo-places...');
-    //   $.getScript( "js/geo-places.js", function( data, textStatus, jqxhr ) {
-    // 	console.log( "geo-places is loaded" );
-    // 	app.getPlaceName = function getPlaceName (geoIdx) {
-    // 	  var placeArr = window.geoPlaces[geoIdx];
-    // 	  if (placeArr) {
-    // 	    return placeArr[0] + ' ' +  placeArr[2] + ' ' + placeArr[1];
-    // 	  } else {
-    // 	    return 'unknown';
-    // 	  }
-    // 	};
-    // 	var name = app.getPlaceName(geoIdx);
-    // 	app.setLocationName(name);
-    //   });
-    // } else {
     var name = app.getPlaceName(geoIdx);
     app.setLocationName(name);
-    // }
   };
   
   function error(err) {
