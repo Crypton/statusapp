@@ -11,9 +11,15 @@ function onDeviceReady() {
     FastClick.attach(document.body);
   });
 
+  // Check for touchID localstorage
+  if(!window.localStorage.touchidLogin) {
+    window.localStorage.setItem('touchidLogin', 0);
+  }
+
   // Now safe to use device APIs
   app.init();
 
+  
   document.addEventListener('resume', function() {
     setTimeout(function(){
       console.log('Application Resume Event!');
@@ -40,12 +46,16 @@ function onDeviceReady() {
   } catch (ex) {
     console.log('Lock orientation not supported');
   }
+
 }
 
 var app = {
   // Application Constructor
   init: function init() {
     console.log('app initializing!: ', arguments);
+    if (window.localStorage.touchidLogin == 1){
+      touchid.authenticate(function(){app.login()}, function(err){ alert(err)}, "Login to Kloak!");
+    }
 
     // Configure the endpoint:
     crypton.host = app.host;
@@ -222,6 +232,19 @@ var app = {
       app.login();
     });
 
+    $("#use-touchid").click(function (e) {
+      console.log("TouchID button Clicked");
+      if (window.localStorage.touchidLogin == 0) {
+        window.localStorage.setItem('touchidLogin', 1);
+        $('#use-touchid').html("Turn off TouchID");
+        app.alert("TouchID Activated");
+      } else {
+        window.localStorage.setItem('touchidLogin', 0);
+        $('#use-touchid').html("Turn on TouchID");
+        app.alert("TouchID De-Activated");
+      }
+    });
+
     $('#forget-credentials').click(function (e) {
       app.keyChain.removePassphrase(function (err) {
 	if (err) {
@@ -288,8 +311,16 @@ var app = {
       if (!app.keyChain.supported) {
 	$('#forget-credentials')[0].disabled = true;
 	$('#display-passphrase')[0].disabled = true;
+    $('#use-touchid')[0].disabled = true;
       }
       
+      // Set touchID message
+      if (window.localStorage.touchidLogin == 0) {
+        $('#use-touchid').html("Turn on TouchID");
+      } else {
+        $('#use-touchid').html("Turn off TouchID");
+      }
+        
       app.switchView('#my-options-pane', 'Options');
     });
     
