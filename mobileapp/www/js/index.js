@@ -7,6 +7,10 @@
 document.addEventListener("deviceready", onDeviceReady, false);
 
 function onDeviceReady() {
+  $(function() {
+    FastClick.attach(document.body);
+  });
+
   // Now safe to use device APIs
   app.init();
 
