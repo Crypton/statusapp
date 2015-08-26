@@ -18,22 +18,11 @@
   <preference name="webviewbounce" value="false" />
   <preference name="UIWebViewBounce" value="false"/>
   <preference name="orientation" value="portrait" /> 
-  <preference name="SplashScreen" value="screen"/>
-  <preference name="SplashScreenDelay" value="3000" />
   <preference name="android-minSdkVersion" value="14" />
   <!-- <access origin="content:///*" /> -->
-
-  <platform name="android">
-    <allow-navigation href="android-webview-video-poster://*" />
-    <access origin="android-webview-video-poster://*" />
-    <splash src="platforms/android/res/drawable-land-hdpi/screen" density="port-hdpi"/>
-    <splash src="platforms/android/res/drawable-land-ldpi/screen" density="port-ldpi"/>
-    <splash src="platforms/android/res/drawable-land-mdpi/screen" density="port-mdpi"/>
-    <splash src="platforms/android/res/drawable-land-xhdpi/screen" density="port-xhdpi"/>
-    <splash src="platforms/android/res/drawable-port-hdpi/screen" density="port-hdpi"/>
-    <splash src="platforms/android/res/drawable-port-ldpi/screen" density="port-ldpi"/>
-    <splash src="platforms/android/res/drawable-port-mdpi/screen" density="port-mdpi"/>
-    <splash src="platforms/android/res/drawable-port-xhdpi/screen" density="port-xhdpi"/>
-    </platform>
   
+  <platform name="ios">
+    <preference name="SplashScreen" value="screen"/>
+    <preference name="SplashScreenDelay" value="3000" />
+  </platform>
 </widget>
