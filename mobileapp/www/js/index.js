@@ -844,6 +844,7 @@ var app = {
         app.alert(err, 'danger');
         app.switchView('#account-login', 'Account');
         app.clearLoginStatus();
+	$('#top-menu').show();
 	$('#top-progress-wrapper').hide();
         return;
       }
