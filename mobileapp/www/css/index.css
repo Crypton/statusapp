@@ -243,7 +243,7 @@ input[type="password"]:focus {
     background: linear-gradient(135deg, rgba(222,45,194,0.9) 0%,rgba(150,13,225,0.9) 100%);
     box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.16), 0px 1px 2.5px 0px rgba(0, 0, 0, 0.26);
     z-index: 10;
-	padding: 2.2rem 0.5rem 0 0.5rem;
+	padding: 1.8rem 0.5rem 0 0.5rem;
     color: #ffffff;
     text-align: center;
 
@@ -260,7 +260,7 @@ input[type="password"]:focus {
 
 #header #header--title {
     flex-grow: 1;
-    font-size: 19px;
+    font-size: 18px;
 }
 
 /* header icon stuff */
