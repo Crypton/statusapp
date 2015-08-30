@@ -164,14 +164,16 @@
 }
 
 .media-timestamp {
-    font-size: 70%;
+    font-size: 10px;
     font-family: Hack;
+    color: #8A8A8A;
 }
 
 .media-location {
-    font-size: 70%;
+    font-size: 10px;
     font-weight: bold;
     font-family: Hack;
+    color: #8A8A8A;
 }
 
 .media-avatar-update {
