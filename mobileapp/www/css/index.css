@@ -3,6 +3,36 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 @font-face {
+    font-family: WorkSans;
+    src: url(fonts/WorkSans-Regular.ttf);
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: WorkSans;
+    src: url(fonts/WorkSans-Light.ttf);
+    font-weight: light;
+}
+
+@font-face {
+    font-family: WorkSans;
+    src: url(fonts/WorkSans-Medium.ttf);
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: Hack;
+    src: url(fonts/Hack-Regular.ttf);
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: Hack;
+    src: url(fonts/Hack-Bold.ttf);
+    font-weight: bold;
+}
+
+@font-face {
     font-family: Roboto;
     src: url(fonts/Roboto-Regular.ttf);
     font-weight: normal;
@@ -261,6 +291,8 @@ input[type="password"]:focus {
 #header #header--title {
     flex-grow: 1;
     font-size: 18px;
+    font-family: WorkSans;
+    font-weight: bold;
 }
 
 /* header icon stuff */

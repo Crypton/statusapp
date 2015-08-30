@@ -78,7 +78,7 @@ app.setCustomEvents = function setCustomEvents () {
     app.switchView('#stati', 'Update Status');
     $('#set-my-status-textarea').focus();
   });
-  
+
   $('#my-feed').click(function () {
     app.hideMenu();
     app.switchView('#feed', app.FEED_LABEL);
@@ -95,7 +95,7 @@ app.setCustomEvents = function setCustomEvents () {
     app.switchView('#feed', app.FEED_LABEL);
     app.loadNewTimeline();
   });
-  
+
   $('#refresh-feed').click(function () {
     app.hideMenu();
     app.switchView('#feed', app.FEED_LABEL);
@@ -160,7 +160,7 @@ app.pickAnImage = function pickAnImage () {
 app.customInitialization = function customInitialization() {
   console.log('customInitialization()');
   var that = this;
-  
+
   // XXXddahl: need a indeterminate progress indicator
   app.createInitialItems(function (err) {
     if (err) {
@@ -187,7 +187,7 @@ app.createInitialItems = function createInitialItems (callback) {
       status.value.timestamp = Date.now();
       status.value.location = null;
       status.value.__meta = { timelineVisible: 't' };
-      
+
       status.save(function (err) {
 	if (err) {
 	  console.error(err);
@@ -202,7 +202,7 @@ app.createInitialItems = function createInitialItems (callback) {
         callback(err);
         return console.error(err);
       }
-      
+
       if (avatar.value.avatar === undefined) {
         avatar.value = {
 	  avatar: null
@@ -292,7 +292,7 @@ app.deferUpdateFeedAvatars = function deferUpdateFeedAvatars(ms) {
       timeout = 0;
     }
   }
-  
+
   setTimeout(function () {
     app.updateFeedAvatars();
   }, timeout);
@@ -307,7 +307,7 @@ app.loadPastTimeline = function loadPastTimeline () {
   $('#top-progress-wrapper').show();
   var beforeId = $("#my-feed-entries").children().last().attr('id');
   if (typeof parseInt(beforeId) == 'number') {
-    var emptyItems = $('.empty-timeline-element').length; 
+    var emptyItems = $('.empty-timeline-element').length;
     var options = { limit: 15, beforeId: beforeId };
     app.session.getTimelineBefore(options, function tlCallback (err, timeline) {
       if (err) {
@@ -338,7 +338,7 @@ app.renderTimeline = function renderTimeline (timeline, append) {
   if (!timeline.length) {
     return;
   }
-  
+
   for (var i = 0; i < timeline.length; i++) {
     console.log('from: ', timeline[i].creatorUsername, 'to: ', app.username);
     console.log('value: ', timeline[i].value);
@@ -350,7 +350,7 @@ app.renderTimeline = function renderTimeline (timeline, append) {
 	console.error(ex);
       }
     }
-    
+
     var node;
     if (!timeline[i].value) {
       // this is some other kind of item, not a status update!
@@ -423,7 +423,7 @@ app.renderTimeline = function renderTimeline (timeline, append) {
       }
       continue;
     }
-    
+
     // Begin status update handling
     console.log('Status Update! creating media node');
     var localUser = (timeline[i].creatorUsername == app.username);
@@ -435,7 +435,7 @@ app.renderTimeline = function renderTimeline (timeline, append) {
       app.handleAvatar(timeline[i].creatorUsername, timeline[i].value.avatarMeta);
     }
 
-    
+
     // Make sure to hide the "empty feed message"
     if ($("#first-run-empty-feed-msg").is(":visible")) {
       $("#first-run-empty-feed-msg").hide();
@@ -483,7 +483,7 @@ app.handleAvatar = function handleAvatar(peerName, avatarMeta) {
 		nameHmac: avatarMeta.nameHmac,
 		avatar: sharedItem.value.avatar
 	      };
-	      
+
 	    });
 	  });
 	});
@@ -553,7 +553,7 @@ app.shareAvatar = function shareAvatar (avatarArr) {
 	}
 	console.log('avatarShared');
 	app.session.items._trusted_peers.value[peer.username].avatarShared = Date.now();
-	
+
 	if (i == avatarArr.length) {
 	  // XXX: save the contacts on quit or logout
 	  app.session.items._trusted_peers.save(function (err) {
@@ -615,14 +615,14 @@ app.updateEmptyTimelineElements = function updateEmptyTimelineElements () {
 
 app.transformEmptyTimelineElement =
 function transformEmptyTimelineElement (emptyId, timelineElement) {
-  
+
   var emptyElement = $('#' + emptyId);
   var localUser = (timelineElement.creatorUsername == app.username);
   var data = app.massageTimelineUpdate(timelineElement);
   data.itemId = timelineElement.timelineId;
   console.log('rendered timelineid: ', timelineElement.timelineId);
   app.createMediaElement(data, localUser, emptyElement);
-  
+
 };
 
 app.transformedTimelineElements = {};
@@ -665,7 +665,7 @@ app.setMyStatus = function setMyStatus() {
   // validate length of data to be sent
   var status = $('#set-my-status-textarea').val();
   status = app.escapeHtml(status);
-  
+
   if (!status.length) {
     return app.alert('Please enter a status update', 'danger');
   }
@@ -700,7 +700,7 @@ app.setMyStatus = function setMyStatus() {
   app.session.items.status.value.tz = app.tz.name();
   app.session.items.status.value.avatarMeta = updateObj.avatarMeta;
   app.session.items.status.value.__meta = updateObj.__meta;
-  
+
   app.session.items.status.save(function (err) {
     if (err) {
       app.toggleSetStatusProgress();
@@ -805,7 +805,7 @@ function createMediaElement(data, localUser, existingNode) {
   if (app.session.items[avatarMetaName]) {
     data.avatar = app.session.items[avatarMetaName].value.avatar;
   }
-  
+
   var avatarMarkup;
   if (!data.avatar) {
     // Make a stand-in avatar
@@ -848,14 +848,14 @@ function createMediaElement(data, localUser, existingNode) {
   	   + '  </a>'
            + '  <div class="bd media-metadata">'
            + '    <div class="status-block">'
-  	   + '    <div class="media-username">' + data.username + '</div>'
+  	   + '    <div class="media-username">@' + data.username + '</div>'
 	   + '    <span class="media-status">'
 	   + status
            + '</span></div>'
-	   + '<span class="media-timestamp">'
+	   + '<footer class="media-footer"> <span class="media-timestamp">'
            + data.humaneTimestamp + '</span>'
            + '    <span class="media-location">'
-           + gps + '</span>';
+           + gps + '</span></footer>';
   if (imageHtml) {
     html = html + imageHtml;
   }
@@ -949,7 +949,7 @@ app.handleMessage = function handleMessage (message) {
 
   // XXXddahl: we no longer use the 'feed' item or depend on web sockets for the sharing of
   //           status messages. Need to re-tool this for DMs or avatars
-  
+
   // if (message.headers.notification != 'sharedItem') {
   //   return;
   // }
@@ -1067,7 +1067,7 @@ app.setMyLocation = function setMyLocation() {
     var name = app.getPlaceName(geoIdx);
     app.setLocationName(name);
   };
-  
+
   function error(err) {
     console.error('Cannot set location');
     console.error(err);
