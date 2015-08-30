@@ -111,6 +111,7 @@
 .media {
     margin-top: 10px !important;
     font-family: WorkSans;
+    -webkit-font-smoothing: subpixel-antialiased;
 }
 
 .media, .bd {
@@ -120,7 +121,7 @@
 
 .media .img {
     float: left;
-    margin: 0 1rem;
+    margin: 0 1.5rem 0 1.65rem;
     width: 5rem;
     height: 5rem;
     overflow: hidden;
@@ -145,7 +146,7 @@
 .media-metadata {
     border-bottom:1px solid rgba(0, 0, 0, 0.1);
     /* border-bottom: 1px solid #d5d5d5; */
-    padding-bottom: 1.6rem;
+    padding: 0 1rem 1.6rem 0;
 }
 
 .media-username {
@@ -165,18 +166,16 @@
 }
 
 .media-timestamp {
-    font-size: 10px;
-    font-family: Hack;
+    font-size: 11px;
+    /* font-family: Hack; */
     color: #8A8A8A;
-    display: block;
 }
 
 .media-location {
-    font-size: 10px;
+    font-size: 11px;
     font-weight: bold;
-    font-family: Hack;
+    /* font-family: Hack; */
     color: #8A8A8A;
-    display: block;
 }
 
 .media-avatar-update {
