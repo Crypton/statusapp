@@ -6,11 +6,6 @@
 
 document.addEventListener("deviceready", onDeviceReady, false);
 
-// Global variables on the fly
-// Intended for simple boolean values, NOT for passing details!
-// Usage: if(thing_to_set) {GLOBALS.foo = [true || false]}.
-var GLOBALS = {};
-
 function onDeviceReady() {
   $(function() {
     FastClick.attach(document.body);
@@ -98,7 +93,7 @@ var app = {
 	    // just display the normal login password. something is wrong...
 	    return defaultLoginBehavior();
 	  } else {
-        GLOBALS.has_p = true;
+        app.hasPassphrase = true;
       }
 	  // we have a passphrase!
 	  $('#username-login').hide();
@@ -252,20 +247,24 @@ var app = {
     });
 
     $('#forget-credentials').click(function (e) {
-      app.keyChain.removePassphrase(function (err) {
-	if (err) {
-	  console.error(err);
-	  app.alert('There is no passphrase to remove from keychain', 'warning');
-	} else {
-	  app.alert('Passphrase removed!', 'info');
-	}
-	delete window.localStorage.lastUserLogin;
-	// re-set the login screen
-	$('#username-login').show();
-	$('#username-placeholder').html('').hide();
-	$('#password-login').show();
-	e.disabled = true;
-      });
+        if (window.localStorage.touchidLogin == 1) {
+          app.alert("Please disable TouchID before Forgetting Credentials");
+        } else {
+          app.keyChain.removePassphrase(function (err) {
+	        if (err) {
+	        console.error(err);
+	        app.alert('There is no passphrase to remove from keychain', 'warning');
+	      } else {
+	        app.alert('Passphrase removed!', 'info');
+	      }
+	      delete window.localStorage.lastUserLogin;
+	      // re-set the login screen
+	      $('#username-login').show();
+	      $('#username-placeholder').html('').hide();
+	      $('#password-login').show();
+	      e.disabled = true;
+        });
+      }
     });
     
     $('#display-passphrase').click(function (e) {
@@ -314,7 +313,7 @@ var app = {
       app.hideMenu();
 
       // disable forget credentials if not supported
-      if (!app.keyChain.supported || !GLOBALS.has_p) {
+      if (!app.keyChain.supported || !app.hasPassphrase) {
 	    $('#forget-credentials')[0].disabled = true;
 	    $('#display-passphrase')[0].disabled = true
       }
@@ -322,7 +321,7 @@ var app = {
       // Hide touchID button if touchID not supported
       // or no passphrase stored.
       touchid.checkSupport(function() {
-          if (!GLOBALS.has_p) {
+          if (!app.hasPassphrase) {
             console.error('Passphrase NOT Stored');
             $('#touchid-wrapper').hide();
           }
