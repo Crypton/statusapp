@@ -6,6 +6,11 @@
 
 document.addEventListener("deviceready", onDeviceReady, false);
 
+// Global variables on the fly
+// Intended for simple boolean values, NOT for passing details!
+// Usage: if(thing_to_set) {GLOBALS.foo = [true || false]}.
+var GLOBALS = {};
+
 function onDeviceReady() {
   $(function() {
     FastClick.attach(document.body);
@@ -92,7 +97,9 @@ var app = {
 	    console.error(err);
 	    // just display the normal login password. something is wrong...
 	    return defaultLoginBehavior();
-	  }
+	  } else {
+        GLOBALS.has_p = true;
+      }
 	  // we have a passphrase!
 	  $('#username-login').hide();
 	  $('#username-placeholder').html(lastUser).show();
@@ -233,7 +240,6 @@ var app = {
     });
 
     $("#use-touchid").click(function (e) {
-      console.log("TouchID button Clicked");
       if (window.localStorage.touchidLogin == 0) {
         window.localStorage.setItem('touchidLogin', 1);
         $('#use-touchid').html("Turn off TouchID");
@@ -308,17 +314,29 @@ var app = {
       app.hideMenu();
 
       // disable forget credentials if not supported
-      if (!app.keyChain.supported) {
-	$('#forget-credentials')[0].disabled = true;
-	$('#display-passphrase')[0].disabled = true;
-    $('#use-touchid')[0].disabled = true;
+      if (!app.keyChain.supported || !GLOBALS.has_p) {
+	    $('#forget-credentials')[0].disabled = true;
+	    $('#display-passphrase')[0].disabled = true
       }
-      
+
+      // Hide touchID button if touchID not supported
+      // or no passphrase stored.
+      touchid.checkSupport(function() {
+          if (!GLOBALS.has_p) {
+            console.error('Passphrase NOT Stored');
+            $('#touchid-wrapper').hide();
+          }
+        },
+        function() {
+          console.error("TouchID NOT Supported");
+          $('#touchid-wrapper').hide();
+        });
+
       // Set touchID message
       if (window.localStorage.touchidLogin == 0) {
-        $('#use-touchid').html("Turn on TouchID");
+        $('#use-touchid').html("TURN ON TOUCH ID");
       } else {
-        $('#use-touchid').html("Turn off TouchID");
+        $('#use-touchid').html("TURN OFF TOUCH ID");
       }
         
       app.switchView('#my-options-pane', 'Options');
