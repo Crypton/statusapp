@@ -53,9 +53,7 @@ var app = {
     
     this.card =  new crypton.Card();
     this.bindEvents();
-    $('#password-login').show();
-    $('#username-login').show();
-    
+
     function defaultLoginBehavior () {
       app.enableLoginButtons();
       app.switchView('#account-login');
@@ -101,7 +99,7 @@ var app = {
       });
     } else {
       // check if keychain is supported
-      defaultLoginBehavior();
+      app.switchView('#access-options');
     }
    // Offline
     window.Offline.options = {
@@ -181,9 +179,14 @@ var app = {
       app.about();
     });
     
-    $("#register-btn").click(function (e) {
+    $("#register-btn, #register-btn2").click(function (e) {
       e.preventDefault();
       app.beginRegistration();
+    });
+
+    $("#has-account-btn").click(function(e) {
+      e.preventDefault();
+      app.switchView('#account-login');
     });
 
     $("#register-generate-cancel-btn").click(function (e) {

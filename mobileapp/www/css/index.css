@@ -685,3 +685,13 @@ body {
     margin-bottom: 1em;
 }
 
+#access-options {
+    margin 0 auto;
+    padding-top: 25%;
+    text-align: center;
+}
+
+#access-options > button {
+    display: block;
+    margin: 10px auto;
+}
