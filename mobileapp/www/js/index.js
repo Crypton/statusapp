@@ -498,9 +498,9 @@ var app = {
   },
 
   switchUser: function switchUser() {
-    $('#username-login').show();
+    $('#username-login').show().val('');
     $('#username-placeholder').html('').hide();
-    $('#password-login').show();
+    $('#password-login').show().val('');
     $('#remember-credentials')[0].checked = true;
     $('#remember-credentials').show();
   },
@@ -853,6 +853,7 @@ var app = {
         app.clearLoginStatus();
 	$('#top-menu').show();
 	$('#top-progress-wrapper').hide();
+        $('#password-login').val('');
         return;
       }
 
