@@ -27,6 +27,12 @@ org.apache.cordova.device
 
 com.crypho.plugins.securestorage
 
+nl.x-services.plugins.actionsheet
+
+com.ionic.keyboard
+
+org.apache.cordova.statusbar
+
 # Android Only
 
 net.yoik.cordova.plugins.screenorientation.wkwebview

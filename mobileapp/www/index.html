@@ -35,9 +35,9 @@
 	<li class="header-btn-wrap">
 	  <img id="my-fingerprint-top-menu" src="svg/card-white.svg" />
 	</li>
-	<li class="header-btn-wrap">
-	  <img id="header-btn-update" src="svg/post.svg" />
-	</li>
+	<!-- <li class="header-btn-wrap"> -->
+	<!--   <img id="header-btn-update" src="svg/post.svg" /> -->
+	<!-- </li> -->
 	<li class="header-btn-wrap">
 	  <img id="header-btn-refresh" src="svg/sync.svg" />
 	</li>
@@ -119,7 +119,7 @@
 		  id="fetch-previous-items">Previous...</button>
 	</div>
       </div>
-
+      
       <div id="find-users-view" class="view">
 	<div id="find-user-form" class="input-group input-group-lg">
 	  <input id="find-someone" 
@@ -406,6 +406,27 @@
       </div>
 
     </div>
+
+    <!-- POST INPUT WRAPPER -->
+    <div id="post-input-wrapper">
+      <a id="post-attach" href="#">
+	<img id="post-attach-icon" src="svg/attach.svg" /></a>
+      <textarea rows="3" id="post-textarea" class="post-textarea" placeholder="Enlighten us, please!"></textarea> <span id="image-data"></span>
+      <a id="post-send" href="#">
+	<img id="post-send-icon" src="svg/send-white.svg" />
+      </a>
+      <div id="img-location-wrapper">
+	<div id="location-data"></div>
+      </div>
+    </div>
+
+    <!-- POST BUTTON -->
+    <div id="post-button-floating-wrapper">
+      <a id="post-button-floating" href="#"><img class="post-button-svg" src="svg/post.svg" /></a>
+    </div>
+
+
+
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="js/crypton.js"></script>
     <script type="text/javascript" src="js/index.js"></script>

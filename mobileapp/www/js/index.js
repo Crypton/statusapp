@@ -10,7 +10,7 @@ function onDeviceReady() {
   $(function() {
     FastClick.attach(document.body);
   });
-
+  
   // Now safe to use device APIs
   app.init();
 
@@ -40,6 +40,7 @@ function onDeviceReady() {
   } catch (ex) {
     console.log('Lock orientation not supported');
   }
+  cordova.plugins.Keyboard.disableScroll(true);
 }
 
 var app = {
@@ -103,7 +104,7 @@ var app = {
       // check if keychain is supported
       defaultLoginBehavior();
     }
-   // Offline
+    // Offline
     window.Offline.options = {
       // Should we check the connection status immediatly on page load.
       checkOnLoad: false,
@@ -147,7 +148,7 @@ var app = {
   
   URL: 'https://zk.gs',
 
-  VERSION: "0.0.2",
+  VERSION: "0.3.0",
 
   get isNodeWebKit() { return (typeof process == "object"); },
 
@@ -405,6 +406,12 @@ var app = {
     } else {
       $('#login-progress').hide();
     }
+
+    if (id == "#feed") {
+      $('#post-button-floating-wrapper').show();
+    } else {
+      $('#post-button-floating-wrapper').hide();
+    }
   },
   
   // // Update DOM on a Received Event
@@ -427,7 +434,7 @@ var app = {
   //   console.log('Received Event: ' + id);
   // },
 
-  alert: function (message, level) {
+  alert: function _alert (message, level) {
     // success, info, warning, danger
     if (!level) {
       level = 'warning';
@@ -599,7 +606,7 @@ var app = {
     if (options) {
       width = options.width || 320;
       height = options.height || 240;
-      quality = options.quality || 50;
+      quality = options.quality || 70;
       cameraDirection = options.cameraDirection || cameraDirectionOptions.BACK;
       pictureSourceType = options.pictureSourceType || navigator.camera.PictureSourceType.CAMERA;
     }

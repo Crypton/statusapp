@@ -102,8 +102,12 @@ app.setCustomEvents = function setCustomEvents () {
     app.loadNewTimeline();
   });
 
-  $('#set-my-status-btn').click(function () {
+  $('#post-send').click(function () {
     app.setMyStatus();
+  });
+
+  $('#post-button-floating').click(function () {
+    app.makeNewPost();
   });
 
   $('#include-gps-btn').click(function () {
@@ -121,6 +125,118 @@ app.setCustomEvents = function setCustomEvents () {
   $('#fetch-previous-items').click(function () {
     app.loadPastTimeline();
   });
+
+  $('#post-attach').click(function () {
+    app.postingUIActionSheet();
+  });
+
+  $('#feed').click(function () {
+    try {
+      $('#post-input-wrapper').hide();
+      $('#post-button-floating-wrapper').show();
+    } catch (ex) {
+      console.warn(ex);
+    }
+  });
+};
+
+app.hidePostUI = function hidePostUI () {
+  $('#post-input-wrapper').hide();
+  $('#post-button-floating-wrapper').show();
+};
+
+app.makeNewPost = function makeNewPost() {
+  // show input UI which will trigger the keyboard
+  $('#post-button-floating-wrapper').hide();
+  $('#post-input-wrapper').show();
+
+  // $('#post-textarea').focus(function (e) {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   window.scrollTo(0,0);
+  // });
+  
+  $('#post-textarea').focus();
+  setTimeout(function () {
+    $('#post-input-wrapper')[0].scrollIntoView({behavior: "smooth"});
+  }, 0);
+};
+
+app.postingUIActionSheet = function postingUIActionSheet () {
+  var options = {
+    'androidTheme' : window.plugins.actionsheet.ANDROID_THEMES.THEME_HOLO_LIGHT,
+    'buttonLabels': ['Add Location', 'Take Photo', 'Choose Photo'],
+    'addCancelButtonWithLabel': 'Cancel',
+    'androidEnableCancelButton' : true
+  };
+
+  function callback(buttonIdx) {
+    console.log(buttonIdx);
+    switch (buttonIdx) {
+    case 1:
+      // Add Location
+      console.log('Add location!');
+      function addLocationCallback() {
+	// app.makeNewPost();
+	setTimeout(function () { $('#post-textarea').focus(); }, 200);
+      }
+      app.setMyLocation(addLocationCallback);
+      $('#post-textarea').focus();
+      // app.makeNewPost();
+      break;
+
+    case 2:
+      // Take Photo
+      var options =
+	{ cameraDirection: 0,
+	  pictureSourceType: navigator.camera.PictureSourceType.CAMERA
+	};
+      app.getPhoto(options, function imgCallback(err, imgData) {
+	if (err) {
+	  console.error(err);
+	  app.alert(err, 'danger');
+	  return;
+	}
+	var img = $('<img src="'  + imgData  +  '" />');
+	$('#image-data').children().remove();
+	$('#image-data').append(img);
+	// app.makeNewPost();
+	$('#post-textarea').focus();
+      });
+      break;
+
+    case 3:
+      // Choose Photo
+      var options =
+	{ cameraDirection: 0,
+	  pictureSourceType: navigator.camera.PictureSourceType.SAVEDPHOTOALBUM
+	};
+      app.getPhoto(options, function imgCallback(err, imgData) {
+	if (err) {
+	  console.error(err);
+	  app.alert('danger', err);
+	  return;
+	}
+	var img = $('<img src="'  + imgData  +  '" />');
+	$('#image-data').children().remove();
+	$('#image-data').append(img);
+	// app.makeNewPost();
+	$('#post-textarea').focus();
+      });
+      break;
+
+    case 4:
+      // Cancel
+      $('#post-textarea').focus();
+      // app.makeNewPost();
+      // app.hidePostUI();
+      return;
+    default:
+      return;
+    }
+  }
+  
+  window.plugins.actionsheet.show(options, callback);
 };
 
 app.takeAPhoto = function takeAPhoto () {
@@ -214,8 +330,6 @@ app.createInitialItems = function createInitialItems (callback) {
     });
   });
 };
-
-// app.tlOptions = { lastItemRead: 0, offset: 0, limit: 5 };
 
 app.feedIsLoading = false;
 
@@ -660,7 +774,7 @@ app.toggleSetStatusProgress = function toggleSetStatusProgress() {
   }
 };
 
-app.setMyStatus = function setMyStatus() {
+app.origsetMyStatus = function origsetMyStatus() {
   // app.toggleSetStatusButton();
   // validate length of data to be sent
   var status = $('#set-my-status-textarea').val();
@@ -710,6 +824,63 @@ app.setMyStatus = function setMyStatus() {
     $('#set-my-status-textarea').val('');
     $('#my-image-to-post').children().remove();
     app.switchView('#feed', app.FEED_LABEL);
+    app.toggleSetStatusProgress();
+    app.loadNewTimeline();
+  });
+};
+
+app.setMyStatus = function setMyStatus() {
+  // app.toggleSetStatusButton();
+  // validate length of data to be sent
+  var status = $('#post-textarea').val();
+  status = app.escapeHtml(status);
+  
+  if (!status.length) {
+    return app.alert('Please enter a status update', 'danger');
+  }
+  if (status.length > 512) {
+    return app.alert('Status update is too long, please shorten it', 'danger');
+  }
+  // update the item
+  app.toggleSetStatusProgress();
+  var imageData;
+  if ($('#image-data').children().length) {
+    imageData = $('#image-data').children()[0].src;
+  }
+   var updateObj= {
+     status: status,
+     location: $('#location-data').text(),
+     timestamp: Date.now(),
+     imageData: null,
+     avatarMeta: {
+       nameHmac: app.session.items.avatar.nameHmac,
+       updated: app.session.items.avatar.value.updated
+     },
+     __meta: { timelineVisible: 't' }
+   };
+  if (imageData) {
+    updateObj.imageData = imageData;
+  }
+
+  app.session.items.status.value.status = updateObj.status;
+  app.session.items.status.value.location = updateObj.location;
+  app.session.items.status.value.timestamp = updateObj.timestamp;
+  app.session.items.status.value.imageData = updateObj.imageData;
+  app.session.items.status.value.tz = app.tz.name();
+  app.session.items.status.value.avatarMeta = updateObj.avatarMeta;
+  app.session.items.status.value.__meta = updateObj.__meta;
+  
+  app.session.items.status.save(function (err) {
+    if (err) {
+      app.toggleSetStatusProgress();
+      console.error(err);
+      return app.alert('Cannot update status', 'danger');
+    }
+    app.hidePostUI();
+    $('#post-textarea').val('');
+    $('#image-data').children().remove();
+    
+    // app.switchView('#feed', app.FEED_LABEL);
     app.toggleSetStatusProgress();
     app.loadNewTimeline();
   });
@@ -1045,7 +1216,38 @@ app.purgeInboxMessage = function purgeInboxMessage (id) {
   delete app.session.inbox.messages[id];
 };
 
-app.setMyLocation = function setMyLocation() {
+// app.setMyLocation = function setMyLocation() {
+//   // set location data to the location div
+//   var accuracy = true;
+//   var options = {
+//     enableHighAccuracy: accuracy,
+//     timeout: 10000,
+//     maximumAge: 6000
+//   };
+
+//   function success(pos) {
+//     var crd = pos.coords;
+//     var gps = crd.latitude + ' ' + crd.longitude;
+//     var obfuGps = app.obfuscateLocation(gps) + ' ';
+//     $('#my-geoloc').text(obfuGps);
+
+//     var lat = new Number(crd.latitude).toFixed(1);
+//     var lng = new Number(crd.longitude).toFixed(1);
+//     var geoIdx = lat + '__' + lng;
+
+//     var name = app.getPlaceName(geoIdx);
+//     app.setLocationName(name);
+//   };
+  
+//   function error(err) {
+//     console.error('Cannot set location');
+//     console.error(err);
+//   };
+
+//   navigator.geolocation.getCurrentPosition(success, error, options);
+// };
+
+app.setMyLocation = function setMyLocation(callback) {
   // set location data to the location div
   var accuracy = true;
   var options = {
@@ -1058,19 +1260,24 @@ app.setMyLocation = function setMyLocation() {
     var crd = pos.coords;
     var gps = crd.latitude + ' ' + crd.longitude;
     var obfuGps = app.obfuscateLocation(gps) + ' ';
-    $('#my-geoloc').text(obfuGps);
+    $('#location-data').text(obfuGps);
 
     var lat = new Number(crd.latitude).toFixed(1);
     var lng = new Number(crd.longitude).toFixed(1);
     var geoIdx = lat + '__' + lng;
 
     var name = app.getPlaceName(geoIdx);
-    app.setLocationName(name);
+    var html = ' <span id="geoloc-name"> <i>near</i> '
+	  + name
+	  + '</span>';
+    $('#location-data').append($(html));
+    callback();
   };
   
   function error(err) {
     console.error('Cannot set location');
     console.error(err);
+    callback(err);
   };
 
   navigator.geolocation.getCurrentPosition(success, error, options);
