@@ -12,8 +12,8 @@ function onDeviceReady() {
   });
 
   // Check for touchID localstorage
-  if(!window.localStorage.touchidLogin) {
-    window.localStorage.setItem('touchidLogin', 0);
+  if(!window.localStorage.touchIdLoginEnabled) {
+    window.localStorage.setItem('touchIdLoginEnabled', 0);
   }
 
   // Now safe to use device APIs
@@ -53,7 +53,7 @@ var app = {
   // Application Constructor
   init: function init() {
     console.log('app initializing!: ', arguments);
-    if (window.localStorage.touchidLogin == 1){
+    if (window.localStorage.touchIdLoginEnabled){
       touchid.authenticate(function(){app.login()}, function(err){ alert(err)}, "Login to Kloak!");
     }
 
@@ -93,7 +93,7 @@ var app = {
 	    // just display the normal login password. something is wrong...
 	    return defaultLoginBehavior();
 	  } else {
-        app.hasPassphrase = true;
+        app.passphraseInKeychain = true;
       }
 	  // we have a passphrase!
 	  $('#username-login').hide();
@@ -235,19 +235,19 @@ var app = {
     });
 
     $("#use-touchid").click(function (e) {
-      if (window.localStorage.touchidLogin == 0) {
-        window.localStorage.setItem('touchidLogin', 1);
+      if (!window.localStorage.touchIdLoginEnabled) {
+        window.localStorage.setItem('touchIdLoginEnabled', 1);
         $('#use-touchid').html("Turn off TouchID");
         app.alert("TouchID Activated");
       } else {
-        window.localStorage.setItem('touchidLogin', 0);
+        window.localStorage.setItem('touchIdLoginEnabled', 0);
         $('#use-touchid').html("Turn on TouchID");
         app.alert("TouchID De-Activated");
       }
     });
 
     $('#forget-credentials').click(function (e) {
-        if (window.localStorage.touchidLogin == 1) {
+        if (window.localStorage.touchIdLoginEnabled) {
           app.alert("Please disable TouchID before Forgetting Credentials");
         } else {
           app.keyChain.removePassphrase(function (err) {
@@ -313,15 +313,16 @@ var app = {
       app.hideMenu();
 
       // disable forget credentials if not supported
-      if (!app.keyChain.supported || !app.hasPassphrase) {
+      if (!app.keyChain.supported || !app.passphraseInKeychain) {
 	    $('#forget-credentials')[0].disabled = true;
 	    $('#display-passphrase')[0].disabled = true
       }
 
       // Hide touchID button if touchID not supported
       // or no passphrase stored.
-      touchid.checkSupport(function() {
-          if (!app.hasPassphrase) {
+      touchid.checkSupport(
+        function() {
+          if (!app.passphraseInKeychain) {
             console.error('Passphrase NOT Stored');
             $('#touchid-wrapper').hide();
           }
@@ -332,10 +333,10 @@ var app = {
         });
 
       // Set touchID message
-      if (window.localStorage.touchidLogin == 0) {
-        $('#use-touchid').html("TURN ON TOUCH ID");
+      if (!window.localStorage.touchIdLoginEnabled) {
+        $('#use-touchid').html("turn on touch id");
       } else {
-        $('#use-touchid').html("TURN OFF TOUCH ID");
+        $('#use-touchid').html("turn off touch id");
       }
         
       app.switchView('#my-options-pane', 'Options');
