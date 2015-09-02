@@ -53,7 +53,8 @@ var app = {
   // Application Constructor
   init: function init() {
     console.log('app initializing!: ', arguments);
-    if (window.localStorage.touchIdLoginEnabled){
+    // Check explicitly for 1 
+    if (window.localStorage.touchIdLoginEnabled == 1){
       touchid.authenticate(function(){app.login()}, function(err){ alert(err)}, "Login to Kloak!");
     }
 
