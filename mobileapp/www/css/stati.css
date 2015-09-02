@@ -110,7 +110,7 @@
 
 .media {
     margin-top: 10px !important;
-    font-family: WorkSans;
+    font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif !important;
     -webkit-font-smoothing: subpixel-antialiased;
 }
 
@@ -159,7 +159,7 @@
 .media-status {
     font-size: 14px;
     font-weight: normal;
-    margin-right: 20%;
+    margin-right: 15%;
     display: block;
     margin-bottom: 0.6rem;
     line-height:1.8rem;
@@ -262,9 +262,13 @@
 
 #fetch-previous-items {
     display: none;
-    width: 90%;
-    margin: 1em;
+    width: 100%;
+    margin: 0 auto;
     text-align: center;
+}
+
+#feed-footer {
+    padding: 2rem 1.5rem;
 }
 
 #top-progress-wrapper {
