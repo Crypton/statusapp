@@ -7,24 +7,32 @@
     <author email="ddahl@nulltxt.se" href="http://nulltxt.se">
     David Dahl
   </author>
-  <content src="index.html" />
-  <access origin="https://kloakstaging.crypton.io" />
-  <access origin="https://zk.gs" />
-  <allow-navigation href="https://kloakstaging.cryopton.io/*" />
-  <allow-navigation href="https://zk.gs/*" />
-  <preference name="target-device" value="universal" />
-  <preference name="BackupWebStorage" value="none" />
-  <preference name="DisallowOverscroll" value="true"/>
-  <preference name="webviewbounce" value="false" />
-  <preference name="UIWebViewBounce" value="false"/>
-  <preference name="orientation" value="portrait" />
-
-  <platform name="ios">
-    <preference name="SplashScreen" value="screen"/>
-    <preference name="SplashScreenDelay" value="2000" />
-  </platform>
-
-  <platform name="android">
-    <preference name="android-minSdkVersion" value="14" />    
-  </platform>
+    <content src="index.html" />
+    <access origin="https://kloakstaging.crypton.io" />
+    <access origin="https://zk.gs" />
+    <allow-navigation href="https://kloakstaging.cryopton.io/*" />
+    <allow-navigation href="https://zk.gs/*" />
+    <preference name="target-device" value="universal" />
+    <preference name="BackupWebStorage" value="none" />
+    <preference name="DisallowOverscroll" value="true" />
+    <preference name="webviewbounce" value="false" />
+    <preference name="UIWebViewBounce" value="false" />
+    <preference name="orientation" value="portrait" />
+    <platform name="ios">
+        <preference name="SplashScreen" value="screen" />
+        <preference name="SplashScreenDelay" value="2000" />
+    </platform>
+    <platform name="android">
+        <preference name="android-minSdkVersion" value="14" />
+    </platform>
+    <plugin name="com.phonegap.plugins.barcodescanner" spec="~2.0.1" />
+    <plugin name="org.apache.cordova.geolocation" spec="~0.3.12" />
+    <plugin name="com.telerik.plugins.wkwebview" spec="~0.5.0" />
+    <plugin name="nl.x-services.plugins.socialsharing" spec="~4.3.19" />
+    <plugin name="org.apache.cordova.statusbar" spec="~0.1.10" />
+    <plugin name="org.apache.cordova.camera" spec="~0.3.6" />
+    <plugin name="org.devgeeks.privacyscreen" spec="~0.0.5" />
+    <plugin name="org.apache.cordova.inappbrowser" spec="~0.6.0" />
+    <plugin name="org.apache.cordova.device" spec="~0.3.0" />
+    <plugin name="com.crypho.plugins.securestorage" spec="~1.1.2" />
 </widget>
