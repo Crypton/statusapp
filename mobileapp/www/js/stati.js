@@ -7,7 +7,7 @@
 
 app.sharingUrl = 'https://kloak.io/';
 
-app.sharingMessage = 'I would like to share messages with you privately via an app called "Kloak". \n\nThis message\'s attachment is my \'App Contact card\', which users exchange in order to establish a private connection. \n\nFor more information: https://zk.gs/ZK/';
+app.sharingMessage = 'I would like to share messages with you privately via an app called "Kloak". \n\nThis message\'s attachment is my \'App Contact card\', which users exchange in order to establish a private connection. \n\nFor more information: https://spideroak.com/solutions/kloak/';
 
 app.sharingTitle = 'Just started using Kloak...';
 
@@ -18,8 +18,6 @@ app.ITEMS = {
 };
 
 app.FEED_LABEL = 'Feed';
-
-app.INITIAL_STATUS_MESSAGE = 'Current Status: null';
 
 app.isReady = false;
 
@@ -69,36 +67,36 @@ app.setCustomEvents = function setCustomEvents () {
 
   $('#my-stati').click(function () {
     app.hideMenu();
-    app.switchView('#stati', 'Update Status');
+    app.switchView('stati', 'Update Status');
     $('#set-my-status-textarea').focus();
   });
 
   $('#header-btn-update').click(function () {
     app.hideMenu();
-    app.switchView('#stati', 'Update Status');
+    app.switchView('stati', 'Update Status');
     $('#set-my-status-textarea').focus();
   });
 
   $('#my-feed').click(function () {
     app.hideMenu();
-    app.switchView('#feed', app.FEED_LABEL);
+    app.switchView('feed', app.FEED_LABEL);
   });
 
   $('#header-refresh-btn').click(function () {
     app.hideMenu();
-    app.switchView('#feed', app.FEED_LABEL);
+    app.switchView('feed', app.FEED_LABEL);
     app.loadNewTimeline();
   });
 
   $('#header-btn-refresh').click(function () {
     app.hideMenu();
-    app.switchView('#feed', app.FEED_LABEL);
+    app.switchView('feed', app.FEED_LABEL);
     app.loadNewTimeline();
   });
 
   $('#refresh-feed').click(function () {
     app.hideMenu();
-    app.switchView('#feed', app.FEED_LABEL);
+    app.switchView('feed', app.FEED_LABEL);
     app.loadNewTimeline();
   });
 
@@ -823,7 +821,7 @@ app.origsetMyStatus = function origsetMyStatus() {
     }
     $('#set-my-status-textarea').val('');
     $('#my-image-to-post').children().remove();
-    app.switchView('#feed', app.FEED_LABEL);
+    app.switchView('feed', app.FEED_LABEL);
     app.toggleSetStatusProgress();
     app.loadNewTimeline();
   });
@@ -880,7 +878,6 @@ app.setMyStatus = function setMyStatus() {
     $('#post-textarea').val('');
     $('#image-data').children().remove();
     
-    // app.switchView('#feed', app.FEED_LABEL);
     app.toggleSetStatusProgress();
     app.loadNewTimeline();
   });
@@ -890,7 +887,7 @@ app.displayInitialView = function displayInitialView() {
   // Check for first run
   if (!app.firstRunIsNow) {
     $('#my-avatar')[0].src = app.session.items.avatar.value.avatar;
-    app.switchView('#feed', app.FEED_LABEL);
+    app.switchView('feed', app.FEED_LABEL);
 
     app.session.on('message', function (message) {
       console.log('session.on("message") event called', message);
@@ -1216,37 +1213,6 @@ app.purgeInboxMessage = function purgeInboxMessage (id) {
   delete app.session.inbox.messages[id];
 };
 
-// app.setMyLocation = function setMyLocation() {
-//   // set location data to the location div
-//   var accuracy = true;
-//   var options = {
-//     enableHighAccuracy: accuracy,
-//     timeout: 10000,
-//     maximumAge: 6000
-//   };
-
-//   function success(pos) {
-//     var crd = pos.coords;
-//     var gps = crd.latitude + ' ' + crd.longitude;
-//     var obfuGps = app.obfuscateLocation(gps) + ' ';
-//     $('#my-geoloc').text(obfuGps);
-
-//     var lat = new Number(crd.latitude).toFixed(1);
-//     var lng = new Number(crd.longitude).toFixed(1);
-//     var geoIdx = lat + '__' + lng;
-
-//     var name = app.getPlaceName(geoIdx);
-//     app.setLocationName(name);
-//   };
-  
-//   function error(err) {
-//     console.error('Cannot set location');
-//     console.error(err);
-//   };
-
-//   navigator.geolocation.getCurrentPosition(success, error, options);
-// };
-
 app.setMyLocation = function setMyLocation(callback) {
   // set location data to the location div
   var accuracy = true;
@@ -1256,7 +1222,7 @@ app.setMyLocation = function setMyLocation(callback) {
     maximumAge: 6000
   };
 
-  function success(pos) {
+  function success (pos) {
     var crd = pos.coords;
     var gps = crd.latitude + ' ' + crd.longitude;
     var obfuGps = app.obfuscateLocation(gps) + ' ';
@@ -1274,7 +1240,7 @@ app.setMyLocation = function setMyLocation(callback) {
     callback();
   };
 
-  function error(err) {
+  function error (err) {
     console.error('Cannot set location');
     console.error(err);
     callback(err);
