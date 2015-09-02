@@ -482,11 +482,15 @@ input[type="password"]:focus {
 }
 
 #header .header-item {
-    flex-shrink:0;
+    flex-grow: 0;
+}
+
+#header nav {
+    display: inline-block;
 }
 
 #header #header--title {
-    flex-grow: 1;
+    flex-shrink: 1;
     font-size: 18px;
     font-family: WorkSans;
     font-weight: bold;
@@ -497,7 +501,7 @@ input[type="password"]:focus {
     width: 2.0rem;
     height: 2.5rem;
     overflow: hidden;
-    display: block;
+    display: inline-block;
     text-indent: -999999999px;
 }
 
