@@ -802,6 +802,9 @@ var app = {
     // generate a long password
     var passphrase = generatePassphrase();
     // display new form
+    if (window.localStorage.lastUserLogin == $('#username-generate').val()) {
+      $('#username-generate').val('');
+    }
     $('#password-generate').val(passphrase);
     $('#username-generate').focus();
   },
