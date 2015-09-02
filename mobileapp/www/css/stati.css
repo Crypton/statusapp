@@ -319,3 +319,83 @@
     padding: 1em;
     border: 1px solid #d1d1d1;
 }
+
+#post-button-floating-wrapper a {
+    width: 100%;
+    height: 100%;
+    
+}
+
+#post-button-floating-wrapper {
+    position: fixed;
+    width: 7rem;
+    height: 7rem;
+    border-radius: 50%;
+    bottom: 2rem;    
+    background-color: rgba(50, 50, 50, 0.85);
+    z-index: 10000;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    display: none;
+    box-shadow: 0 2px 3px 0 rgba(0,0,0,0.15);
+}
+
+#post-input-wrapper {
+    position: fixed;
+    width: 100%;
+    bottom: 0;    
+    background-color: rgba(50, 50, 50, 0.85);
+    z-index: 10000;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    display: none;
+}
+
+#post-input-wrapper textarea {
+    width: 48%;
+    height: 75px;
+    margin-top: 1em;
+}
+
+.post-button-svg {
+    width: 4rem;
+    margin: 0 auto;
+    margin-top: 1rem;
+    margin-left: 1.5rem;
+}
+
+#post-attach-icon {
+    width: 30px;
+    margin-top: -6rem;
+    margin-right: 1rem;
+    margin-left: 1rem;
+}
+
+#post-attach {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+#post-send-icon {
+    width: 30px;
+    margin-top: -6rem;
+    margin-right: 1rem;
+    margin-left: 1rem;
+}
+
+#location-data {
+    color: whitesmoke;
+    padding: 0.3em;
+    width: 100%;
+    text-align: center;
+}
+
+#image-data img {
+    height: 50px;
+    vertical-align: top;
+    margin-top: 2em;
+    border: 2px solid #fff;
+}

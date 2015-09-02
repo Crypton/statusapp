@@ -10,7 +10,7 @@ function onDeviceReady() {
   $(function() {
     FastClick.attach(document.body);
   });
-
+  
   // Now safe to use device APIs
   app.init();
 
@@ -40,6 +40,7 @@ function onDeviceReady() {
   } catch (ex) {
     console.log('Lock orientation not supported');
   }
+  cordova.plugins.Keyboard.disableScroll(true);
 }
 
 var app = {
@@ -58,7 +59,7 @@ var app = {
     
     function defaultLoginBehavior () {
       app.enableLoginButtons();
-      app.switchView('#account-login');
+      app.switchView('account-login');
       // do not show "remember credentials" if keychain is not supported
       if (!app.keyChain.supported) {
 	$('#remember-credentials')[0].checked = false;
@@ -95,7 +96,7 @@ var app = {
 	  $('#remember-credentials-wrapper').hide();
 	  
 	  app.enableLoginButtons();
-	  app.switchView('#account-login');
+	  app.switchView('account-login');
 	  $('#login-btn').focus();
 	});
       });
@@ -103,7 +104,7 @@ var app = {
       // check if keychain is supported
       defaultLoginBehavior();
     }
-   // Offline
+    // Offline
     window.Offline.options = {
       // Should we check the connection status immediatly on page load.
       checkOnLoad: false,
@@ -147,7 +148,7 @@ var app = {
   
   URL: 'https://zk.gs',
 
-  VERSION: "0.0.2",
+  VERSION: "0.3.0",
 
   get isNodeWebKit() { return (typeof process == "object"); },
 
@@ -188,7 +189,7 @@ var app = {
 
     $("#register-generate-cancel-btn").click(function (e) {
       e.preventDefault();
-      app.switchView('#account-login', app.APPNAME);
+      app.switchView('account-login', app.APPNAME);
     });
 
     $("#register-generate-btn").click(function (e) {
@@ -263,21 +264,21 @@ var app = {
     $('#verify-id-card').click(function () {
       app.hideMenu();
       if (app.isNodeWebKit) {
-        app.switchView('#scan-select-desktop', 'Verify Contact Card');
+        app.switchView('scan-select-desktop', 'Verify Contact Card');
       } else {
-        app.switchView('#scan-select', 'Verify Contact Card');
+        app.switchView('scan-select', 'Verify Contact Card');
       }
     });
 
     $('#my-fingerprint').click(function () {
       app.hideMenu();
-      app.switchView('#my-fingerprint-id-wrapper', 'My Contact Card');
+      app.switchView('my-fingerprint-id-wrapper', 'My Contact Card');
       app.displayMyFingerprint(true);
     });
 
     $('#my-fingerprint-top-menu').click(function () {
       app.hideMenu();
-      app.switchView('#my-fingerprint-id-wrapper', 'My Contact Card');
+      app.switchView('my-fingerprint-id-wrapper', 'My Contact Card');
       app.displayMyFingerprint(true);
     });
 
@@ -290,11 +291,11 @@ var app = {
 	$('#display-passphrase')[0].disabled = true;
       }
       
-      app.switchView('#my-options-pane', 'Options');
+      app.switchView('my-options-pane', 'Options');
     });
     
     $('#find-users').click(function () {
-      app.switchView('#find-users-view', 'Find Users');
+      app.switchView('find-users-view', 'Find Users');
     });
 
     $('#find-someone-btn').click(function () {
@@ -312,15 +313,15 @@ var app = {
 
     $('#add-contact-button').click(function () {
       if (app.isNodeWebKit) {
-        app.switchView('#scan-select-desktop', 'Verify Contact Card');
+        app.switchView('scan-select-desktop', 'Verify Contact Card');
       } else {
-        app.switchView('#scan-select', 'Verify Contact Card');
+        app.switchView('scan-select', 'Verify Contact Card');
       }
     });
 
     $('#contacts-detail-dismiss-btn').click(function () {
       $('.contact-id').remove();
-      app.switchView('#contacts', 'Contacts');
+      app.switchView('contacts', 'Contacts');
     });
 
     $('#contact-delete-btn').click(function () {
@@ -388,7 +389,7 @@ var app = {
     $('#create-id-card').click(function () {
       app.firstRunCreateIdCard( function () {
         $('#tasks-btn').addClass('active');
-        app.switchView('#my-fingerprint-id-wrapper', 'My Contact Card');
+        app.switchView('my-fingerprint-id-wrapper', 'My Contact Card');
 	// need to set this here in order to call the firstRunComplete function properly
 	app.firstRunIsNow = false;
         app.firstRunComplete();
@@ -399,11 +400,23 @@ var app = {
   switchView: function switchView (id, name) {
     $('.view').removeClass('active');
     $('#page-title').text(name);
-    $(id).addClass('active');
-    if (id == '#login-progress') { // XXXddahl: special case hack. sigh.
+
+    $('body').removeClass();
+    $('body').addClass(id);
+
+    var htmlId = '#' + id;
+    
+    $(htmlId).addClass('active');
+    if (htmlId == '#login-progress') { // XXXddahl: special case hack. sigh.
       $('#login-progress').show();
     } else {
       $('#login-progress').hide();
+    }
+
+    if (htmlId == "#feed") {
+      $('#post-button-floating-wrapper').show();
+    } else {
+      $('#post-button-floating-wrapper').hide();
     }
   },
   
@@ -427,7 +440,7 @@ var app = {
   //   console.log('Received Event: ' + id);
   // },
 
-  alert: function (message, level) {
+  alert: function _alert (message, level) {
     // success, info, warning, danger
     if (!level) {
       level = 'warning';
@@ -483,7 +496,7 @@ var app = {
     }
     
     app.hideMenu();
-    app.switchView('#account-login', app.APPNAME);
+    app.switchView('account-login', app.APPNAME);
     $('#tasks-btn').removeClass('active');
     $('#header-button-bar').hide();
     app.alert('You are logged out', 'info');
@@ -537,7 +550,7 @@ var app = {
       quality = options.quality || 50;
     }
 
-    app.switchView('#capture-avatar', 'Take a photo');
+    app.switchView('capture-avatar', 'Take a photo');
     navigator.webkitGetUserMedia({video: true}, function _success (stream) {
       var video = document.getElementById("capture-video");
       var canvas = document.getElementById("capture-canvas");
@@ -565,7 +578,7 @@ var app = {
       }
       app.avatarStream.stop();
       document.getElementById("capture-video").src = null;
-      app.switchView('#feed', 'ZK Feed');
+      app.switchView('feed', 'ZK Feed');
       // Save Avatar to Item via overloaded function
       app.saveAvatar(imageData);
 
@@ -599,7 +612,7 @@ var app = {
     if (options) {
       width = options.width || 320;
       height = options.height || 240;
-      quality = options.quality || 50;
+      quality = options.quality || 70;
       cameraDirection = options.cameraDirection || cameraDirectionOptions.BACK;
       pictureSourceType = options.pictureSourceType || navigator.camera.PictureSourceType.CAMERA;
     }
@@ -759,12 +772,12 @@ var app = {
       return;
     }
 
-    app.switchView('#login-progress', '');
+    app.switchView('login-progress', '');
     app.setLoginStatus('Creating Account...');
     
     function callback (err) {
       console.error(err);
-      app.switchView('#account-login', '');
+      app.switchView('account-login', '');
       app.clearLoginStatus();
 
       if (err) {
@@ -791,23 +804,26 @@ var app = {
 
   beginRegistration: function beginRegistration() {
     
-    app.switchView('#generate-account', 'Create Account');    
+    app.switchView('generate-account', 'Create Account');    
     // generate a long password
     var passphrase = generatePassphrase();
     // display new form
+    if (window.localStorage.lastUserLogin == $('#username-generate').val()) {
+      $('#username-generate').val('');
+    }
     $('#password-generate').val(passphrase);
     $('#username-generate').focus();
   },
 
   register: function (user, pass, callback) {
     app.setLoginStatus('Generating account...');
-    app.switchView('#login-progress', '');
+    app.switchView('login-progress', '');
 
     crypton.generateAccount(user, pass, function (err) {
       if (err) {
 	$('#top-progress-wrapper').hide();
 	console.error(err);
-        app.switchView('#account-login', 'Account');
+        app.switchView('account-login', 'Account');
         return callback(err);
       }
       $('#top-progress-wrapper').hide();
@@ -832,7 +848,7 @@ var app = {
       return;
     }
 
-    app.switchView('#login-progress', '');
+    app.switchView('login-progress', '');
     $('#top-progress-wrapper').show();
     
     $('.alert').remove();
@@ -842,7 +858,7 @@ var app = {
     function callback (err, session) {
       if (err) {
         app.alert(err, 'danger');
-        app.switchView('#account-login', 'Account');
+        app.switchView('account-login', 'Account');
         app.clearLoginStatus();
 	$('#top-menu').show();
 	$('#top-progress-wrapper').hide();
@@ -875,7 +891,7 @@ var app = {
 
         if (err) {
           console.error(err);
-          app.switchView('#account-login', 'Account');
+          app.switchView('account-login', 'Account');
 	  $('#top-progress-wrapper').hide();
           return;
         }
@@ -908,7 +924,7 @@ var app = {
 
   firstRun: function () {
     // prompt to create Id card & why
-    app.switchView('#first-run', 'Welcome');
+    app.switchView('first-run', 'Welcome');
   },
 
   firstRunComplete: function firstRunComplete () {
@@ -1020,9 +1036,9 @@ var app = {
         $('#verify-user-failure-msg').children().remove();
         // TODO: remove click events from buttons
         if (app.isNodeWebKit) {
-          app.switchView('#scan-select-desktop', 'Verify Contact Card');
+          app.switchView('scan-select-desktop', 'Verify Contact Card');
         } else {
-          app.switchView('#scan-select', 'Verify Contact Card');
+          app.switchView('scan-select', 'Verify Contact Card');
         }
       }
 
@@ -1122,7 +1138,7 @@ var app = {
 
   displayPeerFingerprint: function (username, fingerprint) {
     $('#peer-fingerprint-id').children().remove();
-    app.switchView('#peer-fingerprint-id', 'Peer Fingerprint');
+    app.switchView('peer-fingerprint-id', 'Peer Fingerprint');
 
     var canvas =
       app.card.createIdCard(fingerprint, username, app.contactCardLabel);
@@ -1175,7 +1191,7 @@ var app = {
     if (callback) {
       callback();
     }
-    app.switchView('#my-fingerprint-id-wrapper', 'My Contact Card');
+    app.switchView('my-fingerprint-id-wrapper', 'My Contact Card');
   },
 
   displayMyFingerprint: function displayMyFingerprint (withPhoto) {
@@ -1314,7 +1330,7 @@ var app = {
   },
 
   displayContacts: function () {
-    app.switchView('#contacts', 'Contacts');
+    app.switchView('contacts', 'Contacts');
     console.log("displayContacts()");
 
     app.getContactsFromServer(function (err, contacts) {
@@ -1407,7 +1423,7 @@ var app = {
       $('#contact-message').append($(html));
     }
     
-    app.switchView('#contact-details', name);
+    app.switchView('contact-details', name);
   },
 
   getContactsFromServer: function (callback) {
@@ -1555,7 +1571,7 @@ var app = {
 
   about: function _about () {
     app.hideMenu();
-    app.switchView('#app-about', 'About ' + app.APPNAME);
+    app.switchView('app-about', 'About ' + app.APPNAME);
     if (typeof app.aboutView == 'function') {
       app.aboutView();
     }
