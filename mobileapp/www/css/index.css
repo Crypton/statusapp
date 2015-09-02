@@ -3,6 +3,36 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 @font-face {
+    font-family: WorkSans;
+    src: url(fonts/WorkSans-Regular.ttf);
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: WorkSans;
+    src: url(fonts/WorkSans-Light.ttf);
+    font-weight: light;
+}
+
+@font-face {
+    font-family: WorkSans;
+    src: url(fonts/WorkSans-Medium.ttf);
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: Hack;
+    src: url(fonts/Hack-Regular.ttf);
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: Hack;
+    src: url(fonts/Hack-Bold.ttf);
+    font-weight: bold;
+}
+
+@font-face {
     font-family: Roboto;
     src: url(fonts/Roboto-Regular.ttf);
     font-weight: normal;
@@ -24,11 +54,198 @@
     -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
 }
 
+/* Normalise from bootstrap because that's ok. */
+
+html {
+  font-family: sans-serif;
+  -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+}
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+main,
+menu,
+nav,
+section,
+summary {
+  display: block;
+}
+audio,
+canvas,
+progress,
+video {
+  display: inline-block;
+  vertical-align: baseline;
+}
+audio:not([controls]) {
+  display: none;
+  height: 0;
+}
+[hidden],
+template {
+  display: none;
+}
+a {
+  background-color: transparent;
+}
+a:active,
+a:hover {
+  outline: 0;
+}
+abbr[title] {
+  border-bottom: 1px dotted;
+}
+b,
+strong {
+  font-weight: bold;
+}
+dfn {
+  font-style: italic;
+}
+h1 {
+  margin: .67em 0;
+  font-size: 2em;
+}
+mark {
+  color: #000;
+  background: #ff0;
+}
+small {
+  font-size: 80%;
+}
+sub,
+sup {
+  position: relative;
+  font-size: 75%;
+  line-height: 0;
+  vertical-align: baseline;
+}
+sup {
+  top: -.5em;
+}
+sub {
+  bottom: -.25em;
+}
+img {
+  border: 0;
+}
+svg:not(:root) {
+  overflow: hidden;
+}
+figure {
+  margin: 1em 40px;
+}
+hr {
+  height: 0;
+  -webkit-box-sizing: content-box;
+     -moz-box-sizing: content-box;
+          box-sizing: content-box;
+}
+pre {
+  overflow: auto;
+}
+code,
+kbd,
+pre,
+samp {
+  font-family: monospace, monospace;
+  font-size: 1em;
+}
+button,
+input,
+optgroup,
+select,
+textarea {
+  margin: 0;
+  font: inherit;
+  color: inherit;
+}
+button {
+  overflow: visible;
+}
+button,
+select {
+  text-transform: none;
+}
+button,
+html input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+  -webkit-appearance: button;
+  cursor: pointer;
+}
+button[disabled],
+html input[disabled] {
+  cursor: default;
+}
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+  padding: 0;
+  border: 0;
+}
+input {
+  line-height: normal;
+}
+input[type="checkbox"],
+input[type="radio"] {
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  padding: 0;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  height: auto;
+}
+input[type="search"] {
+  -webkit-box-sizing: content-box;
+     -moz-box-sizing: content-box;
+          box-sizing: content-box;
+  -webkit-appearance: textfield;
+}
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+fieldset {
+  padding: .35em .625em .75em;
+  margin: 0 2px;
+  border: 1px solid #c0c0c0;
+}
+legend {
+  padding: 0;
+  border: 0;
+}
+textarea {
+  overflow: auto;
+}
+optgroup {
+  font-weight: bold;
+}
+table {
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+td,
+th {
+  padding: 0;
+}
+
+
 body {
     -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
     -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
     -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
-    font-family: Roboto, 'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, sans-serif !important;
+    font-family: Roboto, 'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, sans-serif ;
     height:100%;
     margin:0px;
     padding:0px;
@@ -88,13 +305,13 @@ h1 {
     50% { opacity: 0.4; }
     to { opacity: 1.0; }
 }
- 
+
 @-webkit-keyframes fade {
     from { opacity: 1.0; }
     50% { opacity: 0.4; }
     to { opacity: 1.0; }
 }
- 
+
 .blink {
     animation:fade 3000ms infinite;
     -webkit-animation:fade 3000ms infinite;
@@ -108,7 +325,8 @@ h1 {
     bottom: 0;
     -webkit-transform: translate3d(-100%, 0, 0);
     -webkit-transition: all 0.1s ease;
-    margin-top: 1em;
+    padding-top: 4rem;
+
 }
 
 .view.active {
@@ -116,7 +334,7 @@ h1 {
 }
 
 #top-menu {
-    background: #ffffff !important;
+    background: #ffffff ;
     position: fixed;
     top: 0;
     left: 0;
@@ -162,7 +380,7 @@ h1 {
 input[type="text"],
 input[type="password"] {
     border: 0;
-    border-radius: 0 !important;
+    border-radius: 0 ;
     border-bottom: 1px solid gray;
     outline: 0;
     box-shadow: none;
@@ -173,8 +391,8 @@ input[type="password"] {
 
 input[type="text"]:focus,
 input[type="password"]:focus {
-    font-family: Roboto, 'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, sans-serif !important;
-    box-shadow: none !important;
+    font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif ;
+    box-shadow: none ;
     outline: 0;
     /*border-bottom: 1px solid #787878;*/
     border-bottom-width: 2px;
@@ -182,34 +400,37 @@ input[type="password"]:focus {
 }
 
 ::-webkit-input-placeholder {
-    color: #aaa !important;
+    color: #aaa ;
 }
 
+/* Bootstrap, more like Poopstrap */
 .btn {
-    border: 0 !important;
-    border-radius: 2px !important;
-    box-shadow: 1px 2px 2px #ddd;
-    text-transform: uppercase;
-    font-size: 1em !important;
-    margin: 0 10px;
-    padding: 10px 20px !important;
+    border: 1px solid currentColor ;
+    background-color: transparent ;
+    font-family: WorkSans ;
+    padding: 1rem ;
+    font-weight: normal ;
+    margin: 1rem 0;
+}
+
+.btn:hover, .btn:active, .btn:focus {
+    color: white;
+    background-color: currentColor;
+
 }
 
 .btn-primary {
-    color: #fff !important;
-    background-color: rgb(103, 83, 211) !important;
-    border-color: rgb(103, 83, 211) !important;
-    -webkit-border-radius: 5px !important;
+    color: rgba(150,13,225,1) ;
 }
 
 .btn-success {
-    background-color: rgb(108, 176, 246) !important;
-    border-color: rgb(108, 176, 246) !important;
-    -webkit-border-radius: 5px !important;
+    background-color: rgb(108, 176, 246) ;
+    border-color: rgb(108, 176, 246) ;
+    -webkit-border-radius: 5px ;
 }
 
 .btn-danger {
-    -webkit-border-radius: 5px !important;
+    -webkit-border-radius: 5px ;
 }
 
 #login-status {
@@ -219,7 +440,7 @@ input[type="password"]:focus {
 #app {
     /*background-color: #CFD8DC;*/
     position: absolute;
-    top: 76px;
+    top: 0;
     right: 0px;
     bottom: 0px;
     left: 0px;
@@ -236,17 +457,62 @@ input[type="password"]:focus {
 
 #header {
     position: fixed;
-    top: 0px;
-    right: 0px;
-    left: 0px;
-    height: 76px;
-    line-height: 76px;
-    background-color: rgb(103, 83, 211);
-    /* background-color: #3f51b5; */
+    top: 0;
+    width: 100vw;
+    background: linear-gradient(135deg, rgba(222,45,194,0.9) 0%,rgba(150,13,225,0.9) 100%);
     box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.16), 0px 1px 2.5px 0px rgba(0, 0, 0, 0.26);
-    color: whitesmoke;
     z-index: 10;
-	padding-top: 10px;
+    padding-top: 1.4rem;
+    color: #ffffff;
+    text-align: center;
+
+    display: flex;
+    justify-content: space-between;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+}
+
+#header nav:first-child {
+    padding-left:0.5rem;
+}
+
+#header nav:last-child {
+    padding-right:0.5rem;
+}
+
+#header .header-item {
+    flex-shrink:0;
+}
+
+#header #header--title {
+    flex-grow: 1;
+    font-size: 18px;
+    font-family: WorkSans;
+    font-weight: bold;
+}
+
+/* header icon stuff */
+#header .header-item .header-icon {
+    width: 2.0rem;
+    height: 2.5rem;
+    overflow: hidden;
+    display: block;
+    text-indent: -999999999px;
+}
+
+.icon--contacts {
+    background-size: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('../svg/contacts.svg');
+}
+
+.icon--settings {
+    background-size: 80%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('../svg/settings.svg');
 }
 
 #first-run {
@@ -260,7 +526,7 @@ input[type="password"]:focus {
 
 #tasks-btn {
     display: none;
-    color: #ffffff !important;
+    color: #ffffff ;
     padding: 0 1em;
     font-size: 1.5em;
     text-decoration: none;
@@ -269,7 +535,7 @@ input[type="password"]:focus {
 #tasks-btn.active {
     display: block;
     margin-left: -2.4em;
-    padding-right: 0 !important;
+    padding-right: 0 ;
 }
 
 #account-name-label {
@@ -285,12 +551,12 @@ input[type="password"]:focus {
 .main-btn a {
     color: #black;
     font-size: 1.4em;
-    padding: 13px 15px !important;
+    padding: 13px 15px ;
 }
 
 .main-btn a:hover {
-    background: none !important;
-    color: #000000 !important;
+    background: none ;
+    color: #000000 ;
 }
 
 .main-btn img {
@@ -420,28 +686,28 @@ input[type="password"]:focus {
 }
 
 .alert {
-    background: #323232 !important;
-    border: none !important;
-    border-radius: 2px !important;
+    background: #323232 ;
+    border: none ;
+    border-radius: 2px ;
     color: #fff;
-    margin: 2em !important;
+    margin: 2em ;
     text-align: center;
-    padding: 15px 20px !important;
+    padding: 15px 20px ;
 }
 
 .alert-danger {
-    background: #e51c23 !important;
-    color: #fff !important;
+    background: #e51c23 ;
+    color: #fff ;
 }
 
 .alert-info {
-    color: #fff !important;
+    color: #fff ;
 }
 
 .progress {
-    height: 10px !important;
-    border-radius: 2px !important;
-    box-shadow: none !important;
+    height: 10px ;
+    border-radius: 2px ;
+    box-shadow: none ;
 }
 
 
@@ -455,14 +721,14 @@ input[type="password"]:focus {
 }
 
 .progress-bar {
-    -webkit-animation: progress-bar-stripes-alternate 0.8s linear infinite !important;
-    background-image: linear-gradient(90deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent) !important;
-    background-color: rgb(145, 45, 244) !important;
-    background-size: 50% !important;
+    -webkit-animation: progress-bar-stripes-alternate 0.8s linear infinite ;
+    background-image: linear-gradient(90deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent) ;
+    background-color: rgb(145, 45, 244) ;
+    background-size: 50% ;
 }
 
 h3 {
-    margin-top: 0 !important;
+    margin-top: 0 ;
 }
 
 strong {
@@ -483,8 +749,8 @@ strong {
     z-index:15;
 }
 
-a { 
-    color: #000000 !important; 
+a {
+    color: #000000 ;
 }
 
 #password-generate {
@@ -518,15 +784,15 @@ a {
 }
 
 #register-btn {
-    font-size: smaller !important;
+    font-size: smaller ;
 }
 
 #switch-user-btn {
-    font-size: smaller !important;
+    font-size: smaller ;
 }
 
 #get-new-passphrase {
-    font-size: smaller !important;
+    font-size: smaller ;
 }
 
 #register-btn-wrapper {
@@ -534,10 +800,10 @@ a {
 }
 
 #username-placehoder {
-    text-align: center !important;
+    text-align: center ;
     display: none;
     border-bottom: 1px solid gray;
-    margin: 1em !important;
+    margin: 1em ;
 }
 
 .option {
@@ -616,10 +882,10 @@ option-label {
 ul .offline-ui {
   top: auto;
   bottom: 0;
-  padding: 5px !important;
+  padding: 5px ;
 }
 ul .offline-ui-retry {
-  line-height: 30px !important;
+  line-height: 30px ;
 }
 
 .logged-new-contact {
@@ -631,7 +897,7 @@ ul .offline-ui-retry {
 }
 
 body {
-    background-color: whitesmoke !important;
+    background-color: whitesmoke ;
 }
 
 .user-avatar-generic {
@@ -650,12 +916,12 @@ body {
 }
 
 #retake-id-picture {
-    font-size: 12px !important;
+    font-size: 12px ;
     margin-bottom: 0.5em;
 }
 
 #share-my-id-card {
-    font-size: 12px !important;
+    font-size: 12px ;
     margin-bottom: 0.5em;
 }
 
