@@ -147,6 +147,7 @@
     border-bottom:1px solid rgba(0, 0, 0, 0.1);
     /* border-bottom: 1px solid #d5d5d5; */
     padding: 0 0.5rem 1rem 0;
+    line-height:1.3rem;
 }
 
 .media-username {
@@ -161,8 +162,7 @@
     font-weight: normal;
     margin-right: 15%;
     display: block;
-    margin-bottom: 0.6rem;
-    line-height: 1.2rem;
+    margin-bottom: 0.2rem;
     color: #585858;
 }
 
