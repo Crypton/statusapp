@@ -282,17 +282,27 @@ var app = {
       app.displayMyFingerprint(true);
     });
 
-    $('#my-options').click(function () {
-      app.hideMenu();
-
+    $('.icon--settings').click(function () {
       // disable forget credentials if not supported
       if (!app.keyChain.supported) {
 	$('#forget-credentials')[0].disabled = true;
 	$('#display-passphrase')[0].disabled = true;
       }
-      
+
       app.switchView('my-options-pane', 'Options');
     });
+    
+    // $('#my-options').click(function () {
+    //   app.hideMenu();
+
+    //   // disable forget credentials if not supported
+    //   if (!app.keyChain.supported) {
+    // 	$('#forget-credentials')[0].disabled = true;
+    // 	$('#display-passphrase')[0].disabled = true;
+    //   }
+      
+    //   app.switchView('my-options-pane', 'Options');
+    // });
     
     $('#find-users').click(function () {
       app.switchView('find-users-view', 'Find Users');
@@ -1571,7 +1581,7 @@ var app = {
 
   about: function _about () {
     app.hideMenu();
-    app.switchView('app-about', 'About ' + app.APPNAME);
+    app.switchView('#app-about', 'About ' + app.APPNAME);
     if (typeof app.aboutView == 'function') {
       app.aboutView();
     }

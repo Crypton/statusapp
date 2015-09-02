@@ -103,7 +103,7 @@ app.setCustomEvents = function setCustomEvents () {
   $('#post-send').click(function () {
     app.setMyStatus();
   });
-
+  
   $('#post-button-floating').click(function () {
     app.makeNewPost();
   });
