@@ -7,7 +7,7 @@
 
 app.sharingUrl = 'https://kloak.io/';
 
-app.sharingMessage = 'I would like to share messages with you privately via an app called "Kloak". \n\nThis message\'s attachment is my \'App Contact card\', which users exchange in order to establish a private connection. \n\nFor more information: https://spideroak.com/solutions/kloak/';
+app.sharingMessage = 'I would like to share messages with you privately via an app called "Kloak". \n\nThis message\'s attachment is my \'App Contact card\', which users exchange in order to establish a private connection. \n\nFor more information: https://spideroak.com/solutions/kloak';
 
 app.sharingTitle = 'Just started using Kloak...';
 
