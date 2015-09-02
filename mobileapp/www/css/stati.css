@@ -67,7 +67,7 @@
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    margin-top: 0 !important;
+    margin-top: 0 ;
 }
 
 #my-status {
@@ -109,8 +109,8 @@
 /* ====== media ====== */
 
 .media {
-    margin-top: 10px !important;
-    font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif !important;
+    margin-top: 10px ;
+    font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif ;
     -webkit-font-smoothing: subpixel-antialiased;
 }
 
@@ -121,9 +121,9 @@
 
 .media .img {
     float: left;
-    margin: 0 1.5rem 0 1.65rem;
-    width: 5rem;
-    height: 5rem;
+    margin: 0 1rem 0 0.75rem;
+    width: 3.5rem;
+    height: 3.5rem;
     overflow: hidden;
     border-radius: 50%;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -146,23 +146,24 @@
 .media-metadata {
     border-bottom:1px solid rgba(0, 0, 0, 0.1);
     /* border-bottom: 1px solid #d5d5d5; */
-    padding: 0 1rem 1.6rem 0;
+    padding: 0 0.5rem 1rem 0;
 }
 
 .media-username {
     font-weight: bold;
-    font-size: 14px;
+    font-size: 16px;
     margin-top: 5px;
     color: #585858;
 }
 
 .media-status {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: normal;
     margin-right: 15%;
     display: block;
     margin-bottom: 0.6rem;
-    line-height:1.8rem;
+    line-height: 1.2rem;
+    color: #585858;
 }
 
 .media-timestamp {
@@ -282,11 +283,11 @@
     display: none;
 }
 
-.media-link-url { color: gray !important; }
-.media-link-email { color: gray !important; }
-.media-link-phone { color: red !important; }
-.media-link-twitter { color: blue !important; }
-.media-link-hashtag { color: purple !important; }
+.media-link-url { color: gray }
+.media-link-email { color: gray }
+.media-link-phone { color: red; }
+.media-link-twitter { color: blue; }
+.media-link-hashtag { color: purple; }
 
 #about-view {
     margin: 2em;
