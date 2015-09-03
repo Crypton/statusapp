@@ -260,6 +260,10 @@ app.viewActions = {
   contactCard: function vaContactCard () {
     $('.header-wrap').hide();
     $('#header-contact-card').show();
+  },
+
+  'scan-select': function vaScanSelect () {
+    // noop
   }
 };
 

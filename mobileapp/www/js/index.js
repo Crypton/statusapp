@@ -8,6 +8,7 @@ document.addEventListener("deviceready", onDeviceReady, false);
 
 function onDeviceReady() {
   $('.header-wrap').hide();
+  
   $(function() {
     FastClick.attach(document.body);
   });
@@ -256,6 +257,14 @@ var app = {
       app.displayContacts();
     });
 
+    $('.header-contacts-back').click(function () {
+      app.switchView('feed', 'Timeline');
+    });
+
+    $('.icon--new-contact').click(function () {
+      app.switchView('feed', 'Timeline');
+    });
+    
     $('#header-btn-contacts').click(function () {
       app.hideMenu();
       app.displayContacts();
@@ -321,7 +330,7 @@ var app = {
       app.switchUser();
     });
 
-    $('#add-contact-button').click(function () {
+    $('.icon--new-contact').click(function () {
       if (app.isNodeWebKit) {
         app.switchView('scan-select-desktop', 'Verify Contact Card');
       } else {

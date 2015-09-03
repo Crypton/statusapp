@@ -528,6 +528,15 @@ input[type="password"]:focus {
 
 }
 
+.icon--contact-card {
+    width: 2.0rem;
+    height: 2.5rem;
+    background-size: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('../svg/card-white.svg');
+}
+
 .icon--contacts {
     width: 2.0rem;
     height: 2.5rem;
@@ -537,11 +546,20 @@ input[type="password"]:focus {
     background-image: url('../svg/contacts.svg');
 }
 
+.icon--new-contact {
+    width: 2.0rem;
+    height: 2.5rem;
+    background-size: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('../svg/contact.svg');
+}
+
 .icon--new-post {
     background-size: 55%;
     background-position: center;
     background-repeat: no-repeat;
-    background-image: url('../svg/new-post.svg');
+    background-image: url('../svg/post-white.svg');
 }
 
 .icon--settings {
@@ -570,6 +588,7 @@ input[type="password"]:focus {
     background-repeat: no-repeat;
     background-image: url('../svg/attach.svg');
 }
+
 #first-run {
     padding: 1em;
 }
