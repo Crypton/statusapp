@@ -20,11 +20,11 @@
   </head>
   <body class="logged-out">
     <div class="overlay"></div>
-    <header id="header">
+    
+    <header id="header-timeline" class="header">
       <nav id="header--left-action" class="header-item">
         <a href="#" class="header-icon icon--settings">Settings</a>
       </nav>
-
       <nav id="header--title" class="header-item">
         <span>Timeline</span>
       </nav>
@@ -33,16 +33,40 @@
       </nav>
     </header>
 
-      <div id="top-progress-wrapper">
-	<div id="feed-progress-wrapper"
-	     class="progress progress-striped active">
-	  <div class="progress-bar"  role="progressbar"
-	       aria-valuenow="100" aria-valuemin="0"
-	       aria-valuemax="100" style="width: 100%">
-	  </div>
+    <header id="header-settings" class="header">
+      <nav id="header--left-action" class="header-item">
+        <a href="#" class="header-icon icon--back">Back</a>
+      </nav>
+      <nav id="header--title" class="header-item">
+        <span>Settings</span>
+      </nav>
+    </header>
+
+    <header id="header-contacts" class="header">
+      <nav id="header--left-action" class="header-item">
+        <a href="#" class="header-icon icon--back">Back</a>
+      </nav>
+      <nav id="header--title" class="header-item">
+        <span>Contacts</span>
+      </nav>
+      <nav id="header--right-action" class="header-item">
+        <a href="#" class="header-icon icon--contact-card">Contact Card</a>
+      </nav>
+      <nav id="header--right-action" class="header-item">
+        <a href="#" class="header-icon icon--new-contact">+</a>
+      </nav>
+    </header>
+    
+    <div id="top-progress-wrapper">
+      <div id="feed-progress-wrapper"
+	   class="progress progress-striped active">
+	<div class="progress-bar"  role="progressbar"
+	     aria-valuenow="100" aria-valuemin="0"
+	     aria-valuemax="100" style="width: 100%">
 	</div>
       </div>
     </div>
+
 
     <div id="app" class="app container-fluid">
       <div id="alerts"></div>

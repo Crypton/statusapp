@@ -240,6 +240,29 @@ app.postingUIActionSheet = function postingUIActionSheet () {
   window.plugins.actionsheet.show(options, callback);
 };
 
+app.viewActions = {
+
+  feed: function vaFeed () {
+    $('.header').hide();
+    $('#header-timeline').show();
+  },
+
+  settings: function vaSettings () {
+    $('.header').hide();
+    $('#header-settings').show();
+  },
+
+  contacts: function vaContacts () {
+    $('.header').hide();
+    $('#header-contacts').show();
+  },
+
+  contactCard: function vaContactCard () {
+    $('.header').hide();
+    $('#header-contact-card').show();
+  }
+};
+
 app.takeAPhoto = function takeAPhoto () {
   // remove any photos in the DOM:
   $('#my-image-to-post').children().remove();
@@ -372,6 +395,7 @@ app.loadInitialTimeline = function loadInitialTimeline(callback) {
   if (app.feedIsLoading) {
     return;
   }
+  app.switchView('feed', app.FEED_LABEL);
   app.feedIsLoading = true;
 
   $('#top-progress-wrapper').show();
@@ -890,8 +914,6 @@ app.displayInitialView = function displayInitialView() {
   // Check for first run
   if (!app.firstRunIsNow) {
     $('#my-avatar')[0].src = app.session.items.avatar.value.avatar;
-    app.switchView('feed', app.FEED_LABEL);
-
     app.session.on('message', function (message) {
       console.log('session.on("message") event called', message);
       app.handleMessage(message);
@@ -902,10 +924,10 @@ app.displayInitialView = function displayInitialView() {
       console.log('onSharedItemSync()', item);
 
       if (item.value.avatar) {
-  // this is an avatar update
-  console.log('we were handed an avatar Item!', item.value);
-  app.updateContactAvatar(item.creator.username, item.value);
-  return;
+	// this is an avatar update
+	console.log('we were handed an avatar Item!', item.value);
+	app.updateContactAvatar(item.creator.username, item.value);
+	return;
       }
     };
     // Load the timeline

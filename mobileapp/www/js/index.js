@@ -250,9 +250,8 @@ var app = {
 	app.alert(passphrase, 'info');
       });
     });
-
-    $('#my-contacts').click(function () {
-      app.hideMenu();
+    
+    $('.icon--contacts').click(function () {
       app.displayContacts();
     });
 
@@ -409,11 +408,15 @@ var app = {
 
   switchView: function switchView (id, name) {
     $('.view').removeClass('active');
-    $('#page-title').text(name);
-
     $('body').removeClass();
     $('body').addClass(id);
 
+    try {
+      app.viewActions[id]();
+    } catch (ex) {
+      console.error(ex);
+      console.warn('No defined action in app.viewActions object that handles ' + id);
+    }
     var htmlId = '#' + id;
 
     $(htmlId).addClass('active');
@@ -908,10 +911,11 @@ var app = {
 
         $('#tasks-btn').addClass('active');
 	$('#logout-page-title').hide();
-	$('#header-button-bar').show();
+	// $('#header-button-bar').show();
 
         app.username = app.session.account.username;
-
+	app.setLoginStatus('Loading timeline...');
+	
         if (!prefsItem.value.firstRun) {
           prefsItem.value = { firstRun: Date.now() };
 	  app.firstRunIsNow = true;

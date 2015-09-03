@@ -456,7 +456,7 @@ input[type="password"]:focus {
     margin-left: 0.3em;
 }
 
-#header {
+.header {
     position: fixed;
     top: 0;
     width: 100vw;
@@ -477,23 +477,23 @@ input[type="password"]:focus {
     justify-content: space-between;
 }
 
-#header nav:first-child {
+.header nav:first-child {
     padding-left:0.5rem;
 }
 
-#header nav:last-child {
+.header nav:last-child {
     padding-right:0.5rem;
 }
 
-#header .header-item {
+.header .header-item {
     flex-grow: 0;
 }
 
-#header nav {
+.header nav {
     display: inline-block;
 }
 
-#header #header--title {
+.header #header--title {
     flex-shrink: 1;
     font-size: 18px;
     font-family: WorkSans;
@@ -501,13 +501,25 @@ input[type="password"]:focus {
 }
 
 /* header icon stuff */
-#header .header-item .header-icon, .icon {
+.header .header-item .header-icon, .icon {
      text-indent: -999999999px;
      overflow: hidden;
 }
 
-#header .header-item .header-icon {
+.header .header-item .header-icon {
     display: inline-block;
+}
+
+#header-contacts {
+    display: none;
+}
+
+#header-settings {
+    display: none;
+}
+
+#header-timeline {
+    display: none;
 }
 
 .icon--contacts {
@@ -844,7 +856,7 @@ a {
 }
 
 .option {
-    padding-bottom: 0.5em;
+
 }
 
 #about img {
