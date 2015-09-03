@@ -103,7 +103,7 @@ app.setCustomEvents = function setCustomEvents () {
   $('#post-send').click(function () {
     app.setMyStatus();
   });
-  
+
   $('#post-button-floating').click(function () {
     app.makeNewPost();
   });
@@ -130,7 +130,7 @@ app.setCustomEvents = function setCustomEvents () {
 
   $('#feed').click(function () {
     try {
-      $('#post-input-wrapper').hide();
+      $('body').removeClass('posting');
       $('#post-button-floating-wrapper').show();
     } catch (ex) {
       console.warn(ex);
@@ -139,21 +139,24 @@ app.setCustomEvents = function setCustomEvents () {
 };
 
 app.hidePostUI = function hidePostUI () {
-  $('#post-input-wrapper').hide();
+  $('#post-input-wrapper textarea').trigger('input');
   $('#post-button-floating-wrapper').show();
+  $('body').removeClass('posting');
 };
 
 app.makeNewPost = function makeNewPost() {
   // show input UI which will trigger the keyboard
+  $('textarea.js-auto-size').textareaAutoSize();
+  $('#post-input-wrapper textarea').trigger('input');
   $('#post-button-floating-wrapper').hide();
-  $('#post-input-wrapper').show();
+  $('body').addClass('posting');
 
   // $('#post-textarea').focus(function (e) {
   //   e.preventDefault();
   //   e.stopPropagation();
   //   window.scrollTo(0,0);
   // });
-  
+
   $('#post-textarea').focus();
   setTimeout(function () {
     $('#post-input-wrapper')[0].scrollIntoView({behavior: "smooth"});
@@ -233,7 +236,7 @@ app.postingUIActionSheet = function postingUIActionSheet () {
       return;
     }
   }
-  
+
   window.plugins.actionsheet.show(options, callback);
 };
 
@@ -832,7 +835,7 @@ app.setMyStatus = function setMyStatus() {
   // validate length of data to be sent
   var status = $('#post-textarea').val();
   status = app.escapeHtml(status);
-  
+
   if (!status.length) {
     return app.alert('Please enter a status update', 'danger');
   }
@@ -867,7 +870,7 @@ app.setMyStatus = function setMyStatus() {
   app.session.items.status.value.tz = app.tz.name();
   app.session.items.status.value.avatarMeta = updateObj.avatarMeta;
   app.session.items.status.value.__meta = updateObj.__meta;
-  
+
   app.session.items.status.save(function (err) {
     if (err) {
       app.toggleSetStatusProgress();
@@ -877,7 +880,7 @@ app.setMyStatus = function setMyStatus() {
     app.hidePostUI();
     $('#post-textarea').val('');
     $('#image-data').children().remove();
-    
+
     app.toggleSetStatusProgress();
     app.loadNewTimeline();
   });

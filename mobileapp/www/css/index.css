@@ -507,12 +507,12 @@ input[type="password"]:focus {
 }
 
 #header .header-item .header-icon {
-    width: 2.0rem;
-    height: 2.5rem;
     display: inline-block;
 }
 
 .icon--contacts {
+    width: 2.0rem;
+    height: 2.5rem;
     background-size: 100%;
     background-position: center;
     background-repeat: no-repeat;
@@ -527,12 +527,31 @@ input[type="password"]:focus {
 }
 
 .icon--settings {
+    width: 2.0rem;
+    height: 2.5rem;
     background-size: 80%;
     background-position: center;
     background-repeat: no-repeat;
     background-image: url('../svg/settings.svg');
 }
 
+.icon--send {
+    width: 2.0rem;
+    height: 2.5rem;
+    background-size: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('../svg/send.svg');
+}
+
+.icon--attach {
+    width: 2.0rem;
+    height: 2.25rem;
+    background-size: 78%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('../svg/attach.svg');
+}
 #first-run {
     padding: 1em;
 }

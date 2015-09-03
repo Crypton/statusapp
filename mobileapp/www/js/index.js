@@ -10,7 +10,7 @@ function onDeviceReady() {
   $(function() {
     FastClick.attach(document.body);
   });
-  
+
   // Now safe to use device APIs
   app.init();
 
@@ -21,7 +21,7 @@ function onDeviceReady() {
 	  (typeof app.resumeEventHandler == 'function')) {
 	app.resumeEventHandler();
       }
-      
+
     }, 0);
   }, false);
 
@@ -33,7 +33,7 @@ function onDeviceReady() {
       console.log('app pausing');
     }
   }, false);
-  
+
   try {
     // XXX: need to learn how to #IFDEF
     screen.lockOrientation('portrait');
@@ -51,12 +51,12 @@ var app = {
     // Configure the endpoint:
     crypton.host = app.host;
     crypton.port = app.port || 1025;
-    
+
     this.card =  new crypton.Card();
     this.bindEvents();
     $('#password-login').show();
     $('#username-login').show();
-    
+
     function defaultLoginBehavior () {
       app.enableLoginButtons();
       app.switchView('account-login');
@@ -67,7 +67,7 @@ var app = {
       }
       $('#username-login').focus();
     }
-    
+
     // Check if any user has ever logged in before:
     var lastUser = window.localStorage.getItem('lastUserLogin');
     if (lastUser) {
@@ -94,7 +94,7 @@ var app = {
 
 	  $('#remember-credentials')[0].checked = false;
 	  $('#remember-credentials-wrapper').hide();
-	  
+
 	  app.enableLoginButtons();
 	  app.switchView('account-login');
 	  $('#login-btn').focus();
@@ -139,13 +139,13 @@ var app = {
         }
       }
     };
-    
+
   },
 
   APPNAME: 'Kloak',
 
   get contactCardLabel() { return app.APPNAME + ' contact card'; },
-  
+
   URL: 'https://zk.gs',
 
   VERSION: "0.3.0",
@@ -181,7 +181,7 @@ var app = {
     $('#about').click(function () {
       app.about();
     });
-    
+
     $("#register-btn").click(function (e) {
       e.preventDefault();
       app.beginRegistration();
@@ -207,7 +207,7 @@ var app = {
     $('#password-generate').click(function (e) {
       //e.scrollIntoView({block: "end", behavior: "smooth"});
     });
-    
+
     $('#get-new-passphrase').click(function (e) {
       e.preventDefault();
       var pass = generatePassphrase();
@@ -239,7 +239,7 @@ var app = {
 	e.disabled = true;
       });
     });
-    
+
     $('#display-passphrase').click(function (e) {
       // check if we have the passphrase!
       app.keyChain.getPassphrase(function (err, passphrase) {
@@ -250,7 +250,7 @@ var app = {
 	app.alert(passphrase, 'info');
       });
     });
-    
+
     $('#my-contacts').click(function () {
       app.hideMenu();
       app.displayContacts();
@@ -291,7 +291,7 @@ var app = {
 
       app.switchView('my-options-pane', 'Options');
     });
-    
+
     // $('#my-options').click(function () {
     //   app.hideMenu();
 
@@ -300,10 +300,10 @@ var app = {
     // 	$('#forget-credentials')[0].disabled = true;
     // 	$('#display-passphrase')[0].disabled = true;
     //   }
-      
+
     //   app.switchView('my-options-pane', 'Options');
     // });
-    
+
     $('#find-users').click(function () {
       app.switchView('find-users-view', 'Find Users');
     });
@@ -362,7 +362,7 @@ var app = {
 	  $('#top-progress-wrapper').hide();
 	  return;
 	}
-	// XXXddahl: Move this into a 'cleanUpDeleteUser' function in subclass 
+	// XXXddahl: Move this into a 'cleanUpDeleteUser' function in subclass
 	app.session.items.status.unshare(peer, function (err) {
 	  if (err) {
 	    console.error('Cannot unshare status from ' + peer.username);
@@ -380,7 +380,7 @@ var app = {
 	      return;
 	    }
 	    // XXXddahl: send a message to the deleted peer
-	    //           in order to have them remove you as well? 
+	    //           in order to have them remove you as well?
 
 	    // back to contacts screen
 	    app.alert('Contact ' + peer.username + ' deleted', 'info');
@@ -391,7 +391,7 @@ var app = {
 	});
       });
     });
-    
+
     if (app.setCustomEvents && typeof app.setCustomEvents == 'function') {
       app.setCustomEvents();
     }
@@ -415,7 +415,7 @@ var app = {
     $('body').addClass(id);
 
     var htmlId = '#' + id;
-    
+
     $(htmlId).addClass('active');
     if (htmlId == '#login-progress') { // XXXddahl: special case hack. sigh.
       $('#login-progress').show();
@@ -429,7 +429,7 @@ var app = {
       $('#post-button-floating-wrapper').hide();
     }
   },
-  
+
   // // Update DOM on a Received Event
   // receivedEvent: function(id) {
   //   if (!id) {
@@ -475,7 +475,7 @@ var app = {
     if (typeof app.logoutCleanup == 'function') {
       app.logoutCleanup();
     }
-    
+
     var lastUser = window.localStorage.getItem('lastUserLogin');
     if (lastUser) {
       $('#username-placeholder').html(lastUser);
@@ -504,7 +504,7 @@ var app = {
 	});
       }
     }
-    
+
     app.hideMenu();
     app.switchView('account-login', app.APPNAME);
     $('#tasks-btn').removeClass('active');
@@ -520,7 +520,7 @@ var app = {
     $('#remember-credentials')[0].checked = true;
     $('#remember-credentials').show();
   },
-  
+
   scanQRCode_desktop: function scanQRCode_desktop () {
     // Use GUMHelper here instead
     console.error('Scan QR NOT IMPLEMENTED');
@@ -723,10 +723,10 @@ var app = {
     img.src = dataUrl;
 
     // XXX TODO: use smartcrop.crop()
-    
+
     // get the photo from X=85, Y=325, W=120, H=160
   },
-  
+
   getImage: function () {
     // Specific getImage function for QR parsing
     if (app.isNodeWebKit) {
@@ -740,7 +740,7 @@ var app = {
       //       Trim all of the white border?
       //       Save this data as the avatar!
       // app.getInitialAvatar(dataUrl);
-      
+
       var dataUrlPrefix = 'data:image/png;base64,';
       dataURL = dataUrlPrefix + dataURL;
       console.log(dataURL);
@@ -775,7 +775,7 @@ var app = {
     var user = $('#username-generate').val();
     var pass = $('#password-generate').val();
     $('#top-progress-wrapper').show();
-    
+
     if (!user || !pass) {
       app.alert('Please enter a username and passphrase', 'danger');
       $('#top-progress-wrapper').hide();
@@ -784,7 +784,7 @@ var app = {
 
     app.switchView('login-progress', '');
     app.setLoginStatus('Creating Account...');
-    
+
     function callback (err) {
       console.error(err);
       app.switchView('account-login', '');
@@ -813,8 +813,8 @@ var app = {
   },
 
   beginRegistration: function beginRegistration() {
-    
-    app.switchView('generate-account', 'Create Account');    
+
+    app.switchView('generate-account', 'Create Account');
     // generate a long password
     var passphrase = generatePassphrase();
     // display new form
@@ -844,7 +844,7 @@ var app = {
   login: function _login () {
 
     $('#my-feed-entries').children().remove();
-    
+
     var user = $('#username-login').val();
     var pass = $('#password-login').val();
 
@@ -860,7 +860,7 @@ var app = {
 
     app.switchView('login-progress', '');
     $('#top-progress-wrapper').show();
-    
+
     $('.alert').remove();
 
     app.setLoginStatus('Logging in...');
@@ -909,7 +909,7 @@ var app = {
         $('#tasks-btn').addClass('active');
 	$('#logout-page-title').hide();
 	$('#header-button-bar').show();
-	
+
         app.username = app.session.account.username;
 
         if (!prefsItem.value.firstRun) {
@@ -999,7 +999,7 @@ var app = {
 	  + '</li>';
     $('#contact-add-log').prepend($(html));
   },
-  
+
   verifyUser: function (username, fingerprint) {
     if (username == app.username) {
       app.alert('Cannot verify your own account', 'danger');
@@ -1184,7 +1184,7 @@ var app = {
   displayIdCard: function (idCard, callback) {
     $(idCard).css({ width: '290px' });
     $('#my-fingerprint-id').append(idCard);
-    
+
     $('#my-avatar')[0].src = app.session.items.avatar.value.avatar;
     $('#share-my-id-card').click(function () {
       if (app.isNodeWebKit) {
@@ -1235,7 +1235,7 @@ var app = {
     img.src = imageData;
     return idCard;
   },
-  
+
   addPhotoToIdCard: function addPhotoToIdCard (idCard, override, callback) {
     // check for existing photo:
     app.session.getOrCreateItem(app.PHOTO_ITEM,
@@ -1424,7 +1424,7 @@ var app = {
     $(canvas).attr({'class': 'contact-id'});
     $('#contact-details .contact-id').remove();
     $('#contact-details').prepend(canvas);
-    
+
     $('#contact-message').children().remove();
     if (!contact.fingerprint) {
       var html = '<p class="contact-msg">'
@@ -1432,7 +1432,7 @@ var app = {
 	    + ' has scanned your Contact Card, but you need to obtain and scan their card in order to communicate</span>';
       $('#contact-message').append($(html));
     }
-    
+
     app.switchView('contact-details', name);
   },
 
@@ -1471,13 +1471,13 @@ var app = {
     }
     return device.version;
   },
-  
+
   keyChain: {
 
     MIN_SUPPORT_IOS: 8,
 
     MIN_SUPPORT_ANDROID: 5,
-    
+
     init: function init_keyChain (username, callback) {
       if (!this.supported) {
 	return callback('Keychain unsupported');

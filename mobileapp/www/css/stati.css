@@ -122,8 +122,8 @@
 .media .img {
     float: left;
     margin: 0 1rem 0 0.75rem;
-    width: 3.5rem;
-    height: 3.5rem;
+    width: 3rem;
+    height: 3rem;
     overflow: hidden;
     border-radius: 50%;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -340,6 +340,12 @@
     margin: 0 auto;
     display: none;
     box-shadow: 0 2px 3px 0 rgba(0,0,0,0.15);
+    transition: all .1s ease-in-out;
+}
+#post-button-floating-wrapper:hover,
+#post-button-floating-wrapper:focus,
+#post-button-floating-wrapper:active {
+    transform: scale(1.2);
 }
 
 #post-input-wrapper {
@@ -352,12 +358,48 @@
     right: 0;
     margin: 0 auto;
     display: none;
+
+    -webkit-box-align: center;
+    -webkit-align-items: flex-end;
+    align-items: flex-end;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+    justify-content: space-between;
+}
+
+.posting #post-input-wrapper {
+    display: flex;
+    display: -webkit-flex;
+}
+.posting #app {
+    opacity: 0.5;
+}
+/* Ugly solution, but will do for now. -C. */
+
+#post-input-wrapper .icon:first-child {
+    margin-left: 0.5rem;
+    margin-bottom: 0;
+}
+
+#post-input-wrapper .icon:last-child {
+    margin-right: 0.5rem;
+    margin-bottom: 0.25rem;
 }
 
 #post-input-wrapper textarea {
-    width: 48%;
-    height: 75px;
-    margin-top: 1em;
+    flex: 1;
+    -webkit-flex: 1;
+    margin:0.25rem 0.5rem;
+    border-radius:0;
+    min-height: 2rem;
+    border: 1px solid black;
+    font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif ;
+    background-color: rgba(255, 255, 255, 0.95);
+    color: #585858;
+    font-size: 15px;
+    padding: 0.25rem;
+    box-sizing: border-box;
+    transition: height .1s ease-out;
 }
 
 .post-button-svg {
@@ -368,23 +410,14 @@
 }
 
 #post-attach-icon {
-    width: 30px;
-    margin-top: -6rem;
-    margin-right: 1rem;
-    margin-left: 1rem;
+
 }
 
 #post-attach {
-    width: 100%;
-    height: 100%;
     margin: 0;
 }
 
 #post-send-icon {
-    width: 30px;
-    margin-top: -6rem;
-    margin-right: 1rem;
-    margin-left: 1rem;
 }
 
 #location-data {
