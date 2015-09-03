@@ -243,22 +243,22 @@ app.postingUIActionSheet = function postingUIActionSheet () {
 app.viewActions = {
 
   feed: function vaFeed () {
-    $('.header').hide();
+    // $('.header-wrap').hide();
     $('#header-timeline').show();
   },
 
   settings: function vaSettings () {
-    $('.header').hide();
+    // $('.header-wrap').hide();
     $('#header-settings').show();
   },
 
   contacts: function vaContacts () {
-    $('.header').hide();
+    // $('.header-wrap').hide();
     $('#header-contacts').show();
   },
 
   contactCard: function vaContactCard () {
-    $('.header').hide();
+    // $('.header-wrap').hide();
     $('#header-contact-card').show();
   }
 };
@@ -395,6 +395,7 @@ app.loadInitialTimeline = function loadInitialTimeline(callback) {
   if (app.feedIsLoading) {
     return;
   }
+
   app.switchView('feed', app.FEED_LABEL);
   app.feedIsLoading = true;
 

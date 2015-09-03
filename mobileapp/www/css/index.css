@@ -460,8 +460,7 @@ input[type="password"]:focus {
    position: fixed;
    top: 0;
    width: 100vw;
-   display: flex;
-   display: -webkit-flex;
+   display: inline-block;
 }
 
 .header-wrap {
@@ -471,6 +470,8 @@ input[type="password"]:focus {
     padding-top: 1.4rem;
     color: #ffffff;
     text-align: center;
+    display: flex;
+    display: -webkit-flex;
     -webkit-box-align: center;
     -webkit-align-items: center;
     align-items: center;
@@ -521,7 +522,7 @@ input[type="password"]:focus {
 }
 
 #header-timeline {
-    display: none;
+    /* display: none; */
 }
 
 .icon--contacts {
