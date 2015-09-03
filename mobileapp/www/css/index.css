@@ -456,19 +456,21 @@ input[type="password"]:focus {
     margin-left: 0.3em;
 }
 
-.header {
-    position: fixed;
-    top: 0;
-    width: 100vw;
+#header {
+   position: fixed;
+   top: 0;
+   width: 100vw;
+   display: flex;
+   display: -webkit-flex;
+}
+
+.header-wrap {
     background: linear-gradient(135deg, rgba(222,45,194,0.9) 0%,rgba(150,13,225,0.9) 100%);
     box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.16), 0px 1px 2.5px 0px rgba(0, 0, 0, 0.26);
     z-index: 10;
     padding-top: 1.4rem;
     color: #ffffff;
     text-align: center;
-
-    display: flex;
-    display: -webkit-flex;
     -webkit-box-align: center;
     -webkit-align-items: center;
     align-items: center;
@@ -477,23 +479,23 @@ input[type="password"]:focus {
     justify-content: space-between;
 }
 
-.header nav:first-child {
+.header-wrap nav:first-child {
     padding-left:0.5rem;
 }
 
-.header nav:last-child {
+.header-wrap nav:last-child {
     padding-right:0.5rem;
 }
 
-.header .header-item {
+.header-wrap .header-item {
     flex-grow: 0;
 }
 
-.header nav {
+.header-wrap nav {
     display: inline-block;
 }
 
-.header #header--title {
+.header-wrap #header--title {
     flex-shrink: 1;
     font-size: 18px;
     font-family: WorkSans;
@@ -501,12 +503,12 @@ input[type="password"]:focus {
 }
 
 /* header icon stuff */
-.header .header-item .header-icon, .icon {
+.header-wrap .header-item .header-icon, .icon {
      text-indent: -999999999px;
      overflow: hidden;
 }
 
-.header .header-item .header-icon {
+.header-wrap .header-item .header-icon {
     display: inline-block;
 }
 
