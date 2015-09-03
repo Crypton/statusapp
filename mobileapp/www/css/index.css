@@ -334,6 +334,10 @@ h1 {
     -webkit-transform: translate3d(0, 0, 0);
 }
 
+.header-wrap.active {
+    -webkit-transform: translate3d(0, 0, 0);
+}
+
 #top-menu {
     background: #ffffff ;
     position: fixed;
@@ -439,7 +443,7 @@ input[type="password"]:focus {
 }
 
 #app {
-    /*background-color: #CFD8DC;*/
+    z-index: -20;
     position: absolute;
     top: 0;
     right: 0px;
@@ -460,7 +464,6 @@ input[type="password"]:focus {
    position: fixed;
    top: 0;
    width: 100vw;
-   display: inline-block;
 }
 
 .header-wrap {
@@ -514,15 +517,15 @@ input[type="password"]:focus {
 }
 
 #header-contacts {
-    display: none;
+
 }
 
 #header-settings {
-    display: none;
+
 }
 
 #header-timeline {
-    /* display: none; */
+
 }
 
 .icon--contacts {

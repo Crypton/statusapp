@@ -7,10 +7,11 @@
 document.addEventListener("deviceready", onDeviceReady, false);
 
 function onDeviceReady() {
+  $('.header-wrap').hide();
   $(function() {
     FastClick.attach(document.body);
   });
-
+  
   // Now safe to use device APIs
   app.init();
 

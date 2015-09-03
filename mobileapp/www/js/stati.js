@@ -243,22 +243,22 @@ app.postingUIActionSheet = function postingUIActionSheet () {
 app.viewActions = {
 
   feed: function vaFeed () {
-    // $('.header-wrap').hide();
+    $('.header-wrap').hide();
     $('#header-timeline').show();
   },
 
   settings: function vaSettings () {
-    // $('.header-wrap').hide();
+    $('.header-wrap').hide();
     $('#header-settings').show();
   },
 
   contacts: function vaContacts () {
-    // $('.header-wrap').hide();
+    $('.header-wrap').hide();
     $('#header-contacts').show();
   },
 
   contactCard: function vaContactCard () {
-    // $('.header-wrap').hide();
+    $('.header-wrap').hide();
     $('#header-contact-card').show();
   }
 };
