@@ -35,4 +35,5 @@
     <plugin name="org.apache.cordova.inappbrowser" spec="~0.6.0" />
     <plugin name="org.apache.cordova.device" spec="~0.3.0" />
     <plugin name="com.crypho.plugins.securestorage" spec="~1.1.2" />
+    <plugin name="nl.x-services.plugins.actionsheet" spec="~1.1.7" />
 </widget>
