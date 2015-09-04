@@ -245,24 +245,29 @@ app.viewActions = {
   feed: function vaFeed () {
     $('.header-wrap').hide();
     $('#header-timeline').show();
+    $('#post-button-floating-wrapper').show();
   },
 
   settings: function vaSettings () {
+    $('#post-button-floating-wrapper').hide();
     $('.header-wrap').hide();
     $('#header-settings').show();
   },
 
   contacts: function vaContacts () {
+    $('#post-button-floating-wrapper').hide();
     $('.header-wrap').hide();
     $('#header-contacts').show();
   },
 
   contactCard: function vaContactCard () {
+    $('#post-button-floating-wrapper').hide();
     $('.header-wrap').hide();
     $('#header-contact-card').show();
   },
 
   'scan-select': function vaScanSelect () {
+    $('#post-button-floating-wrapper').hide();
     // noop
   }
 };

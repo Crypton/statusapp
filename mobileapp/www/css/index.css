@@ -419,23 +419,17 @@ input[type="password"]:focus {
 }
 
 .btn:hover, .btn:active, .btn:focus {
-    color: white;
     background-color: currentColor;
-
 }
 
-.btn-primary {
-    color: rgba(150,13,225,1) ;
-}
-
-.btn-success {
-    background-color: rgb(108, 176, 246) ;
-    border-color: rgb(108, 176, 246) ;
+.btn-primary .btn-success {
+    color: rgb(108, 176, 246);
+    border-color: rgb(108, 176, 246);
     -webkit-border-radius: 5px ;
 }
 
 .btn-danger {
-    -webkit-border-radius: 5px ;
+    color: red;
 }
 
 #login-status {
@@ -552,7 +546,7 @@ input[type="password"]:focus {
     background-size: 100%;
     background-position: center;
     background-repeat: no-repeat;
-    background-image: url('../svg/contact.svg');
+    background-image: url('../svg/add.svg');
 }
 
 .icon--new-post {
@@ -709,11 +703,12 @@ input[type="password"]:focus {
 }
 
 #scan-select {
-  padding: 20px;
+    padding: 40px;
+    margin-top: 4rem;
 }
 
 #scan-select-desktop {
-  padding: 20px;
+  padding: 40px;
 }
 
 #scan-select-buttons {
