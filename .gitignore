@@ -1,0 +1,4 @@
+.ds-store
+platforms/
+plugins/
+configuration.js
