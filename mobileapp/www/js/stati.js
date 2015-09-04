@@ -182,9 +182,9 @@ app.postingUIActionSheet = function postingUIActionSheet () {
 	// app.makeNewPost();
 	setTimeout(function () { $('#post-textarea').focus(); }, 200);
       }
+      $('#post-image-location-wrapper').show();
       app.setMyLocation(addLocationCallback);
       $('#post-textarea').focus();
-      // app.makeNewPost();
       break;
 
     case 2:
@@ -222,7 +222,7 @@ app.postingUIActionSheet = function postingUIActionSheet () {
 	var img = $('<img src="'  + imgData  +  '" />');
 	$('#image-data').children().remove();
 	$('#image-data').append(img);
-	// app.makeNewPost();
+	$('#post-image-location-wrapper').show();
 	$('#post-textarea').focus();
       });
       break;
@@ -230,8 +230,6 @@ app.postingUIActionSheet = function postingUIActionSheet () {
     case 4:
       // Cancel
       $('#post-textarea').focus();
-      // app.makeNewPost();
-      // app.hidePostUI();
       return;
     default:
       return;
