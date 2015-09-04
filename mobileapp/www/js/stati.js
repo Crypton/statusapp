@@ -131,6 +131,7 @@ app.setCustomEvents = function setCustomEvents () {
   $('#feed').click(function () {
     try {
       $('body').removeClass('posting');
+      $('#post-image-location-wrapper').hide();
       $('#post-button-floating-wrapper').show();
     } catch (ex) {
       console.warn(ex);
@@ -201,7 +202,7 @@ app.postingUIActionSheet = function postingUIActionSheet () {
 	var img = $('<img src="'  + imgData  +  '" />');
 	$('#image-data').children().remove();
 	$('#image-data').append(img);
-	// app.makeNewPost();
+	$('#post-image-location-wrapper').show();
 	$('#post-textarea').focus();
       });
       break;
@@ -1277,6 +1278,7 @@ app.setMyLocation = function setMyLocation(callback) {
 	  + name
 	  + '</span>';
     $('#location-data').append($(html));
+    $('#post-image-location-wrapper').show();
     callback();
   };
 

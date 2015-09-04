@@ -348,6 +348,21 @@
     transform: scale(1.2);
 }
 
+#post-image-location-wrapper {
+    display: none;
+    background-color: rgba(50, 50, 50, 0.85);
+    z-index: 10000;
+    position: fixed;
+    z-index: 1000;
+    bottom: 44px !important;
+    width: 100%;
+    text-align: center;
+}
+
+#post-outer-wrapper {
+    display: block;
+}
+
 #post-input-wrapper {
     position: fixed;
     width: 100%;
@@ -428,8 +443,8 @@
 }
 
 #image-data img {
-    height: 50px;
+    height: 80px;
     vertical-align: top;
-    margin-top: 2em;
+    margin-top: 0.5em;
     border: 2px solid #fff;
 }
