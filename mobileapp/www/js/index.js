@@ -257,12 +257,21 @@ var app = {
       app.displayContacts();
     });
 
-    $('.header-contacts-back').click(function () {
+    $('.icon--contact-card').click(function () {
+      app.displayMyFingerprint(true);
+      app.switchView('my-fingerprint-id-wrapper', 'My Contact Card');
+    });
+    
+    $('#header-contacts .header-back').click(function () {
       app.switchView('feed', 'Timeline');
     });
 
-    $('.icon--new-contact').click(function () {
+    $('#header-settings .header-back').click(function () {
       app.switchView('feed', 'Timeline');
+    });
+    
+    $('.icon--new-contact').click(function () {
+      app.switchView('scan-select', null);
     });
     
     $('#header-btn-contacts').click(function () {
@@ -1594,8 +1603,7 @@ var app = {
   },
 
   about: function _about () {
-    app.hideMenu();
-    app.switchView('#app-about', 'About ' + app.APPNAME);
+    app.switchView('app-about', 'About ' + app.APPNAME);
     if (typeof app.aboutView == 'function') {
       app.aboutView();
     }

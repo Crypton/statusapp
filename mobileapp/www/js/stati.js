@@ -268,7 +268,12 @@ app.viewActions = {
 
   'scan-select': function vaScanSelect () {
     $('#post-button-floating-wrapper').hide();
-    // noop
+  },
+
+  'my-options-pane': function vaMyOptionsPane () {
+    $('#post-button-floating-wrapper').hide();
+    $('.header-wrap').hide();
+    $('#header-settings').show();
   }
 };
 

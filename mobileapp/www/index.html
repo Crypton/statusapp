@@ -36,16 +36,20 @@
       
       <div id="header-settings" class="header-wrap">
 	<nav id="header--left-action" class="header-item">
-          <a href="#" class="header-contacts-back">Back</a>
+          <a href="#" class="header-back">&lt; Back</a>
 	</nav>
 	<nav id="header--title" class="header-item">
           <span>Settings</span>
+	</nav>
+	<nav id="header--right-action" class="header-item">
+          <a href="#" class="header-icon icon--blank" style="width: 2.0rem;
+height: 2.5rem;"></a>
 	</nav>
       </div>
       
       <div id="header-contacts" class="header-wrap">
 	<nav id="header--left-action" class="header-item">
-          <a href="#" class="header-back">Back</a>
+          <a href="#" class="header-back">&lt; Back</a>
 	</nav>
 	<nav id="header--title" class="header-item">
           <span>Contacts</span>
@@ -224,7 +228,9 @@
       <div id="scan-select" class="view">
 	<p>
 	  To add a contact, you must first have your contact send you
-	  their 'Contact Card'. You may either scan the QR Code or load
+	  their 'Contact Card'.
+	  <br />
+	  You may either scan the QR Code or load
 	  the Contact Card image from your image library.
 	</p>
 	<div id="scan-select-buttons">
@@ -264,10 +270,10 @@
 	  <ul id="contacts-list" class="nav nav-pills nav-stacked">
 	  </ul>
 	</div>
-	<div id="add-contact-button-row">
-	  <img id="my-fingerprint" src="svg/card-black.svg" />
-	  <img id="add-contact-button" src="svg/add.svg" />
-	</div>
+	<!-- <div id="add-contact-button-row"> -->
+	<!--   <img id="my-fingerprint" src="svg/card-black.svg" /> -->
+	<!--   <img id="add-contact-button" src="svg/add.svg" /> -->
+	<!-- </div> -->
       </div>
 
       <div id="contact-details" class="view">
@@ -296,6 +302,11 @@
 
       <div id="my-options-pane" class="view">
 	<div id="options-controls">
+	  <p class="option">
+	    <a href="#" id="about">
+	      <img src="svg/info.svg" />
+	    </a>
+	  </p>
 	  <p class="option option-text">
 	    By default (on supported devices), your credentials are securely remembered to allow for fast login
 	  </p>
@@ -304,30 +315,17 @@
 		    id="forget-credentials"
 		    class="btn btn-success">Forget credentials</button>
 	  </p>
-	  <p class="option option-text">
-	    Display My Passphrase
+	  <p class="option">
+	    <button type="button"
+		    id="display-passphrase"
+		    class="btn btn-success">Display passphrase</button>
 	  </p>
 	  <p class="option">
-	  <button type="button"
-		  id="display-passphrase"
-		  class="btn btn-success">Display passphrase</button>
+	    <button disabled type="button"
+		    id="change-passphrase"
+		    class="btn btn-success">Change passphrase</button>
 	  </p>
-	  <p class="option option-text">
-	    Change my passphrase
-	  </p>
-	  <p class="option">
-	  <button disabled type="button"
-		  id="change-passphrase"
-		  class="btn btn-success">Change passphrase</button>
-	  </p>
-	  <p class="option">
-	  <p class="option option-text">
-	    About
-	  </p>
-	  <a href="#" id="about">
-	    <img src="svg/info.svg" />
-	  </a>
-	  </p>
+
 	  <!-- <p class="option option-text"> 148 46 244
 	  <!--   Delete Account & All Data Created -->
 	  <!-- </p> -->
