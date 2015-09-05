@@ -272,13 +272,6 @@
     padding: 2rem 1.5rem;
 }
 
-#top-progress-wrapper {
-    background-color: whitesmoke;
-    height: 10px;
-    display: none;
-    margin-top: -1.6em;
-}
-
 #first-run-empty-feed-btn {
     display: none;
 }

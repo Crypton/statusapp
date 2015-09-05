@@ -405,14 +405,15 @@ app.statusNameHmac = function statusNameHmac() {
 };
 
 app.loadInitialTimeline = function loadInitialTimeline(callback) {
+
   if (app.feedIsLoading) {
     return;
   }
-
+  $('#top-progress-wrapper').show();
+  
   app.switchView('feed', app.FEED_LABEL);
   app.feedIsLoading = true;
 
-  $('#top-progress-wrapper').show();
   var options = { limit: 15 };
   app.session.getLatestTimeline(options, function tlCallback (err, timeline) {
     if (err) {
@@ -424,10 +425,6 @@ app.loadInitialTimeline = function loadInitialTimeline(callback) {
     app.renderTimeline(timeline);
     $('#top-progress-wrapper').hide();
     app.feedIsLoading = false;
-    if ($('.empty-timeline-element').length > 9) {
-      app.loadPastTimeline();
-    }
-    app.loadPastTimeline();
     if (!$("#fetch-previous-items").is(":visible")) {
       $("#fetch-previous-items").show();
     }
@@ -861,7 +858,8 @@ app.origsetMyStatus = function origsetMyStatus() {
       return app.alert('Cannot update status', 'danger');
     }
     $('#set-my-status-textarea').val('');
-    $('#my-image-to-post').children().remove();
+    // $('#my-image-to-post').children().remove();
+    $('#post-image-location-wrapper').hide();
     app.switchView('feed', app.FEED_LABEL);
     app.toggleSetStatusProgress();
     app.loadNewTimeline();
@@ -918,7 +916,7 @@ app.setMyStatus = function setMyStatus() {
     app.hidePostUI();
     $('#post-textarea').val('');
     $('#image-data').children().remove();
-
+    $('#post-image-location-wrapper').hide();
     app.toggleSetStatusProgress();
     app.loadNewTimeline();
   });

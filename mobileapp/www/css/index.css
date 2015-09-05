@@ -361,6 +361,14 @@ h1 {
     -webkit-transform: translate3d(0, 0, 0);
 }
 
+#login-title {
+    font-family: WorkSans;
+    padding: 1rem;
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 1rem 0;
+}
+
 #login-progress {
     margin: 10px 15px;
     display: none;
@@ -788,27 +796,35 @@ a.header-back {
     color: #fff ;
 }
 
-.progress {
-    height: 10px ;
-    border-radius: 2px ;
-    box-shadow: none ;
+#top-progress-wrapper {
+    display: none;
+    height: 3em;
+    border-radius: 2em;
+    z-index: 100;
+    padding: 0.5em;
+    color: whitesmoke;
+    background-color: rgba(50, 50, 50, 0.85);
+    width: 75%;
+    position: fixed;
+    left: 10%;
+    bottom: 50%;	
+    text-align: center;
 }
 
-
-@-webkit-keyframes progress-bar-stripes-alternate {
-  from {
-    background-position: 50% 0;
-  }
-  to {
-    background-position: 0 0;
-  }
+@-webkit-keyframes blink {
+    from {
+        opacity: 1.0;
+    }
+    to {
+        opacity: 0.0;
+    }
 }
 
-.progress-bar {
-    -webkit-animation: progress-bar-stripes-alternate 0.8s linear infinite ;
-    background-image: linear-gradient(90deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent) ;
-    background-color: rgb(145, 45, 244) ;
-    background-size: 50% ;
+blink {
+    -webkit-animation-name: blink;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-timing-function: cubic-bezier(1.0, 0, 0, 1.0);
+    -webkit-animation-duration: 1s;
 }
 
 h3 {

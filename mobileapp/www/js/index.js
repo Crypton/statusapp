@@ -805,7 +805,7 @@ var app = {
     }
 
     app.switchView('login-progress', '');
-    app.setLoginStatus('Creating Account...');
+    app.setProgressStatus('Creating Account...');
 
     function callback (err) {
       console.error(err);
@@ -848,7 +848,7 @@ var app = {
   },
 
   register: function (user, pass, callback) {
-    app.setLoginStatus('Generating account...');
+    app.setProgressStatus('Generating account...');
     app.switchView('login-progress', '');
 
     crypton.generateAccount(user, pass, function (err) {
@@ -885,7 +885,7 @@ var app = {
 
     $('.alert').remove();
 
-    app.setLoginStatus('Logging in...');
+    app.setProgressStatus('Logging in...');
 
     function callback (err, session) {
       if (err) {
@@ -914,7 +914,7 @@ var app = {
       }
       app.username = user;
       app.session = session;
-      app.setLoginStatus('Loading contacts and  preferences...');
+      app.setProgressStatus('Loading contacts and  preferences...');
 
       // Check for first run
       app.session.getOrCreateItem('_prefs_', function(err, prefsItem) {
@@ -933,7 +933,7 @@ var app = {
 	// $('#header-button-bar').show();
 
         app.username = app.session.account.username;
-	app.setLoginStatus('Loading timeline...');
+	app.setProgressStatus('Loading timeline...');
 	
         if (!prefsItem.value.firstRun) {
           prefsItem.value = { firstRun: Date.now() };
@@ -1003,9 +1003,10 @@ var app = {
     $('#login-buttons').show();
   },
 
-  setLoginStatus: function (m) {
-    $('#login-status .status').text(m);
-    $('#login-status').show();
+  setProgressStatus: function (m) {
+    // $('#login-status .status').text(m);
+    // $('#login-status').show();
+    $("blink").text(m);
   },
 
   clearLoginStatus: function (m) {
