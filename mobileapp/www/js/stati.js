@@ -137,6 +137,24 @@ app.setCustomEvents = function setCustomEvents () {
       console.warn(ex);
     }
   });
+
+  // Mutation Observer for the input textarea whcih helps us re-position the
+  // image and location piece
+  (function inputMutationObs() {
+    var target = document.querySelector('#post-input-wrapper textarea');
+    var observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+	var newBottom = mutation.target.parentElement.clientHeight;
+	$('#post-image-location-wrapper').css({ bottom: newBottom + 'px' });
+      });
+    });
+
+    // configuration of the observer: // XXX: May not need all of these
+    var config = { attributes: true, childList: true, characterData: true };
+    
+    // pass in the target node, as well as the observer options
+    observer.observe(target, config);
+  })();
 };
 
 app.hidePostUI = function hidePostUI () {

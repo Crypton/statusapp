@@ -347,7 +347,6 @@
     z-index: 10000;
     position: fixed;
     z-index: 1000;
-    bottom: 44px !important;
     width: 100%;
     text-align: center;
 }
