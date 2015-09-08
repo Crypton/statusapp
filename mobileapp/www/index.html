@@ -12,100 +12,84 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: wss: data: gap: android-webview-video-poster: https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" />
     <link rel="stylesheet" type="text/css" href="css/index.css" />
     <link rel="stylesheet" type="text/css" href="css/stati.css" />
-    <link rel="stylesheet" type="text/css" href="css/vendor/font-awesome.css" />
-    <link rel="stylesheet" type="text/css" href="css/vendor/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/vendor/animated.css" />
     <link rel="stylesheet" type="text/css" href="css/vendor/offline-theme-default.css" />
     <link rel="stylesheet" type="text/css" href="css/vendor/offline-language-english.css" />
     <link rel="stylesheet" type="text/css" href="css/vendor/offline-language-english-indicator.css" />
     <title>Kloak</title>
   </head>
-  <body>
+  <body class="logged-out">
     <div class="overlay"></div>
-    <div id="header">
-      <span id="logout-page-title">Kloak</span>
-      <ul id="header-button-bar">
-	<li>
-	  <a href="#" id="tasks-btn">
-	    <img id="main-menu-btn" src="svg/menu.svg" />
-	  </a>
-	</li>
-	<li class="header-bb-title">
-	  <span id="page-title">Kloak</span>
-	</li>
-	<li class="header-btn-wrap">
-	  <img id="my-fingerprint-top-menu" src="svg/card-white.svg" />
-	</li>
-	<li class="header-btn-wrap">
-	  <img id="header-btn-update" src="svg/post.svg" />
-	</li>
-	<li class="header-btn-wrap">
-	  <img id="header-btn-refresh" src="svg/sync.svg" />
-	</li>
-      </ul>
-      
-      <div id="top-progress-wrapper">
-	<div id="feed-progress-wrapper"
-	     class="progress progress-striped active">
-	  <div class="progress-bar"  role="progressbar" 
-	       aria-valuenow="100" aria-valuemin="0" 
-	       aria-valuemax="100" style="width: 100%">
-	  </div>
-	</div>
+
+    <header id="header" class="header">
+      <div id="header-timeline" class="header-wrap">
+	<nav id="header--left-action" class="header-item">
+          <a href="#" class="header-icon icon--settings">Settings</a>
+	</nav>
+	<nav id="header--title" class="header-item">
+          <span>Timeline</span>
+	</nav>
+	<nav id="header--right-action" class="header-item">
+          <a href="#" class="header-icon icon--contacts">Contacts</a>
+	</nav>
       </div>
+
+      <div id="header-settings" class="header-wrap">
+	<nav id="header--left-action" class="header-item">
+          <a href="#" class="header-back">&lt; Back</a>
+	</nav>
+	<nav id="header--title" class="header-item">
+          <span>Settings</span>
+	</nav>
+	<nav id="header--right-action" class="header-item">
+          <a href="#" class="header-icon icon--blank" style="width: 2.0rem;
+height: 2.5rem;"></a>
+	</nav>
+      </div>
+
+      <div id="header-contacts" class="header-wrap">
+	<nav id="header--left-action" class="header-item">
+          <a href="#" class="header-back">&lt; Back</a>
+	</nav>
+	<nav id="header--title" class="header-item">
+          <span>Contacts</span>
+	</nav>
+	<nav id="header--right-action" class="header-item">
+	  <a href="#" class="header-icon icon--contact-card">Contact Card</a>
+          <a href="#" class="header-icon icon--new-contact">+</a>
+	</nav>
+      </div>
+    </header>
+
+    <div id="top-progress-wrapper" class="progress">
+      <blink>
+	Doing Stuff...
+      </blink>
     </div>
+
 
     <div id="app" class="app container-fluid">
       <div id="alerts"></div>
 
       <ul id="top-menu" class="menu nav nav-stacked">
-	<!-- <li class="main-btn" id="my-stati"> -->
-	<!--   <a href="#"> -->
-	<!--     <img src="svg/post-dark.svg" /> -->
-	<!--     <span>Update Status</span> -->
-	<!--   </a> -->
-	<!-- </li> -->
 	<li class="main-btn" id="my-feed">
 	  <a href="#">
 	    <img src="svg/sync-dark.svg" />
 	    <span>Feed</span>
 	  </a>
 	</li>
-	<!-- <li class="main-btn" id="refresh-feed"> -->
-	<!--   <a href="#"> -->
-	<!--     <i class="fa fa-refresh"></i> <span>Refresh Feed</span> -->
-	<!--   </a> -->
-	<!-- </li> -->
 	<li class="main-btn" id="my-contacts">
 	  <a href="#">
 	    <img src="svg/contacts.svg" />
 	    Contacts
 	  </a>
 	</li>
-	<!-- <li class="main-btn" id="my-fingerprint"> -->
-	<!--   <a href="#"> -->
-	<!--     <img src="svg/contact.svg" /> -->
-	<!--     My Contact Card -->
-	<!--   </a> -->
-	<!-- </li> -->
 	<li class="main-btn" id="my-options">
 	  <a href="#">
 	    <img src="svg/setting.svg" />
 	    Options
 	  </a>
 	</li>
-	<!-- <li class="main-btn" id="about"> -->
-	<!--   <a href="#"> -->
-	<!--     <img src="svg/info.svg" /> -->
-	<!--     About -->
-	<!--   </a> -->
-	<!-- </li> -->
-
-	<!-- <li class="main-btn" id="logout"> -->
-	<!--   <a href="#"> -->
-	<!--     <img src="svg/logout.svg" /> -->
-	<!--     <\!-- <i class="fa fa-sign-out"></i> -\-> Logout -->
-	<!--   </a> -->
-	<!-- </li> -->
       </ul>
 
       <div id="stati" class="view">
@@ -128,38 +112,38 @@
       </div>
 
       <div id="capture-avatar" class="view">
-	<canvas id="capture-canvas" width="200" height="200" 
+	<canvas id="capture-canvas" width="200" height="200"
 		style="display:none;">
 	</canvas>
 	<video autoplay id="capture-video" width="200" height="200"></video>
 	<button class="btn" id="capture-picture">Capture</button>
       </div>
-      
+
       <div id="feed" class="view">
-	
+
 	<div id="first-run-empty-feed-msg">
 	  <p>Your feed is empty. Say something or connect with contacts to fill your feed</p>
 	</div>
-	
+
 	<div id="my-feed-entries">
 	</div>
 
 	<div id="feed-footer">
-	  <button class="btn btn-primary" 
-		  id="fetch-previous-items">Previous...</button>
+	  <button class="btn btn-primary"
+		  id="fetch-previous-items">Load more...</button>
 	</div>
       </div>
 
       <div id="find-users-view" class="view">
 	<div id="find-user-form" class="input-group input-group-lg">
-	  <input id="find-someone" 
+	  <input id="find-someone"
 		 type="text"
 		 size="12"
 		 maxlength="32"
 		 type="text" class="form-control">
 	  <span class="input-group-btn btn-group-lg">
-	    <button id="find-someone-btn" 
-		    class="btn btn-default" 
+	    <button id="find-someone-btn"
+		    class="btn btn-default"
 		    type="button">Find User</button>
 	  </span>
 	</div>
@@ -172,7 +156,7 @@
 		 autocapitalize="off"
 		 size="12"
 		 maxlength="32"
-		 class="form-control login-input" 
+		 class="form-control login-input"
 		 id="username-generate" type="text" />
 	  <p id="generate-account-verbage">A long passphrase might have been generated randomly for you, <i class="ired">in red below</i> (unless you typed one into the login form). It is highly suggested you use a long passphrase and save it into a password manager application.</p>
 	  <p id="get-new-passphrase-wrapper">
@@ -180,35 +164,35 @@
 	      Generate Long Passphrase
 	    </button>
 	  </p>
-	  <input placeholder="Passphrase" 
+	  <input placeholder="Passphrase"
 		 size="12"
 		 maxlength="32"
 		 class="form-control login-input"
-		 id="password-generate" type="text" 
+		 id="password-generate" type="text"
 		 autocomplete="off" />
 	  <div id="generate-buttons">
-	    <button class="btn btn-primary" 
+	    <button class="btn btn-primary"
 		    id="register-generate-btn">Create Account</button>
 	    <br />
-	    <button class="btn btn-primary" 
+	    <button class="btn btn-primary"
 		    id="register-generate-cancel-btn">Cancel</button>
 	  </div>
 	</form>
       </div>
-      
+
       <div id="account-login" class="view active">
 	<form id="login-form" class="input-group input-group-lg">
 	  <input placeholder="Username"
 		 autocapitalize="off"
 		 size="12"
 		 maxlength="32"
-		 class="form-control login-input" 
+		 class="form-control login-input"
 		 id="username-login" type="text" />
-	  <input placeholder="Passphrase" 
+	  <input placeholder="Passphrase"
 		 size="12"
 		 maxlength="32"
 		 class="form-control login-input"
-		 id="password-login" type="password" 
+		 id="password-login" type="password"
 		 autocomplete="off" />
 	  <div id="remember-credentials-wrapper">
 	    <input type="checkbox" id="remember-credentials" checked />
@@ -235,31 +219,26 @@
 	<div id="login-status">
 	  <span class="status"></span>
 	</div>
-	<!-- <div id="progress-wrapper" -->
-	<!--      class="progress progress-striped active"> -->
-	<!--   <div class="progress-bar"  role="progressbar"  -->
-	<!--        aria-valuenow="100" aria-valuemin="0"  -->
-	<!--        aria-valuemax="100" style="width: 100%"> -->
-	<!--   </div> -->
-	<!-- </div> -->
       </div>
 
       <div id="scan-select" class="view">
 	<p>
 	  To add a contact, you must first have your contact send you
-	  their 'Contact Card'. You may either scan the QR Code or load
+	  their 'Contact Card'.
+	  <br />
+	  You may either scan the QR Code or load
 	  the Contact Card image from your image library.
 	</p>
 	<div id="scan-select-buttons">
-	  <button type="button" 
+	  <button type="button"
 		  class="btn btn-success"
 		  id="scan">Scan QR</button>
-	  <button type="button" 
+	  <button type="button"
 		  class="btn btn-primary"
 		  id="get-image">Load File</button>
 	</div>
 	<ul id="contact-add-log">
-	  
+
 	</ul>
       </div>
 
@@ -274,10 +253,10 @@
 	  supplied by the server.
 	</p>
 	<div id="scan-select-buttons">
-	  <button type="button" 
+	  <button type="button"
 		  class="btn btn-primary"
 		  id="get-image-desktop">Load file</button>
-	  <input style="display:none;" id="id-file-dialog" type="file" 
+	  <input style="display:none;" id="id-file-dialog" type="file"
 		 accept=".png,image/png" />
 	</div>
       </div>
@@ -287,17 +266,17 @@
 	  <ul id="contacts-list" class="nav nav-pills nav-stacked">
 	  </ul>
 	</div>
-	<div id="add-contact-button-row">
-	  <img id="my-fingerprint" src="svg/card-black.svg" />
-	  <img id="add-contact-button" src="svg/add.svg" />
-	</div>
+	<!-- <div id="add-contact-button-row"> -->
+	<!--   <img id="my-fingerprint" src="svg/card-black.svg" /> -->
+	<!--   <img id="add-contact-button" src="svg/add.svg" /> -->
+	<!-- </div> -->
       </div>
 
       <div id="contact-details" class="view">
 
 	<div id="contact-message">
 	</div>
-	
+
 	<div id="contact-details-buttons" class="btn-group btn-group-lg">
 	  <button type="button"
 		  class="btn btn-success"
@@ -319,6 +298,11 @@
 
       <div id="my-options-pane" class="view">
 	<div id="options-controls">
+	  <p class="option">
+	    <a href="#" id="about">
+	      <img src="svg/info.svg" />
+	    </a>
+	  </p>
 	  <p class="option option-text">
 	    By default (on supported devices), your credentials are securely remembered to allow for fast login
 	  </p>
@@ -327,30 +311,24 @@
 		    id="forget-credentials"
 		    class="btn btn-success">Forget credentials</button>
 	  </p>
-	  <p class="option option-text">
-	    Display My Passphrase
+      <div id="touchid-wrapper">
+        <p class="option">
+        <button type="button"
+          id="use-touchid"
+          class="btn btn-success">Toggle Touch ID</button>
+        </p>
+      </div>
+	  <p class="option">
+	    <button type="button"
+		    id="display-passphrase"
+		    class="btn btn-success">Display passphrase</button>
 	  </p>
 	  <p class="option">
-	  <button type="button"
-		  id="display-passphrase"
-		  class="btn btn-success">Display passphrase</button>
+	    <button disabled type="button"
+		    id="change-passphrase"
+		    class="btn btn-success">Change passphrase</button>
 	  </p>
-	  <p class="option option-text">
-	    Change my passphrase
-	  </p>
-	  <p class="option">
-	  <button disabled type="button"
-		  id="change-passphrase"
-		  class="btn btn-success">Change passphrase</button>
-	  </p>
-	  <p class="option">
-	  <p class="option option-text">
-	    About
-	  </p>
-	  <a href="#" id="about">
-	    <img src="svg/info.svg" />
-	  </a>
-	  </p>
+
 	  <!-- <p class="option option-text"> 148 46 244
 	  <!--   Delete Account & All Data Created -->
 	  <!-- </p> -->
@@ -367,7 +345,7 @@
 	  <!-- </p> -->
 	</div>
       </div>
-      
+
       <div id="my-fingerprint-id-wrapper" class="view">
 	<div id="my-fingerprint-id">
 	</div>
@@ -382,7 +360,7 @@
 
       <div id="app-about" class="view">
       </div>
-      
+
       <div id="first-run" class="view">
 	<h3>Initial Setup</h3>
 	<p><strong>Congratulations! You've signed up for Kloak.</strong></p>
@@ -397,7 +375,7 @@
 	</p>
 	<br />
 	<p class="text-center">
-	  <button class="btn btn-success" 
+	  <button class="btn btn-success"
 		  id="create-id-card">Take Contact Card Photo</button>
 	</p>
       </div>
@@ -421,9 +399,9 @@
 	    and speak with the person who sent you this Contact card.
 	  </p>
 	  <div id="verify-user-buttons">
-	    <button id="verify-trust-save" 
+	    <button id="verify-trust-save"
 		    class="btn btn-success">Trust</button>
-	    <button id="verify-trust-cancel" 
+	    <button id="verify-trust-cancel"
 		    class="btn btn-danger">Cancel</button>
 	  </div>
 	</div>
@@ -432,7 +410,7 @@
 	  <p><strong>Failed to capture fingerprint</strong></p>
 	  <div id="verify-user-failure-msg"></div>
 	  <div>
-	    <button id="verify-trust-failure-ok" 
+	    <button id="verify-trust-failure-ok"
 		    class="btn btn-default">OK</button>
 	  </div>
 	</div>
@@ -443,6 +421,28 @@
       </div>
 
     </div>
+
+    <div id="post-image-location-wrapper">
+      <div id="image-data"></div>
+      <div id="img-location-wrapper">
+      	<div id="location-data"></div>
+      </div>
+    </div>
+
+    <!-- POST INPUT WRAPPER -->
+    <div id="post-input-wrapper">
+      <a id="post-attach" href="#" class="icon icon--attach">Add Attachment...</a>
+      <textarea rows="1" id="post-textarea" class="js-auto-size post-textarea" placeholder="Enlighten us, please!"></textarea>
+
+      <a id="post-send" href="#" class="">Post</a>
+
+    </div>
+
+    <!-- POST BUTTON -->
+    <nav id="post-button-floating-wrapper">
+      <a id="post-button-floating" href="#" class="icon icon--new-post">New Post</a>
+    </nav>
+
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="js/crypton.js"></script>
     <script type="text/javascript" src="js/index.js"></script>
@@ -451,11 +451,12 @@
     <script type="text/javascript" src="js/day-of-year.js"></script>
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/vendor/humane.js"></script>
-    <script type="text/javascript" src="js/vendor/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/vendor/autoresize.js"></script>
     <script type="text/javascript" src="js/vendor/canvas-toBlob.js"></script>
     <script type="text/javascript" src="js/vendor/FileSaver.js"></script>
     <script async type="text/javascript" src="js/passphrase-corpus.js"></script>
-    <!-- BEGIN QR Code Reader --> 
+    <script type="text/javascript" src="js/vendor/fastclick.js"></script>
+    <!-- BEGIN QR Code Reader -->
     <script type="text/javascript" src="js/vendor/jsqrcode/grid.js"></script>
     <script type="text/javascript" src="js/vendor/jsqrcode/version.js"></script>
     <script type="text/javascript" src="js/vendor/jsqrcode/detector.js"></script>

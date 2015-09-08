@@ -7,6 +7,17 @@
 document.addEventListener("deviceready", onDeviceReady, false);
 
 function onDeviceReady() {
+  $('.header-wrap').hide();
+  
+  $(function() {
+    FastClick.attach(document.body);
+  });
+
+    //Check for touchID localstorage
+  if(!window.localStorage.touchIdLoginEnabled) {
+     window.localStorage.setItem('touchIdLoginEnabled', 0);
+  }
+  
   // Now safe to use device APIs
   app.init();
 
@@ -17,7 +28,7 @@ function onDeviceReady() {
 	  (typeof app.resumeEventHandler == 'function')) {
 	app.resumeEventHandler();
       }
-      
+
     }, 0);
   }, false);
 
@@ -29,13 +40,14 @@ function onDeviceReady() {
       console.log('app pausing');
     }
   }, false);
-  
+
   try {
     // XXX: need to learn how to #IFDEF
     screen.lockOrientation('portrait');
   } catch (ex) {
     console.log('Lock orientation not supported');
   }
+  cordova.plugins.Keyboard.disableScroll(true);
 }
 
 var app = {
@@ -43,18 +55,23 @@ var app = {
   init: function init() {
     console.log('app initializing!: ', arguments);
 
+    // Check explicitly for 1 
+    if (window.localStorage.touchIdLoginEnabled == 1){
+      touchid.authenticate(function(){app.login()}, function(err){ alert(err)}, "Login to Kloak!");
+    }
+
     // Configure the endpoint:
     crypton.host = app.host;
     crypton.port = app.port || 1025;
-    
+
     this.card =  new crypton.Card();
     this.bindEvents();
     $('#password-login').show();
     $('#username-login').show();
-    
+
     function defaultLoginBehavior () {
       app.enableLoginButtons();
-      app.switchView('#account-login');
+      app.switchView('account-login');
       // do not show "remember credentials" if keychain is not supported
       if (!app.keyChain.supported) {
 	$('#remember-credentials')[0].checked = false;
@@ -62,7 +79,7 @@ var app = {
       }
       $('#username-login').focus();
     }
-    
+
     // Check if any user has ever logged in before:
     var lastUser = window.localStorage.getItem('lastUserLogin');
     if (lastUser) {
@@ -78,7 +95,9 @@ var app = {
 	    console.error(err);
 	    // just display the normal login password. something is wrong...
 	    return defaultLoginBehavior();
-	  }
+	  } else {
+        app.passphraseInKeychain = true;
+      }
 	  // we have a passphrase!
 	  $('#username-login').hide();
 	  $('#username-placeholder').html(lastUser).show();
@@ -89,9 +108,9 @@ var app = {
 
 	  $('#remember-credentials')[0].checked = false;
 	  $('#remember-credentials-wrapper').hide();
-	  
+
 	  app.enableLoginButtons();
-	  app.switchView('#account-login');
+	  app.switchView('account-login');
 	  $('#login-btn').focus();
 	});
       });
@@ -99,7 +118,7 @@ var app = {
       // check if keychain is supported
       defaultLoginBehavior();
     }
-   // Offline
+    // Offline
     window.Offline.options = {
       // Should we check the connection status immediatly on page load.
       checkOnLoad: false,
@@ -134,16 +153,16 @@ var app = {
         }
       }
     };
-    
+
   },
 
   APPNAME: 'Kloak',
 
   get contactCardLabel() { return app.APPNAME + ' contact card'; },
-  
+
   URL: 'https://zk.gs',
 
-  VERSION: "0.0.2",
+  VERSION: "0.3.0",
 
   get isNodeWebKit() { return (typeof process == "object"); },
 
@@ -176,7 +195,7 @@ var app = {
     $('#about').click(function () {
       app.about();
     });
-    
+
     $("#register-btn").click(function (e) {
       e.preventDefault();
       app.beginRegistration();
@@ -184,7 +203,7 @@ var app = {
 
     $("#register-generate-cancel-btn").click(function (e) {
       e.preventDefault();
-      app.switchView('#account-login', app.APPNAME);
+      app.switchView('account-login', app.APPNAME);
     });
 
     $("#register-generate-btn").click(function (e) {
@@ -202,7 +221,7 @@ var app = {
     $('#password-generate').click(function (e) {
       //e.scrollIntoView({block: "end", behavior: "smooth"});
     });
-    
+
     $('#get-new-passphrase').click(function (e) {
       e.preventDefault();
       var pass = generatePassphrase();
@@ -218,23 +237,39 @@ var app = {
       app.login();
     });
 
-    $('#forget-credentials').click(function (e) {
-      app.keyChain.removePassphrase(function (err) {
-	if (err) {
-	  console.error(err);
-	  app.alert('There is no passphrase to remove from keychain', 'warning');
-	} else {
-	  app.alert('Passphrase removed!', 'info');
-	}
-	delete window.localStorage.lastUserLogin;
-	// re-set the login screen
-	$('#username-login').show();
-	$('#username-placeholder').html('').hide();
-	$('#password-login').show();
-	e.disabled = true;
-      });
+    $("#use-touchid").click(function (e) {
+      if (window.localStorage.touchIdLoginEnabled == 0) {
+        window.localStorage.setItem('touchIdLoginEnabled', 1);
+        $('#use-touchid').html("Turn Off TouchID");
+        app.alert("TouchID Activated");
+      } else {
+        window.localStorage.setItem('touchIdLoginEnabled', 0);
+        $('#use-touchid').html("Turn On TouchID");
+        app.alert("TouchID De-Activated");
+      }
     });
-    
+
+    $('#forget-credentials').click(function (e) {
+        if (window.localStorage.touchIdLoginEnabled == 1) {
+          app.alert("Please disable TouchID before Forgetting Credentials");
+        } else {
+          app.keyChain.removePassphrase(function (err) {
+            if (err) {
+            console.error(err);
+            app.alert('There is no passphrase to remove from keychain', 'warning');
+          } else {
+            app.alert('Passphrase removed!', 'info');
+          }
+          delete window.localStorage.lastUserLogin;
+          // re-set the login screen
+          $('#username-login').show();
+          $('#username-placeholder').html('').hide();
+          $('#password-login').show();
+          e.disabled = true;
+        });
+      }
+    });
+
     $('#display-passphrase').click(function (e) {
       // check if we have the passphrase!
       app.keyChain.getPassphrase(function (err, passphrase) {
@@ -246,11 +281,27 @@ var app = {
       });
     });
     
-    $('#my-contacts').click(function () {
-      app.hideMenu();
+    $('.icon--contacts').click(function () {
       app.displayContacts();
     });
 
+    $('.icon--contact-card').click(function () {
+      app.displayMyFingerprint(true);
+      app.switchView('my-fingerprint-id-wrapper', 'My Contact Card');
+    });
+    
+    $('#header-contacts .header-back').click(function () {
+      app.switchView('feed', 'Timeline');
+    });
+
+    $('#header-settings .header-back').click(function () {
+      app.switchView('feed', 'Timeline');
+    });
+    
+    $('.icon--new-contact').click(function () {
+      app.switchView('scan-select', null);
+    });
+    
     $('#header-btn-contacts').click(function () {
       app.hideMenu();
       app.displayContacts();
@@ -259,38 +310,69 @@ var app = {
     $('#verify-id-card').click(function () {
       app.hideMenu();
       if (app.isNodeWebKit) {
-        app.switchView('#scan-select-desktop', 'Verify Contact Card');
+        app.switchView('scan-select-desktop', 'Verify Contact Card');
       } else {
-        app.switchView('#scan-select', 'Verify Contact Card');
+        app.switchView('scan-select', 'Verify Contact Card');
       }
     });
 
     $('#my-fingerprint').click(function () {
       app.hideMenu();
-      app.switchView('#my-fingerprint-id-wrapper', 'My Contact Card');
+      app.switchView('my-fingerprint-id-wrapper', 'My Contact Card');
       app.displayMyFingerprint(true);
     });
 
     $('#my-fingerprint-top-menu').click(function () {
       app.hideMenu();
-      app.switchView('#my-fingerprint-id-wrapper', 'My Contact Card');
+      app.switchView('my-fingerprint-id-wrapper', 'My Contact Card');
       app.displayMyFingerprint(true);
     });
 
-    $('#my-options').click(function () {
-      app.hideMenu();
-
+    $('.icon--settings').click(function () {
       // disable forget credentials if not supported
       if (!app.keyChain.supported) {
 	$('#forget-credentials')[0].disabled = true;
 	$('#display-passphrase')[0].disabled = true;
       }
-      
-      app.switchView('#my-options-pane', 'Options');
+
+      // Hide touchID button if touchID not supported
+      // or no passphrase stored.
+      touchid.checkSupport(
+        function() {
+          if (!app.passphraseInKeychain) {
+            console.error('Passphrase NOT Stored');
+            $('#touchid-wrapper').hide();
+          }
+        },
+        function() {
+          console.error("TouchID NOT Supported");
+          $('#touchid-wrapper').hide();
+        });
+
+      // Set touchID message
+      if (window.localStorage.touchIdLoginEnabled == 0) {
+        $('#use-touchid').html("Turn On TouchID");
+      } else {
+        $('#use-touchid').html("Turn Off TouchID");
+      }
+
+      app.switchView('my-options-pane', 'Options');
     });
-    
+
+    // $('#my-options').click(function () {
+    //   app.hideMenu();
+
+    //   // disable forget credentials if not supported
+    //   if (!app.keyChain.supported) {
+    // 	$('#forget-credentials')[0].disabled = true;
+    // 	$('#display-passphrase')[0].disabled = true;
+    //   }
+
+    //   app.switchView('my-options-pane', 'Options');
+    // });
+
     $('#find-users').click(function () {
-      app.switchView('#find-users-view', 'Find Users');
+      app.switchView('find-users-view', 'Find Users');
     });
 
     $('#find-someone-btn').click(function () {
@@ -306,17 +388,17 @@ var app = {
       app.switchUser();
     });
 
-    $('#add-contact-button').click(function () {
+    $('.icon--new-contact').click(function () {
       if (app.isNodeWebKit) {
-        app.switchView('#scan-select-desktop', 'Verify Contact Card');
+        app.switchView('scan-select-desktop', 'Verify Contact Card');
       } else {
-        app.switchView('#scan-select', 'Verify Contact Card');
+        app.switchView('scan-select', 'Verify Contact Card');
       }
     });
 
     $('#contacts-detail-dismiss-btn').click(function () {
       $('.contact-id').remove();
-      app.switchView('#contacts', 'Contacts');
+      app.switchView('contacts', 'Contacts');
     });
 
     $('#contact-delete-btn').click(function () {
@@ -347,7 +429,7 @@ var app = {
 	  $('#top-progress-wrapper').hide();
 	  return;
 	}
-	// XXXddahl: Move this into a 'cleanUpDeleteUser' function in subclass 
+	// XXXddahl: Move this into a 'cleanUpDeleteUser' function in subclass
 	app.session.items.status.unshare(peer, function (err) {
 	  if (err) {
 	    console.error('Cannot unshare status from ' + peer.username);
@@ -365,7 +447,7 @@ var app = {
 	      return;
 	    }
 	    // XXXddahl: send a message to the deleted peer
-	    //           in order to have them remove you as well? 
+	    //           in order to have them remove you as well?
 
 	    // back to contacts screen
 	    app.alert('Contact ' + peer.username + ' deleted', 'info');
@@ -376,7 +458,7 @@ var app = {
 	});
       });
     });
-    
+
     if (app.setCustomEvents && typeof app.setCustomEvents == 'function') {
       app.setCustomEvents();
     }
@@ -384,7 +466,7 @@ var app = {
     $('#create-id-card').click(function () {
       app.firstRunCreateIdCard( function () {
         $('#tasks-btn').addClass('active');
-        app.switchView('#my-fingerprint-id-wrapper', 'My Contact Card');
+        app.switchView('my-fingerprint-id-wrapper', 'My Contact Card');
 	// need to set this here in order to call the firstRunComplete function properly
 	app.firstRunIsNow = false;
         app.firstRunComplete();
@@ -394,15 +476,31 @@ var app = {
 
   switchView: function switchView (id, name) {
     $('.view').removeClass('active');
-    $('#page-title').text(name);
-    $(id).addClass('active');
-    if (id == '#login-progress') { // XXXddahl: special case hack. sigh.
+    $('body').removeClass();
+    $('body').addClass(id);
+
+    try {
+      app.viewActions[id]();
+    } catch (ex) {
+      console.error(ex);
+      console.warn('No defined action in app.viewActions object that handles ' + id);
+    }
+    var htmlId = '#' + id;
+
+    $(htmlId).addClass('active');
+    if (htmlId == '#login-progress') { // XXXddahl: special case hack. sigh.
       $('#login-progress').show();
     } else {
       $('#login-progress').hide();
     }
+
+    if (htmlId == "#feed") {
+      $('#post-button-floating-wrapper').show();
+    } else {
+      $('#post-button-floating-wrapper').hide();
+    }
   },
-  
+
   // // Update DOM on a Received Event
   // receivedEvent: function(id) {
   //   if (!id) {
@@ -423,7 +521,7 @@ var app = {
   //   console.log('Received Event: ' + id);
   // },
 
-  alert: function (message, level) {
+  alert: function _alert (message, level) {
     // success, info, warning, danger
     if (!level) {
       level = 'warning';
@@ -448,7 +546,7 @@ var app = {
     if (typeof app.logoutCleanup == 'function') {
       app.logoutCleanup();
     }
-    
+
     var lastUser = window.localStorage.getItem('lastUserLogin');
     if (lastUser) {
       $('#username-placeholder').html(lastUser);
@@ -477,9 +575,9 @@ var app = {
 	});
       }
     }
-    
+
     app.hideMenu();
-    app.switchView('#account-login', app.APPNAME);
+    app.switchView('account-login', app.APPNAME);
     $('#tasks-btn').removeClass('active');
     $('#header-button-bar').hide();
     app.alert('You are logged out', 'info');
@@ -487,13 +585,13 @@ var app = {
   },
 
   switchUser: function switchUser() {
-    $('#username-login').show();
+    $('#username-login').show().val('');
     $('#username-placeholder').html('').hide();
-    $('#password-login').show();
+    $('#password-login').show().val('');
     $('#remember-credentials')[0].checked = true;
     $('#remember-credentials').show();
   },
-  
+
   scanQRCode_desktop: function scanQRCode_desktop () {
     // Use GUMHelper here instead
     console.error('Scan QR NOT IMPLEMENTED');
@@ -533,7 +631,7 @@ var app = {
       quality = options.quality || 50;
     }
 
-    app.switchView('#capture-avatar', 'Take a photo');
+    app.switchView('capture-avatar', 'Take a photo');
     navigator.webkitGetUserMedia({video: true}, function _success (stream) {
       var video = document.getElementById("capture-video");
       var canvas = document.getElementById("capture-canvas");
@@ -561,7 +659,7 @@ var app = {
       }
       app.avatarStream.stop();
       document.getElementById("capture-video").src = null;
-      app.switchView('#feed', 'ZK Feed');
+      app.switchView('feed', 'ZK Feed');
       // Save Avatar to Item via overloaded function
       app.saveAvatar(imageData);
 
@@ -595,7 +693,7 @@ var app = {
     if (options) {
       width = options.width || 320;
       height = options.height || 240;
-      quality = options.quality || 50;
+      quality = options.quality || 70;
       cameraDirection = options.cameraDirection || cameraDirectionOptions.BACK;
       pictureSourceType = options.pictureSourceType || navigator.camera.PictureSourceType.CAMERA;
     }
@@ -696,10 +794,10 @@ var app = {
     img.src = dataUrl;
 
     // XXX TODO: use smartcrop.crop()
-    
+
     // get the photo from X=85, Y=325, W=120, H=160
   },
-  
+
   getImage: function () {
     // Specific getImage function for QR parsing
     if (app.isNodeWebKit) {
@@ -713,7 +811,7 @@ var app = {
       //       Trim all of the white border?
       //       Save this data as the avatar!
       // app.getInitialAvatar(dataUrl);
-      
+
       var dataUrlPrefix = 'data:image/png;base64,';
       dataURL = dataUrlPrefix + dataURL;
       console.log(dataURL);
@@ -748,19 +846,19 @@ var app = {
     var user = $('#username-generate').val();
     var pass = $('#password-generate').val();
     $('#top-progress-wrapper').show();
-    
+
     if (!user || !pass) {
       app.alert('Please enter a username and passphrase', 'danger');
       $('#top-progress-wrapper').hide();
       return;
     }
 
-    app.switchView('#login-progress', '');
-    app.setLoginStatus('Creating Account...');
-    
+    app.switchView('login-progress', '');
+    app.setProgressStatus('Creating Account...');
+
     function callback (err) {
       console.error(err);
-      app.switchView('#account-login', '');
+      app.switchView('account-login', '');
       app.clearLoginStatus();
 
       if (err) {
@@ -786,24 +884,27 @@ var app = {
   },
 
   beginRegistration: function beginRegistration() {
-    
-    app.switchView('#generate-account', 'Create Account');    
+
+    app.switchView('generate-account', 'Create Account');
     // generate a long password
     var passphrase = generatePassphrase();
     // display new form
+    if (window.localStorage.lastUserLogin == $('#username-generate').val()) {
+      $('#username-generate').val('');
+    }
     $('#password-generate').val(passphrase);
     $('#username-generate').focus();
   },
 
   register: function (user, pass, callback) {
-    app.setLoginStatus('Generating account...');
-    app.switchView('#login-progress', '');
+    app.setProgressStatus('Generating account...');
+    app.switchView('login-progress', '');
 
     crypton.generateAccount(user, pass, function (err) {
       if (err) {
 	$('#top-progress-wrapper').hide();
 	console.error(err);
-        app.switchView('#account-login', 'Account');
+        app.switchView('account-login', 'Account');
         return callback(err);
       }
       $('#top-progress-wrapper').hide();
@@ -814,7 +915,7 @@ var app = {
   login: function _login () {
 
     $('#my-feed-entries').children().remove();
-    
+
     var user = $('#username-login').val();
     var pass = $('#password-login').val();
 
@@ -828,19 +929,21 @@ var app = {
       return;
     }
 
-    app.switchView('#login-progress', '');
+    app.switchView('login-progress', '');
     $('#top-progress-wrapper').show();
-    
+
     $('.alert').remove();
 
-    app.setLoginStatus('Logging in...');
+    app.setProgressStatus('Logging in...');
 
     function callback (err, session) {
       if (err) {
         app.alert(err, 'danger');
-        app.switchView('#account-login', 'Account');
+        app.switchView('account-login', 'Account');
         app.clearLoginStatus();
+	$('#top-menu').show();
 	$('#top-progress-wrapper').hide();
+        $('#password-login').val('');
         return;
       }
 
@@ -861,7 +964,7 @@ var app = {
       }
       app.username = user;
       app.session = session;
-      app.setLoginStatus('Loading contacts and  preferences...');
+      app.setProgressStatus('Loading contacts and  preferences...');
 
       // Check for first run
       app.session.getOrCreateItem('_prefs_', function(err, prefsItem) {
@@ -870,17 +973,18 @@ var app = {
 
         if (err) {
           console.error(err);
-          app.switchView('#account-login', 'Account');
+          app.switchView('account-login', 'Account');
 	  $('#top-progress-wrapper').hide();
           return;
         }
 
         $('#tasks-btn').addClass('active');
 	$('#logout-page-title').hide();
-	$('#header-button-bar').show();
-	
-        app.username = app.session.account.username;
+	// $('#header-button-bar').show();
 
+        app.username = app.session.account.username;
+	app.setProgressStatus('Loading timeline...');
+	
         if (!prefsItem.value.firstRun) {
           prefsItem.value = { firstRun: Date.now() };
 	  app.firstRunIsNow = true;
@@ -903,7 +1007,7 @@ var app = {
 
   firstRun: function () {
     // prompt to create Id card & why
-    app.switchView('#first-run', 'Welcome');
+    app.switchView('first-run', 'Welcome');
   },
 
   firstRunComplete: function firstRunComplete () {
@@ -949,9 +1053,10 @@ var app = {
     $('#login-buttons').show();
   },
 
-  setLoginStatus: function (m) {
-    $('#login-status .status').text(m);
-    $('#login-status').show();
+  setProgressStatus: function (m) {
+    // $('#login-status .status').text(m);
+    // $('#login-status').show();
+    $("blink").text(m);
   },
 
   clearLoginStatus: function (m) {
@@ -968,7 +1073,7 @@ var app = {
 	  + '</li>';
     $('#contact-add-log').prepend($(html));
   },
-  
+
   verifyUser: function (username, fingerprint) {
     if (username == app.username) {
       app.alert('Cannot verify your own account', 'danger');
@@ -1015,9 +1120,9 @@ var app = {
         $('#verify-user-failure-msg').children().remove();
         // TODO: remove click events from buttons
         if (app.isNodeWebKit) {
-          app.switchView('#scan-select-desktop', 'Verify Contact Card');
+          app.switchView('scan-select-desktop', 'Verify Contact Card');
         } else {
-          app.switchView('#scan-select', 'Verify Contact Card');
+          app.switchView('scan-select', 'Verify Contact Card');
         }
       }
 
@@ -1117,7 +1222,7 @@ var app = {
 
   displayPeerFingerprint: function (username, fingerprint) {
     $('#peer-fingerprint-id').children().remove();
-    app.switchView('#peer-fingerprint-id', 'Peer Fingerprint');
+    app.switchView('peer-fingerprint-id', 'Peer Fingerprint');
 
     var canvas =
       app.card.createIdCard(fingerprint, username, app.contactCardLabel);
@@ -1153,7 +1258,7 @@ var app = {
   displayIdCard: function (idCard, callback) {
     $(idCard).css({ width: '290px' });
     $('#my-fingerprint-id').append(idCard);
-    
+
     $('#my-avatar')[0].src = app.session.items.avatar.value.avatar;
     $('#share-my-id-card').click(function () {
       if (app.isNodeWebKit) {
@@ -1170,7 +1275,7 @@ var app = {
     if (callback) {
       callback();
     }
-    app.switchView('#my-fingerprint-id-wrapper', 'My Contact Card');
+    app.switchView('my-fingerprint-id-wrapper', 'My Contact Card');
   },
 
   displayMyFingerprint: function displayMyFingerprint (withPhoto) {
@@ -1204,7 +1309,7 @@ var app = {
     img.src = imageData;
     return idCard;
   },
-  
+
   addPhotoToIdCard: function addPhotoToIdCard (idCard, override, callback) {
     // check for existing photo:
     app.session.getOrCreateItem(app.PHOTO_ITEM,
@@ -1309,7 +1414,7 @@ var app = {
   },
 
   displayContacts: function () {
-    app.switchView('#contacts', 'Contacts');
+    app.switchView('contacts', 'Contacts');
     console.log("displayContacts()");
 
     app.getContactsFromServer(function (err, contacts) {
@@ -1337,6 +1442,7 @@ var app = {
 	if (!name) {
 	  continue;
 	}
+
 	if (!app._contacts[name].trustedAt) {
 	  followingStatus = ' <span class="following-not-complete"> Follow Back?</span>';
 	}
@@ -1392,7 +1498,7 @@ var app = {
     $(canvas).attr({'class': 'contact-id'});
     $('#contact-details .contact-id').remove();
     $('#contact-details').prepend(canvas);
-    
+
     $('#contact-message').children().remove();
     if (!contact.fingerprint) {
       var html = '<p class="contact-msg">'
@@ -1400,8 +1506,8 @@ var app = {
 	    + ' has scanned your Contact Card, but you need to obtain and scan their card in order to communicate</span>';
       $('#contact-message').append($(html));
     }
-    
-    app.switchView('#contact-details', name);
+
+    app.switchView('contact-details', name);
   },
 
   getContactsFromServer: function (callback) {
@@ -1409,9 +1515,10 @@ var app = {
     function (err, trustedPeers) {
       if (err) {
 	console.error(err);
-	return callback(err);
+	callback(err);
+	return;
       }
-      return callback(null, trustedPeers.value);
+      callback(null, trustedPeers.value);
     });
   },
 
@@ -1438,13 +1545,13 @@ var app = {
     }
     return device.version;
   },
-  
+
   keyChain: {
 
     MIN_SUPPORT_IOS: 8,
 
     MIN_SUPPORT_ANDROID: 5,
-    
+
     init: function init_keyChain (username, callback) {
       if (!this.supported) {
 	return callback('Keychain unsupported');
@@ -1547,8 +1654,7 @@ var app = {
   },
 
   about: function _about () {
-    app.hideMenu();
-    app.switchView('#app-about', 'About ' + app.APPNAME);
+    app.switchView('app-about', 'About ' + app.APPNAME);
     if (typeof app.aboutView == 'function') {
       app.aboutView();
     }

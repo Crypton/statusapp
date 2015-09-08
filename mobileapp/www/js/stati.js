@@ -7,20 +7,17 @@
 
 app.sharingUrl = 'https://kloak.io/';
 
-app.sharingMessage = 'I would like to share messages with you privately via an app called "Kloak". \n\nThis message\'s attachment is my \'App Contact card\', which users exchange in order to establish a private connection. \n\nFor more information: https://zk.gs/ZK/';
+app.sharingMessage = 'I would like to share messages with you privately via an app called "Kloak". \n\nThis message\'s attachment is my \'App Contact card\', which users exchange in order to establish a private connection. \n\nFor more information: https://spideroak.com/solutions/kloak';
 
 app.sharingTitle = 'Just started using Kloak...';
 
 app.ITEMS = {
   firstRun: 'firstRun',
-  feed: 'feed',
   status: 'status',
   avatar: 'avatar'
 };
 
 app.FEED_LABEL = 'Feed';
-
-app.INITIAL_STATUS_MESSAGE = 'Current Status: null';
 
 app.isReady = false;
 
@@ -52,15 +49,15 @@ app.aboutView = function _aboutView () {
   var info = 'Kloak is an <strong>*experiment*</strong> in social networking that is un-dataminable. All data sent to the server is "end to end" encrypted and unreadable by the server operator. <br /> Kloak is in beta and <strong>should not be used to hide communications from well-equipped potential attackers</strong> <p><a onclick="window.open(\'https://github.com/Crypton/statusapp\', \'_system\')" class="media-link media-link-url">Kloak issue tracker</a> <br />Kloak is built with <a onclick="window.open(\'https://crypton.io\', \'_system\')" class="media-link media-link-url">Crypton</a> by <a onclick="window.open(\'https://spideroak.com\', \'_system\')" class="media-link media-link-url">SpiderOak</a></p>';
 
   var html = '<div id="about-view"><h4>'
-	+ header
+  + header
         + '</h4>'
-	+ '<p>'
+  + '<p>'
         + info
-	+ '</p>'
-	+ '<p>'
-	+ logos
-	+ '</p>'
-	+ '</div>';
+  + '</p>'
+  + '<p>'
+  + logos
+  + '</p>'
+  + '</div>';
   $('#app-about').children().remove();
   $('#app-about').append($(html));
 };
@@ -70,41 +67,45 @@ app.setCustomEvents = function setCustomEvents () {
 
   $('#my-stati').click(function () {
     app.hideMenu();
-    app.switchView('#stati', 'Update Status');
+    app.switchView('stati', 'Update Status');
     $('#set-my-status-textarea').focus();
   });
 
   $('#header-btn-update').click(function () {
     app.hideMenu();
-    app.switchView('#stati', 'Update Status');
+    app.switchView('stati', 'Update Status');
     $('#set-my-status-textarea').focus();
   });
-  
+
   $('#my-feed').click(function () {
     app.hideMenu();
-    app.switchView('#feed', app.FEED_LABEL);
+    app.switchView('feed', app.FEED_LABEL);
   });
 
   $('#header-refresh-btn').click(function () {
     app.hideMenu();
-    app.switchView('#feed', app.FEED_LABEL);
+    app.switchView('feed', app.FEED_LABEL);
     app.loadNewTimeline();
   });
 
   $('#header-btn-refresh').click(function () {
     app.hideMenu();
-    app.switchView('#feed', app.FEED_LABEL);
-    app.loadNewTimeline();
-  });
-  
-  $('#refresh-feed').click(function () {
-    app.hideMenu();
-    app.switchView('#feed', app.FEED_LABEL);
+    app.switchView('feed', app.FEED_LABEL);
     app.loadNewTimeline();
   });
 
-  $('#set-my-status-btn').click(function () {
+  $('#refresh-feed').click(function () {
+    app.hideMenu();
+    app.switchView('feed', app.FEED_LABEL);
+    app.loadNewTimeline();
+  });
+
+  $('#post-send').click(function () {
     app.setMyStatus();
+  });
+
+  $('#post-button-floating').click(function () {
+    app.makeNewPost();
   });
 
   $('#include-gps-btn').click(function () {
@@ -122,6 +123,175 @@ app.setCustomEvents = function setCustomEvents () {
   $('#fetch-previous-items').click(function () {
     app.loadPastTimeline();
   });
+
+  $('#post-attach').click(function () {
+    app.postingUIActionSheet();
+  });
+
+  $('#feed').click(function () {
+    try {
+      $('body').removeClass('posting');
+      $('#post-image-location-wrapper').hide();
+      $('#post-button-floating-wrapper').show();
+    } catch (ex) {
+      console.warn(ex);
+    }
+  });
+
+  // Mutation Observer for the input textarea whcih helps us re-position the
+  // image and location piece
+  (function inputMutationObs() {
+    var target = document.querySelector('#post-input-wrapper textarea');
+    var observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+	var newBottom = mutation.target.parentElement.clientHeight;
+	$('#post-image-location-wrapper').css({ bottom: newBottom + 'px' });
+      });
+    });
+
+    // configuration of the observer: // XXX: May not need all of these
+    var config = { attributes: true, childList: true, characterData: true };
+    
+    // pass in the target node, as well as the observer options
+    observer.observe(target, config);
+  })();
+};
+
+app.hidePostUI = function hidePostUI () {
+  $('#post-input-wrapper textarea').trigger('input');
+  $('#post-button-floating-wrapper').show();
+  $('body').removeClass('posting');
+};
+
+app.makeNewPost = function makeNewPost() {
+  // show input UI which will trigger the keyboard
+  $('textarea.js-auto-size').textareaAutoSize();
+  $('#post-input-wrapper textarea').trigger('input');
+  $('#post-button-floating-wrapper').hide();
+  $('body').addClass('posting');
+
+  // $('#post-textarea').focus(function (e) {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   window.scrollTo(0,0);
+  // });
+
+  $('#post-textarea').focus();
+  setTimeout(function () {
+    $('#post-input-wrapper')[0].scrollIntoView({behavior: "smooth"});
+  }, 0);
+};
+
+app.postingUIActionSheet = function postingUIActionSheet () {
+  var options = {
+    'androidTheme' : window.plugins.actionsheet.ANDROID_THEMES.THEME_HOLO_LIGHT,
+    'buttonLabels': ['Add Location', 'Take Photo', 'Choose Photo'],
+    'addCancelButtonWithLabel': 'Cancel',
+    'androidEnableCancelButton' : true
+  };
+
+  function callback(buttonIdx) {
+    console.log(buttonIdx);
+    switch (buttonIdx) {
+    case 1:
+      // Add Location
+      console.log('Add location!');
+      function addLocationCallback() {
+	// app.makeNewPost();
+	setTimeout(function () { $('#post-textarea').focus(); }, 200);
+      }
+      $('#post-image-location-wrapper').show();
+      app.setMyLocation(addLocationCallback);
+      $('#post-textarea').focus();
+      break;
+
+    case 2:
+      // Take Photo
+      var options =
+	{ cameraDirection: 0,
+	  pictureSourceType: navigator.camera.PictureSourceType.CAMERA
+	};
+      app.getPhoto(options, function imgCallback(err, imgData) {
+	if (err) {
+	  console.error(err);
+	  app.alert(err, 'danger');
+	  return;
+	}
+	var img = $('<img src="'  + imgData  +  '" />');
+	$('#image-data').children().remove();
+	$('#image-data').append(img);
+	$('#post-image-location-wrapper').show();
+	$('#post-textarea').focus();
+      });
+      break;
+
+    case 3:
+      // Choose Photo
+      var options =
+	{ cameraDirection: 0,
+	  pictureSourceType: navigator.camera.PictureSourceType.SAVEDPHOTOALBUM
+	};
+      app.getPhoto(options, function imgCallback(err, imgData) {
+	if (err) {
+	  console.error(err);
+	  app.alert('danger', err);
+	  return;
+	}
+	var img = $('<img src="'  + imgData  +  '" />');
+	$('#image-data').children().remove();
+	$('#image-data').append(img);
+	$('#post-image-location-wrapper').show();
+	$('#post-textarea').focus();
+      });
+      break;
+
+    case 4:
+      // Cancel
+      $('#post-textarea').focus();
+      return;
+    default:
+      return;
+    }
+  }
+
+  window.plugins.actionsheet.show(options, callback);
+};
+
+app.viewActions = {
+
+  feed: function vaFeed () {
+    $('.header-wrap').hide();
+    $('#header-timeline').show();
+    $('#post-button-floating-wrapper').show();
+  },
+
+  settings: function vaSettings () {
+    $('#post-button-floating-wrapper').hide();
+    $('.header-wrap').hide();
+    $('#header-settings').show();
+  },
+
+  contacts: function vaContacts () {
+    $('#post-button-floating-wrapper').hide();
+    $('.header-wrap').hide();
+    $('#header-contacts').show();
+  },
+
+  contactCard: function vaContactCard () {
+    $('#post-button-floating-wrapper').hide();
+    $('.header-wrap').hide();
+    $('#header-contact-card').show();
+  },
+
+  'scan-select': function vaScanSelect () {
+    $('#post-button-floating-wrapper').hide();
+  },
+
+  'my-options-pane': function vaMyOptionsPane () {
+    $('#post-button-floating-wrapper').hide();
+    $('.header-wrap').hide();
+    $('#header-settings').show();
+  }
 };
 
 app.takeAPhoto = function takeAPhoto () {
@@ -158,100 +328,9 @@ app.pickAnImage = function pickAnImage () {
   });
 };
 
-app.createNewLocalProfile = function () {
-  var user = crypton.hmac('', app.username);
-  var profile = {};
-  profile[user] = {
-    tlOptions: {
-      lastItemRead: 0,
-      limit: 5,
-      offset: 0
-    },
-    historyOptions: {
-      lastItemRead: 0,
-      limit: 5,
-      offset: 0
-    }
-  };
-  app.saveProfile(profile);
-  return profile;
-}
-
-app.addNewLocalProfile = function (profile) {
-  var user = crypton.hmac('', app.username);
-  profile[user] = {
-    tlOptions: {
-      lastItemRead: 0,
-      limit: 5,
-      offset: 0
-    },
-    historyOptions: {
-      lastItemRead: 0,
-      limit: 5,
-      offset: 0
-    }
-  };
-  app.saveProfile(profile);
-  return profile;
-};
-
-app.saveProfile = function saveProfile (profileObj) {
-  var str = JSON.stringify(profileObj);
-  localStorage.setItem('_profile_', str);
-};
-
-app.setupClientProfile = function setupClientProfile () {
-
-  var strProfile = localStorage.getItem('_profile_');
-  if (!strProfile) {
-    var profile = app.createNewLocalProfile();
-    localStorage.setItem('_profile_', JSON.stringify(profile));
-  } else {
-    var profileObj = JSON.parse(strProfile);
-    var user = crypton.hmac('', app.username);
-    if (!profileObj[user]) {
-      // Need to add this username to the profile obj
-      app.addNewLocalProfile(profileObj);
-    }
-  }
-};
-
-app.getCurrentProfile = function getCurrentProfile () {
-  var user = crypton.hmac('', app.username);
-  this._profile = JSON.parse(localStorage.getItem('_profile_'));
-  return this._profile[user];
-};
-
-app.saveLocalProfile = function saveLocalProfile() {
-  var profiles = JSON.parse(localStorage.getItem('_profile_'));
-  var user = crypton.hmac('', app.username);
-  profiles[user] = this._profile[user];
-  localStorage.setItem('_profile_', JSON.stringify(profiles));
-}
-
 app.customInitialization = function customInitialization() {
   console.log('customInitialization()');
-
-  app.setupClientProfile();
-  // Profile setup
   var that = this;
-  if (!app.currentProfile) {
-    Object.defineProperty(app, 'currentProfile', {
-      get: function() {
-        return app.getCurrentProfile();
-      },
-
-      set: function(value) {
-        var user = crypton.hmac('', app.username);
-        if (value.lastItemRead && value.offset && value.limit) {
-          that._profile[user] = value;
-          app.saveLocalProfile();
-        } else {
-          console.error('Error setting local profile data');
-        }
-      }
-    });
-  }
 
   // XXXddahl: need a indeterminate progress indicator
   app.createInitialItems(function (err) {
@@ -266,45 +345,46 @@ app.customInitialization = function customInitialization() {
 };
 
 app.createInitialItems = function createInitialItems (callback) {
-  app.session.getOrCreateItem(app.ITEMS.feed, function (err, feed) {
+
+  app.session.getOrCreateItem(app.ITEMS.status, function (err, status) {
     if (err) {
       callback(err);
       return console.error(err);
     }
+    var callbackFired;
+    if (!status.value.status) {
+      console.log('creating status Item');
+      status.value.status = 'Hello World!';
+      status.value.timestamp = Date.now();
+      status.value.location = null;
+      status.value.__meta = { timelineVisible: 't' };
 
-    if (!feed.value.feedHmacs) {
-      feed.value = { feedHmacs: {}, lastUpdated: Date.now() };
+      status.save(function (err) {
+  if (err) {
+    console.error(err);
+  }
+  callbackFired = true;
+  callback(null);
+      });
     }
 
-    app.session.getOrCreateItem(app.ITEMS.status, function (err, status) {
+    app.session.getOrCreateItem(app.ITEMS.avatar, function (err, avatar) {
       if (err) {
         callback(err);
         return console.error(err);
       }
 
-      if (!status.value.status) {
-        status.value = { status: 'Hello World!',
-                         timestamp: Date.now(),
-                         location: null
-                       };
+      if (avatar.value.avatar === undefined) {
+        avatar.value = {
+    avatar: null
+  };
       }
-
-      app.session.getOrCreateItem(app.ITEMS.avatar, function (err, avatar) {
-        if (err) {
-          callback(err);
-          return console.error(err);
-        }
-
-        if (avatar.value.avatar === undefined) {
-          avatar.value = { avatar: null, __timelineIgnore: true };
-        }
-        callback(null);
-      });
+      if (!callbackFired) {
+  callback(null);
+      }
     });
   });
 };
-
-app.tlOptions = { lastItemRead: 0, offset: 0, limit: 5 };
 
 app.feedIsLoading = false;
 
@@ -320,10 +400,10 @@ app.loadNewTimeline = function loadNewTimeline () {
     var options = { limit: 15, afterId: afterId };
     app.session.getTimelineAfter(options, function tlCallback (err, timeline) {
       if (err) {
-	console.error(err);
-	app.feedIsLoading = false;
-	$('#top-progress-wrapper').hide();
-	return app.alert('Cannot get feed', 'info');
+  console.error(err);
+  app.feedIsLoading = false;
+  $('#top-progress-wrapper').hide();
+  return app.alert('Cannot get feed', 'info');
       }
       app.renderTimeline(timeline);
       $('#top-progress-wrapper').hide();
@@ -343,12 +423,15 @@ app.statusNameHmac = function statusNameHmac() {
 };
 
 app.loadInitialTimeline = function loadInitialTimeline(callback) {
+
   if (app.feedIsLoading) {
     return;
   }
+  $('#top-progress-wrapper').show();
+  
+  app.switchView('feed', app.FEED_LABEL);
   app.feedIsLoading = true;
 
-  $('#top-progress-wrapper').show();
   var options = { limit: 15 };
   app.session.getLatestTimeline(options, function tlCallback (err, timeline) {
     if (err) {
@@ -360,10 +443,6 @@ app.loadInitialTimeline = function loadInitialTimeline(callback) {
     app.renderTimeline(timeline);
     $('#top-progress-wrapper').hide();
     app.feedIsLoading = false;
-    if ($('.empty-timeline-element').length > 9) {
-      app.loadPastTimeline();
-    }
-    app.loadPastTimeline();
     if (!$("#fetch-previous-items").is(":visible")) {
       $("#fetch-previous-items").show();
     }
@@ -381,7 +460,7 @@ app.deferUpdateFeedAvatars = function deferUpdateFeedAvatars(ms) {
       timeout = 0;
     }
   }
-  
+
   setTimeout(function () {
     app.updateFeedAvatars();
   }, timeout);
@@ -396,14 +475,14 @@ app.loadPastTimeline = function loadPastTimeline () {
   $('#top-progress-wrapper').show();
   var beforeId = $("#my-feed-entries").children().last().attr('id');
   if (typeof parseInt(beforeId) == 'number') {
-    var emptyItems = $('.empty-timeline-element').length; 
+    var emptyItems = $('.empty-timeline-element').length;
     var options = { limit: 15, beforeId: beforeId };
     app.session.getTimelineBefore(options, function tlCallback (err, timeline) {
       if (err) {
-	console.error(err);
-	app.feedIsLoading = false;
-	$('#top-progress-wrapper').hide();
-	return app.alert('Cannot get feed', 'info');
+  console.error(err);
+  app.feedIsLoading = false;
+  $('#top-progress-wrapper').hide();
+  return app.alert('Cannot get feed', 'info');
       }
       // TRY??
       app.renderTimeline(timeline, true);
@@ -411,7 +490,7 @@ app.loadPastTimeline = function loadPastTimeline () {
       app.feedIsLoading = false;
       var newEmptyItems = $('.empty-timeline-element').length;
       // if ((newEmptyItems - emptyItems) > 9) {
-      // 	app.loadPastTimeline();
+      //  app.loadPastTimeline();
       // }
     });
   } else {
@@ -428,34 +507,27 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     return;
   }
 
-  // var shareAvatarWith = {};
-  
   for (var i = 0; i < timeline.length; i++) {
     console.log('from: ', timeline[i].creatorUsername, 'to: ', app.username);
     console.log('value: ', timeline[i].value);
     var _username = timeline[i].creatorUsername;
     if (_username != app.username) {
       try {
-	var contact = app.session.items._trusted_peers.value[_username];
-	// if (contact) {
-	  // if (!contact.avatarShared) {
-	  //   shareAvatarWith[_username] = null;
-	  // }
-	// }
+  var contact = app.session.items._trusted_peers.value[_username];
       } catch (ex) {
-	console.error(ex);
+  console.error(ex);
       }
     }
-    
+
     var node;
     if (!timeline[i].value) {
       // this is some other kind of item, not a status update!
       // Ignore this for now, probably a 'trustedAt notification'
       node = app.createEmptyElement(timeline[i]);
       if (append) {
-	$('#my-feed-entries').append(node);
+  $('#my-feed-entries').append(node);
       } else {
-	$('#my-feed-entries').prepend(node);
+  $('#my-feed-entries').prepend(node);
       }
       console.warn('no value, not rendering...');
       continue;
@@ -464,9 +536,9 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     if (timeline[i].value.avatar) {
       node = app.createEmptyElement(timeline[i]);
       if (append) {
-	$('#my-feed-entries').append(node);
+  $('#my-feed-entries').append(node);
       } else {
-	$('#my-feed-entries').prepend(node);
+  $('#my-feed-entries').prepend(node);
       }
       continue; // XXXddahl: going to handle this differently
       // this is some other kind of item, not a status update!
@@ -477,9 +549,9 @@ app.renderTimeline = function renderTimeline (timeline, append) {
       data.itemId = timeline[i].timelineId;
       node = app.createAvatarUpdateElement(data);
       if (append) {
-	$('#my-feed-entries').append(node);
+  $('#my-feed-entries').append(node);
       } else {
-	$('#my-feed-entries').prepend(node);
+  $('#my-feed-entries').prepend(node);
       }
 
       // when we get a new avatar we need to save it to the contacts object
@@ -487,23 +559,22 @@ app.renderTimeline = function renderTimeline (timeline, append) {
       if (!app.session.items._trusted_peers.value[user]) {
         // Let's tell the user about this 1 way connection
         console.warn('User ', user, ' is not trusted - one way connection');
-	console.warn('User ', user, ' is not trusted - Adding this peer to contacts as *untrusted*');
-	// add this usser to contacts as an untrusted user
-	app.session.items._trusted_peers.value[user] = { avatar: null,
-						         trustedAt: null,
-							 avatarUpdated: null,
-							 fingerprint: null
-						       };
-	app.newContactDiscovered = true;
+  console.warn('User ', user, ' is not trusted - Adding this peer to contacts as *untrusted*');
+  // add this user to contacts as an untrusted user
+  app.session.items._trusted_peers.value[user] = { avatar: null,
+                     trustedAt: null,
+               avatarUpdated: null,
+               fingerprint: null
+                   };
+  app.newContactDiscovered = true;
       } else {
-	app.session.items._trusted_peers.value[user].avatar = timeline[i].value.avatar;
-	app.session.items._trusted_peers.value[user].avatarUpdated = Date.now();
-	app.session.items._trusted_peers.value[user].__timelineIgnore = true;
-	app.session.items._trusted_peers.save(function (err) {
-	  if (err) {
-	    console.error(err);
-	  }
-	});
+  app.session.items._trusted_peers.value[user].avatar = timeline[i].value.avatar;
+  app.session.items._trusted_peers.value[user].avatarUpdated = Date.now();
+  app.session.items._trusted_peers.save(function (err) {
+    if (err) {
+      console.error(err);
+    }
+  });
       }
       continue;
     }
@@ -514,13 +585,13 @@ app.renderTimeline = function renderTimeline (timeline, append) {
       // Ignore this for now, probably a 'trustedAt notification'
       node = app.createEmptyElement(timeline[i]);
       if (append) {
-	$('#my-feed-entries').append(node);
+  $('#my-feed-entries').append(node);
       } else {
-	$('#my-feed-entries').prepend(node);
+  $('#my-feed-entries').prepend(node);
       }
       continue;
     }
-    
+
     // Begin status update handling
     console.log('Status Update! creating media node');
     var localUser = (timeline[i].creatorUsername == app.username);
@@ -532,7 +603,7 @@ app.renderTimeline = function renderTimeline (timeline, append) {
       app.handleAvatar(timeline[i].creatorUsername, timeline[i].value.avatarMeta);
     }
 
-    
+
     // Make sure to hide the "empty feed message"
     if ($("#first-run-empty-feed-msg").is(":visible")) {
       $("#first-run-empty-feed-msg").hide();
@@ -548,13 +619,6 @@ app.renderTimeline = function renderTimeline (timeline, append) {
   if (!$("#fetch-previous-items").is(":visible")) {
     $("#fetch-previous-items").show();
   }
-
-  // var shareWith = Object.keys(shareAvatarWith);
-  // console.log('shareWith', shareWith);
-  // if (shareWith.length) {
-  //   console.log('shareAvatar()');
-  //   app.shareAvatar(shareWith);
-  // }  
 };
 
 app.handleAvatar = function handleAvatar(peerName, avatarMeta) {
@@ -563,61 +627,61 @@ app.handleAvatar = function handleAvatar(peerName, avatarMeta) {
     var avatarMetaName = peerName + '-avatar-meta';
     if (app.session.items[avatarMetaName]) {
       if (avatarMeta.updated > app.session.items[avatarMetaName].value.updated) {
-	// update the avatarMeta!
-	app.session.items[avatarMetaName].value.updated = avatarMeta.updated;
-	app.session.getOrCreateItem(avatarMetaName, function (err, item) {
-	  if (err) {
-	    console.error(err);
-	    return;
-	  }
+  // update the avatarMeta!
+  app.session.items[avatarMetaName].value.updated = avatarMeta.updated;
+  app.session.getOrCreateItem(avatarMetaName, function (err, item) {
+    if (err) {
+      console.error(err);
+      return;
+    }
 
-	  app.session.getPeer(peerName, function (err, peer) {
-	    if (err) {
-	      console.error(err);
-	      return;
-	    }
-	    app.session.getSharedItem(avatarMeta.nameHmac, peer,
-	    function (err, sharedItem) {
-	      if (err) {
-		console.error(err);
-		return;
-	      }
-	      item.value = {
-		updated: avatarMeta.updated,
-		nameHmac: avatarMeta.nameHmac,
-		avatar: sharedItem.value.avatar
-	      };
-	      
-	    });
-	  });
-	});
+    app.session.getPeer(peerName, function (err, peer) {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      app.session.getSharedItem(avatarMeta.nameHmac, peer,
+      function (err, sharedItem) {
+        if (err) {
+    console.error(err);
+    return;
+        }
+        item.value = {
+    updated: avatarMeta.updated,
+    nameHmac: avatarMeta.nameHmac,
+    avatar: sharedItem.value.avatar
+        };
+
+      });
+    });
+  });
       }
     } else {
       // add meta to the object
       app.session.getOrCreateItem(avatarMetaName, function (err, item) {
-	if (err) {
-	  console.error(err);
-	  return;
-	}
-	app.session.getPeer(peerName, function (err, peer) {
-	  if (err) {
-	    console.error(err);
-	    return;
-	  }
-	  app.session.getSharedItem(avatarMeta.nameHmac, peer,
-	  function (err, sharedItem) {
-	    if (err) {
-	      console.error(err);
-	      return;
-	    }
-	    item.value = {
-	      updated: avatarMeta.updated,
-	      nameHmac: avatarMeta.nameHmac,
-	      avatar: sharedItem.value.avatar
-	    };
-	    // XXX: update all avatars in the feed?
-	  });
-	});
+  if (err) {
+    console.error(err);
+    return;
+  }
+  app.session.getPeer(peerName, function (err, peer) {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    app.session.getSharedItem(avatarMeta.nameHmac, peer,
+    function (err, sharedItem) {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      item.value = {
+        updated: avatarMeta.updated,
+        nameHmac: avatarMeta.nameHmac,
+        avatar: sharedItem.value.avatar
+      };
+      // XXX: update all avatars in the feed?
+    });
+  });
       });
     }
   }
@@ -630,8 +694,8 @@ app.updateFeedAvatars = function updateFeedAvatars () {
     var avatarMetaName = username + '-avatar-meta';
     if (app.session.items[avatarMetaName]) {
       var html = '<img class="media-avatar" src="'
-	    + app.session.items[avatarMetaName].value.avatar
-	    + '"/>';
+      + app.session.items[avatarMetaName].value.avatar
+      + '"/>';
       var node = $(html);
       var parent = $(this.parentNode);
       parent.children().remove();
@@ -645,29 +709,28 @@ app.shareAvatar = function shareAvatar (avatarArr) {
   for (var i = 0; i < avatarArr.length; i++) {
     app.session.getPeer(avatarArr[i], function (err, peer) {
       if (err) {
-	console.error(err);
-	return;
+  console.error(err);
+  return;
       }
       console.log('got peer', peer);
       console.log('sharing avatar: ');
       app.session.items.avatar.share(peer, function (err) {
-	if (err) {
-	  console.error(err);
-	  return;
-	}
-	console.log('avatarShared');
-	app.session.items._trusted_peers.value[peer.username].avatarShared = Date.now();
-	app.session.items._trusted_peers.value[peer.username].__timelineIgnore = true;
-	
-	if (i == avatarArr.length) {
-	  // XXX: save the contacts on quit or logout
-	  app.session.items._trusted_peers.save(function (err) {
-	    if (err) {
-	      console.error(err);
-	      return;
-	    }
-	  });
-	}
+  if (err) {
+    console.error(err);
+    return;
+  }
+  console.log('avatarShared');
+  app.session.items._trusted_peers.value[peer.username].avatarShared = Date.now();
+
+  if (i == avatarArr.length) {
+    // XXX: save the contacts on quit or logout
+    app.session.items._trusted_peers.save(function (err) {
+      if (err) {
+        console.error(err);
+        return;
+      }
+    });
+  }
       });
     });
   }
@@ -675,8 +738,8 @@ app.shareAvatar = function shareAvatar (avatarArr) {
 
 app.createEmptyElement = function createEmptyElement(timelineItem) {
   var html = '<div id="'
-	+ timelineItem.timelineId
-	+ '" class="empty-timeline-element"></div>';
+  + timelineItem.timelineId
+  + '" class="empty-timeline-element"></div>';
   return $(html);
 };
 
@@ -701,18 +764,18 @@ app.updateEmptyTimelineElements = function updateEmptyTimelineElements () {
     for (var i = 0; i < empties.length; i++) {
       var status;
       try {
-	status = history[empties[i]].value.status;
+  status = history[empties[i]].value.status;
       } catch (ex) {
-	console.warn('timelineItem has no status property: ', history[empties[i]]);
-	continue;
+  console.warn('timelineItem has no status property: ', history[empties[i]]);
+  continue;
       }
       if (status) {
-	// we have unknown update data
-	app.transformEmptyTimelineElement(empties[i], history[empties[i]]);
-	app.transformedTimelineElements[empties[i]] = Date.now();
+  // we have unknown update data
+  app.transformEmptyTimelineElement(empties[i], history[empties[i]]);
+  app.transformedTimelineElements[empties[i]] = Date.now();
       }
       if (i == (empties.length -1)) {
-	app.deferUpdateFeedAvatars();
+  app.deferUpdateFeedAvatars();
       }
     }
   }, 2000);
@@ -720,14 +783,14 @@ app.updateEmptyTimelineElements = function updateEmptyTimelineElements () {
 
 app.transformEmptyTimelineElement =
 function transformEmptyTimelineElement (emptyId, timelineElement) {
-  
+
   var emptyElement = $('#' + emptyId);
   var localUser = (timelineElement.creatorUsername == app.username);
   var data = app.massageTimelineUpdate(timelineElement);
   data.itemId = timelineElement.timelineId;
   console.log('rendered timelineid: ', timelineElement.timelineId);
   app.createMediaElement(data, localUser, emptyElement);
-  
+
 };
 
 app.transformedTimelineElements = {};
@@ -765,12 +828,12 @@ app.toggleSetStatusProgress = function toggleSetStatusProgress() {
   }
 };
 
-app.setMyStatus = function setMyStatus() {
+app.origsetMyStatus = function origsetMyStatus() {
   // app.toggleSetStatusButton();
   // validate length of data to be sent
   var status = $('#set-my-status-textarea').val();
   status = app.escapeHtml(status);
-  
+
   if (!status.length) {
     return app.alert('Please enter a status update', 'danger');
   }
@@ -791,7 +854,8 @@ app.setMyStatus = function setMyStatus() {
      avatarMeta: {
        nameHmac: app.session.items.avatar.nameHmac,
        updated: app.session.items.avatar.value.updated
-     }
+     },
+     __meta: { timelineVisible: 't' }
    };
   if (imageData) {
     updateObj.imageData = imageData;
@@ -803,7 +867,8 @@ app.setMyStatus = function setMyStatus() {
   app.session.items.status.value.imageData = updateObj.imageData;
   app.session.items.status.value.tz = app.tz.name();
   app.session.items.status.value.avatarMeta = updateObj.avatarMeta;
-  
+  app.session.items.status.value.__meta = updateObj.__meta;
+
   app.session.items.status.save(function (err) {
     if (err) {
       app.toggleSetStatusProgress();
@@ -811,8 +876,65 @@ app.setMyStatus = function setMyStatus() {
       return app.alert('Cannot update status', 'danger');
     }
     $('#set-my-status-textarea').val('');
-    $('#my-image-to-post').children().remove();
-    app.switchView('#feed', app.FEED_LABEL);
+    // $('#my-image-to-post').children().remove();
+    $('#post-image-location-wrapper').hide();
+    app.switchView('feed', app.FEED_LABEL);
+    app.toggleSetStatusProgress();
+    app.loadNewTimeline();
+  });
+};
+
+app.setMyStatus = function setMyStatus() {
+  // app.toggleSetStatusButton();
+  // validate length of data to be sent
+  var status = $('#post-textarea').val();
+  status = app.escapeHtml(status);
+
+  if (!status.length) {
+    return app.alert('Please enter a status update', 'danger');
+  }
+  if (status.length > 512) {
+    return app.alert('Status update is too long, please shorten it', 'danger');
+  }
+  // update the item
+  app.toggleSetStatusProgress();
+  var imageData;
+  if ($('#image-data').children().length) {
+    imageData = $('#image-data').children()[0].src;
+  }
+   var updateObj= {
+     status: status,
+     location: $('#location-data').text(),
+     timestamp: Date.now(),
+     imageData: null,
+     avatarMeta: {
+       nameHmac: app.session.items.avatar.nameHmac,
+       updated: app.session.items.avatar.value.updated
+     },
+     __meta: { timelineVisible: 't' }
+   };
+  if (imageData) {
+    updateObj.imageData = imageData;
+  }
+
+  app.session.items.status.value.status = updateObj.status;
+  app.session.items.status.value.location = updateObj.location;
+  app.session.items.status.value.timestamp = updateObj.timestamp;
+  app.session.items.status.value.imageData = updateObj.imageData;
+  app.session.items.status.value.tz = app.tz.name();
+  app.session.items.status.value.avatarMeta = updateObj.avatarMeta;
+  app.session.items.status.value.__meta = updateObj.__meta;
+
+  app.session.items.status.save(function (err) {
+    if (err) {
+      app.toggleSetStatusProgress();
+      console.error(err);
+      return app.alert('Cannot update status', 'danger');
+    }
+    app.hidePostUI();
+    $('#post-textarea').val('');
+    $('#image-data').children().remove();
+    $('#post-image-location-wrapper').hide();
     app.toggleSetStatusProgress();
     app.loadNewTimeline();
   });
@@ -822,8 +944,6 @@ app.displayInitialView = function displayInitialView() {
   // Check for first run
   if (!app.firstRunIsNow) {
     $('#my-avatar')[0].src = app.session.items.avatar.value.avatar;
-    app.switchView('#feed', app.FEED_LABEL);
-
     app.session.on('message', function (message) {
       console.log('session.on("message") event called', message);
       app.handleMessage(message);
@@ -843,7 +963,9 @@ app.displayInitialView = function displayInitialView() {
     // Load the timeline
     app.loadInitialTimeline();
   } else {
-    $('#first-run-empty-feed-msg').show();
+    setTimeout(function () {
+      app.loadInitialTimeline();
+    }, 1000);
   }
 };
 
@@ -852,7 +974,6 @@ app.updateContactAvatar = function updateContactAvatar (username, value) {
     return console.error('Incorrect arguments, cannot update contact avatar');
   }
   app.session.items._trusted_peers.value[username].avatar = value.avatar;
-  app.session.items._trusted_peers.value[username].__timelineIgnore = true;
   app.session.items._trusted_peers.save(function (err) {
     if (err) {
       console.error(err, 'Cannot update avatar for ' + username);
@@ -869,7 +990,7 @@ app.obfuscateLocation = function obfuscateLocation (location, decimalPlaces) {
   var loc1 = new Number(gps[0]).toFixed(decimalPlaces);
   var loc2 = new Number(gps[1]).toFixed(decimalPlaces);
 
-  return loc1 + ' ' + loc2;
+  return '';
 };
 
 app.createAvatarUpdateElement =
@@ -879,14 +1000,14 @@ function createAvatarUpdateElement(data) {
   var timestamp = app.formatDate(data.timestamp || data.updated, data.tz);
   var html = '<div id="' + data.itemId
            + '" class="media attribution">'
-	   + '<a class="img">'
+     + '<a class="img">'
            + '<img class="media-avatar" src="' + data.avatar
            + '" />'
-  	   + '</a>'
+       + '</a>'
            + '  <div class="bd media-metadata">'
-	   + '    <span class="media-username">' + data.username + '</span>'
-	   + '    <div class="media-avatar-update">'
-	   + 'avatar updated ' + timestamp
+     + '    <span class="media-username">' + data.username + '</span>'
+     + '    <div class="media-avatar-update">'
+     + 'avatar updated ' + timestamp
            + '</div>'
            + '  </div>'
            + '</div>';
@@ -900,14 +1021,14 @@ function createMediaElement(data, localUser, existingNode) {
     // gps = app.obfuscateLocation(data.location);
     gps = data.location;
   } else {
-    gps = 'undisclosed';
+    gps = '';
   }
 
   var avatarMetaName = data.username + '-avatar-meta';
   if (app.session.items[avatarMetaName]) {
     data.avatar = app.session.items[avatarMetaName].value.avatar;
   }
-  
+
   var avatarMarkup;
   if (!data.avatar) {
     // Make a stand-in avatar
@@ -947,17 +1068,17 @@ function createMediaElement(data, localUser, existingNode) {
 
   var html = '<a class="img">'
            + avatarMarkup
-  	   + '  </a>'
+       + '  </a>'
            + '  <div class="bd media-metadata">'
            + '    <div class="status-block">'
-  	   + '    <div class="media-username">' + data.username + '</div>'
-	   + '    <span class="media-status">'
-	   + status
+       + '    <div class="media-username">@' + data.username + '</div>'
+     + '    <span class="media-status">'
+     + status
            + '</span></div>'
-	   + '<span class="media-timestamp">'
+     + '<footer class="media-footer"> <span class="media-timestamp">'
            + data.humaneTimestamp + '</span>'
            + '    <span class="media-location">'
-           + gps + '</span>';
+           + gps + '</span></footer>';
   if (imageHtml) {
     html = html + imageHtml;
   }
@@ -1029,11 +1150,11 @@ app.shareStatus = function shareStatus (peerObj) {
     }
     if (app.session.items.avatar) {
       app.session.items.avatar.share(peerObj, function (err) {
-	if (err) {
-	  console.error(err);
-	  console.error('cannot share avatar with ' + peerObj.username);
-	}
-	console.log('avatar shared with ' + peerObj.username);
+  if (err) {
+    console.error(err);
+    console.error('cannot share avatar with ' + peerObj.username);
+  }
+  console.log('avatar shared with ' + peerObj.username);
       });
     } else {
       console.error('app.session.items.avatar does not exist');
@@ -1048,66 +1169,70 @@ app.shareStatus = function shareStatus (peerObj) {
 app.handleMessage = function handleMessage (message) {
   // just add the shared container hmac + username to the feed container
   console.log('handleMessage();', arguments);
-  if (message.headers.notification != 'sharedItem') {
-    return;
-  }
 
-  var itemNameHmac = message.payload.itemNameHmac;
-  var username = message.payload.from;
-  // cache the hmac sent to us!
-  var newFeedHmac = {
-    fromUser: username,
-    itemNameHmac: itemNameHmac,
-    timestamp: Date.now()
-  };
+  // XXXddahl: we no longer use the 'feed' item or depend on web sockets for the sharing of
+  //           status messages. Need to re-tool this for DMs or avatars
 
-  if (app.session.items.feed.value.feedHmacs[itemNameHmac]) {
-    app.session.getPeer(username, function (err, peer) {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      // We need to load and watch this container
-      app.session.getSharedItem(itemNameHmac, peer, function (err, statusItem) {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        // delete this inbox message
-        app.deleteInboxMessage(message.messageId);
-	// If this is an avatar, save to contacts
-	if (statusItem.value.avatar) {
-	  app.updateContactAvatar(username, statusItem.value);
-	  // XXXddahl: Update timeline with a "new avatar message??"
-	} else {
-          // create status item, prepend to the top of the list
-          app.updatePeerStatus(username, statusItem.value);
-        }
-      });
-    });
-  } else {
-    app.session.items.feed.value.feedHmacs[itemNameHmac] = newFeedHmac;
-    app.session.items.feed.save(function saveCallback (err) {
-      if (err) {
-        console.error(err);
-      }
-      app.session.getPeer(username, function (err, peer) {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        // We need to load and watch this container
-        app.session.getSharedItem(itemNameHmac, peer, function (err, statusItem) {
-          if (err) {
-            console.error(err);
-            return;
-          }
-          // delete this inbox message
-          app.deleteInboxMessage(message.messageId);
-        });
-      });
-    });
-  }
+  // if (message.headers.notification != 'sharedItem') {
+  //   return;
+  // }
+
+  // var itemNameHmac = message.payload.itemNameHmac;
+  // var username = message.payload.from;
+  // // cache the hmac sent to us!
+  // var newFeedHmac = {
+  //   fromUser: username,
+  //   itemNameHmac: itemNameHmac,
+  //   timestamp: Date.now()
+  // };
+
+  // if (app.session.items.feed.value.feedHmacs[itemNameHmac]) {
+  //   app.session.getPeer(username, function (err, peer) {
+  //     if (err) {
+  //       console.error(err);
+  //       return;
+  //     }
+  //     // We need to load and watch this container
+  //     app.session.getSharedItem(itemNameHmac, peer, function (err, statusItem) {
+  //       if (err) {
+  //         console.error(err);
+  //         return;
+  //       }
+  //       // delete this inbox message
+  //       app.deleteInboxMessage(message.messageId);
+  //  // If this is an avatar, save to contacts
+  //  if (statusItem.value.avatar) {
+  //    app.updateContactAvatar(username, statusItem.value);
+  //    // XXXddahl: Update timeline with a "new avatar message??"
+  //  } else {
+  //         // create status item, prepend to the top of the list
+  //         app.updatePeerStatus(username, statusItem.value);
+  //       }
+  //     });
+  //   });
+  // } else {
+  //   app.session.items.feed.value.feedHmacs[itemNameHmac] = newFeedHmac;
+  //   app.session.items.feed.save(function saveCallback (err) {
+  //     if (err) {
+  //       console.error(err);
+  //     }
+  //     app.session.getPeer(username, function (err, peer) {
+  //       if (err) {
+  //         console.error(err);
+  //         return;
+  //       }
+  //       // We need to load and watch this container
+  //       app.session.getSharedItem(itemNameHmac, peer, function (err, statusItem) {
+  //         if (err) {
+  //           console.error(err);
+  //           return;
+  //         }
+  //         // delete this inbox message
+  //         app.deleteInboxMessage(message.messageId);
+  //       });
+  //     });
+  //   });
+  // }
 };
 
 app.deleteInboxMessage = function (messageId) {
@@ -1143,33 +1268,7 @@ app.purgeInboxMessage = function purgeInboxMessage (id) {
   delete app.session.inbox.messages[id];
 };
 
-app.updatePeerStatus = function updatePeerStatus(username, statusItem) {
-  console.log('updatePeerStatus()', arguments);
-  var klass = '.' + username + '-' + statusItem.timestamp;
-  console.log('klass: ', klass);
-  var checkDupes = $(klass);
-  if (checkDupes.length > 0) {
-    // Lets not prepend a duplicate status update:)
-    return;
-  }
-
-  statusItem.username = username;
-  statusItem.statusText = statusItem.status;
-  statusItem.humaneTimestamp =
-    app.formatDate(statusItem.timestamp, statusItem.tz);
-
-  var avatarMetaName = username + '-avatar-meta';
-  if (app.session.items[avatarMetaName]) {
-    statusItem.avatar = app.session.items[avatarMetaName].value.avatar;
-  } else if (app.session.items._trusted_peers.value[username]) {
-    statusItem.avatar = app.session.items._trusted_peers.value[username].avatar;
-  }
-  
-  var statusNode = app.createMediaElement(statusItem);
-  $('#my-feed-entries').prepend(statusNode);
-};
-
-app.setMyLocation = function setMyLocation() {
+app.setMyLocation = function setMyLocation(callback) {
   // set location data to the location div
   var accuracy = true;
   var options = {
@@ -1178,44 +1277,29 @@ app.setMyLocation = function setMyLocation() {
     maximumAge: 6000
   };
 
-  function success(pos) {
+  function success (pos) {
     var crd = pos.coords;
     var gps = crd.latitude + ' ' + crd.longitude;
     var obfuGps = app.obfuscateLocation(gps) + ' ';
-    $('#my-geoloc').text(obfuGps);
+    $('#location-data').text(obfuGps);
 
     var lat = new Number(crd.latitude).toFixed(1);
     var lng = new Number(crd.longitude).toFixed(1);
     var geoIdx = lat + '__' + lng;
 
-    // if (!app.getPlaceName) {
-    //   // load the geoPlaces script
-    //   $.ajaxSetup({
-    // 	cache: true
-    //   });
-    //   console.log('loading geo-places...');
-    //   $.getScript( "js/geo-places.js", function( data, textStatus, jqxhr ) {
-    // 	console.log( "geo-places is loaded" );
-    // 	app.getPlaceName = function getPlaceName (geoIdx) {
-    // 	  var placeArr = window.geoPlaces[geoIdx];
-    // 	  if (placeArr) {
-    // 	    return placeArr[0] + ' ' +  placeArr[2] + ' ' + placeArr[1];
-    // 	  } else {
-    // 	    return 'unknown';
-    // 	  }
-    // 	};
-    // 	var name = app.getPlaceName(geoIdx);
-    // 	app.setLocationName(name);
-    //   });
-    // } else {
     var name = app.getPlaceName(geoIdx);
-    app.setLocationName(name);
-    // }
+    var html = ' <span id="geoloc-name"> <i>near</i> '
+	  + name
+	  + '</span>';
+    $('#location-data').append($(html));
+    $('#post-image-location-wrapper').show();
+    callback();
   };
-  
-  function error(err) {
+
+  function error (err) {
     console.error('Cannot set location');
     console.error(err);
+    callback(err);
   };
 
   navigator.geolocation.getCurrentPosition(success, error, options);
@@ -1232,8 +1316,8 @@ app.getPlaceName = function getPlaceName (geoIdx) {
 
 app.setLocationName = function setLocationName (name) {
   var html = ' <span id="geoloc-name"> <i>near</i> '
-	+ name
-	+ '</span>';
+  + name
+  + '</span>';
   $('#my-geoloc').append($(html));
 };
 
@@ -1257,7 +1341,7 @@ app.formatDate = function formatDate (timestamp, zone) {
 
   date =  moment.tz(parseInt(timestamp), zone || 'Europe/London');
 
-  return date.clone().tz(app.tz.name()).format('h:mm a, MMM Do YYYY z');
+  return date.clone().tz(app.tz.name()).format('h:mma, MMM Do, YYYY');
 };
 
 // XXXddahl: TODO
