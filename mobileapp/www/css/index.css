@@ -423,7 +423,7 @@ input[type="password"]:focus {
     font-family: WorkSans;
     padding: 1rem;
     font-weight: normal;
-    margin: 1rem 0;
+    margin: 0.5rem 0;
     -webkit-border-radius: 5px;
 }
 
@@ -1049,3 +1049,6 @@ body {
     margin-bottom: 1em;
 }
 
+#my-options-pane.view.active {
+    overflow: scroll;
+}
