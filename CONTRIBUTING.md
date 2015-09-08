@@ -26,6 +26,7 @@ Once you're done with whatever it is you're doing, here's the best way to submit
     ```
     git checkout -b repo_name
     git push origin repo_name
+    ```
 5.  Submit your PR!
 
 ## Acceptance policies
