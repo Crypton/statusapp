@@ -47,7 +47,6 @@
 .status-update {
     margin-bottom: 3px;
     padding-left: 1em;
-    border-bottom: 1px solid gray;
 }
 
 .status-update-username {
@@ -68,14 +67,13 @@
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    margin-top: 0 !important;
+    margin-top: 0 ;
 }
 
 #my-status {
     padding-top: 2em;
     padding-left: 1em;
     background-color: white;
-    border-bottom: 2px solid rgba(67, 67, 67, 0.14);
     color: black;
 }
 
@@ -111,8 +109,9 @@
 /* ====== media ====== */
 
 .media {
-    margin-top: 10px !important;
-    border-bottom: 1px solid #d5d5d5;
+    margin-top: 10px ;
+    font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif ;
+    -webkit-font-smoothing: subpixel-antialiased;
 }
 
 .media, .bd {
@@ -121,11 +120,19 @@
 }
 
 .media .img {
-    float:left;
-    margin-right: 10px;
+    float: left;
+    margin: 0 1rem 0 0.75rem;
+    width: 3rem;
+    height: 3rem;
+    overflow: hidden;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.media .img img { display:block; }
+.media .img img {
+    display:block;
+
+}
 
 .media .imgExt {
     float:right;
@@ -133,36 +140,43 @@
 }
 
 .media-avatar {
-    width: 50px;
-    margin-left: 10px;
-    margin-bottom: 5px;
-    -webkit-border-radius: 5px;
-    border: 1px solid #aaaaaa;
+    width: 100%;
 }
 
 .media-metadata {
+    border-bottom:1px solid rgba(0, 0, 0, 0.1);
     /* border-bottom: 1px solid #d5d5d5; */
-    padding-bottom: 0.5em;
+    padding: 0 0.5rem 1rem 0;
+    line-height:1.3rem;
 }
 
 .media-username {
     font-weight: bold;
-    color: rgb(107, 72, 219);
-    font-size: 1em;
+    font-size: 16px;
     margin-top: 5px;
+    color: #585858;
 }
 
 .media-status {
-    font-size: 1em;
+    font-size: 16px;
+    font-weight: normal;
+    margin-right: 15%;
+    display: block;
+    margin-bottom: 0.2rem;
+    color: #585858;
 }
 
 .media-timestamp {
-    font-size: 70%;
+    font-size: 11px;
+    /* font-family: Hack; */
+    color: #8A8A8A;
 }
 
 .media-location {
-    font-size: 70%;
+    font-size: 11px;
     font-weight: bold;
+    /* font-family: Hack; */
+    color: #8A8A8A;
 }
 
 .media-avatar-update {
@@ -177,13 +191,16 @@
     margin: 10px;
 }
 
+.media-footer {
+    line-height: 1.2rem;
+}
+
 #my-status-wrapper {
     margin-top: 20px;
-    
 }
 
 .post-img {
-    -webkit-border-radius: 5px;
+    margin: 0 0.5rem 0 0;
 }
 
 .post-button {
@@ -225,10 +242,10 @@
 }
 
 .feed-image {
-    border: 1px solid #aaaaaa;
+    border: 4px solid white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
     margin-top: 0.5em;
-    width: 97%;
-    -webkit-border-radius: 5px;
+    width: 100%;
 }
 
 .ired {
@@ -246,27 +263,24 @@
 
 #fetch-previous-items {
     display: none;
-    width: 90%;
-    margin: 1em;
+    width: 100%;
+    margin: 0 auto;
     text-align: center;
 }
 
-#top-progress-wrapper {
-    background-color: whitesmoke;
-    height: 10px;
-    display: none;
-    margin-top: -1.6em;
+#feed-footer {
+    padding: 2rem 1.5rem;
 }
 
 #first-run-empty-feed-btn {
     display: none;
 }
 
-.media-link-url { color: gray !important; }
-.media-link-email { color: gray !important; }
-.media-link-phone { color: red !important; }
-.media-link-twitter { color: blue !important; }
-.media-link-hashtag { color: purple !important; }
+.media-link-url { color: gray }
+.media-link-email { color: gray }
+.media-link-phone { color: red; }
+.media-link-twitter { color: blue; }
+.media-link-hashtag { color: purple; }
 
 #about-view {
     margin: 2em;
@@ -297,4 +311,132 @@
     font-size: 1.1em;
     padding: 1em;
     border: 1px solid #d1d1d1;
+}
+
+#post-button-floating-wrapper a {
+    width: 3.75rem;
+    height: 3.75rem;
+    display: block;
+}
+
+#post-button-floating-wrapper {
+    position: fixed;
+    width: 3.75rem;
+    height: 3.75rem;
+    padding: 0.4rem 0.4rem 0.5rem 0.6rem;
+    border-radius: 50%;
+    bottom: 1rem;
+    background-color: rgba(50, 50, 50, 0.85);
+    z-index: 10000;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    display: none;
+    box-shadow: 0 2px 3px 0 rgba(0,0,0,0.15);
+    transition: all .1s ease-in-out;
+}
+#post-button-floating-wrapper:hover,
+#post-button-floating-wrapper:focus,
+#post-button-floating-wrapper:active {
+    transform: scale(1.2);
+}
+
+#post-image-location-wrapper {
+    display: none;
+    background-color: rgba(50, 50, 50, 0.85);
+    z-index: 10000;
+    position: fixed;
+    z-index: 1000;
+    width: 100%;
+    text-align: center;
+}
+
+#post-outer-wrapper {
+    display: block;
+}
+
+#post-input-wrapper {
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    background-color: rgba(50, 50, 50, 0.85);
+    z-index: 10000;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    display: none;
+
+    -webkit-box-align: center;
+    -webkit-align-items: flex-end;
+    align-items: flex-end;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+    justify-content: space-between;
+}
+
+.posting #post-input-wrapper {
+    display: flex;
+    display: -webkit-flex;
+}
+.posting #app {
+    opacity: 0.5;
+}
+/* Ugly solution, but will do for now. -C. */
+
+#post-input-wrapper .icon:first-child {
+    margin-left: 0.5rem;
+    margin-bottom: 0;
+}
+
+#post-input-wrapper .icon:last-child {
+    margin-right: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+#post-input-wrapper textarea {
+    flex: 1;
+    -webkit-flex: 1;
+    margin:0.25rem 0.5rem;
+    border-radius:0;
+    min-height: 2rem;
+    border: 1px solid black;
+    font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif ;
+    background-color: rgba(255, 255, 255, 0.95);
+    color: #585858;
+    font-size: 15px;
+    padding: 0.25rem;
+    box-sizing: border-box;
+    transition: height .1s ease-out;
+}
+
+.post-button-svg {
+    width: 4rem;
+    margin: 0 auto;
+    margin-top: 1rem;
+    margin-left: 1.5rem;
+}
+
+#post-attach-icon {
+
+}
+
+#post-attach {
+    margin: 0;
+}
+
+#post-send-icon {
+}
+
+#location-data {
+    color: whitesmoke;
+    padding: 0.3em;
+    width: 100%;
+    text-align: center;
+}
+
+#image-data img {
+    height: 80px;
+    vertical-align: top;
+    margin-top: 0.5em;
+    border: 2px solid #fff;
 }
