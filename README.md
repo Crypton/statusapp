@@ -12,7 +12,7 @@ You'll need a few things to get going:
 1. Download [Xcode](https://developer.apple.com/) or Command Line Tools, and install.
 2. Install Node.js, either through the [official install packages](https://nodejs.com), or via a package installer (eg [Homebrew](https://brew.sh)),
 3. Once #1 and #2 are installed, get [Cordova](~cordova link~) set up by opening your terminal and typing `npm install -g cordova`.
-4. Install `npm install -g cordova-icon cordova-splash`
+4. Install the rest of the node dependencies: `npm install -g cordova-icon cordova-splash ios-sim`.
 5. Clone (or fork) this repo, `cd` into `statusapp/mobileapp` You'll need to install plugins before you start.
 
 Plugin list.
@@ -42,13 +42,14 @@ To get StatusApp running:
 If you want to build icons and splash screens, use `cordova-icon` and `cordova-splash` commands before you run statusapp.
 More info on Cordova apps are available here.
 
-Under the hood.
--------------
-ddahl to complete.
-
 Contact cards
 -------------
 To complete.
+
+
+Under the hood.
+-------------
+ddahl to complete.
 
 Credits
 -------------
