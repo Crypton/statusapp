@@ -314,15 +314,15 @@
 }
 
 #post-button-floating-wrapper a {
-    width: 3.75rem;
-    height: 3.75rem;
+    width: 3rem;
+    height: 3rem;
     display: block;
 }
 
 #post-button-floating-wrapper {
     position: fixed;
-    width: 3.75rem;
-    height: 3.75rem;
+    width: 3rem;
+    height: 3rem;
     padding: 0.4rem 0.4rem 0.5rem 0.6rem;
     border-radius: 50%;
     bottom: 1rem;
@@ -424,7 +424,11 @@
     margin: 0;
 }
 
-#post-send-icon {
+#post-send {
+    font-family: WorkSans;
+    color: white;
+    text-decoration: none;
+    padding: 0 0.65rem 0.65rem 0.24rem
 }
 
 #location-data {
