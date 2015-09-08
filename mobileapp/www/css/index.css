@@ -551,7 +551,7 @@ a.header-back {
     background-size: 100%;
     background-position: center;
     background-repeat: no-repeat;
-    background-image: url('../svg/card-white.svg');
+    background-image: url('../svg/show-card.svg');
 }
 
 .icon--contacts {
@@ -569,7 +569,7 @@ a.header-back {
     background-size: 100%;
     background-position: center;
     background-repeat: no-repeat;
-    background-image: url('../svg/add.svg');
+    background-image: url('../svg/add-contact.svg');
     margin-left: 1em;
 }
 
@@ -577,7 +577,7 @@ a.header-back {
     background-size: 55%;
     background-position: center;
     background-repeat: no-repeat;
-    background-image: url('../svg/post-white.svg');
+    background-image: url('../svg/post.svg');
 }
 
 .icon--settings {
@@ -604,7 +604,7 @@ a.header-back {
     background-size: 78%;
     background-position: center;
     background-repeat: no-repeat;
-    background-image: url('../svg/attach.svg');
+    background-image: url('../svg/attach-file.svg');
 }
 
 #first-run {
@@ -807,7 +807,7 @@ a.header-back {
     width: 75%;
     position: fixed;
     left: 10%;
-    bottom: 50%;	
+    bottom: 50%;
     text-align: center;
 }
 
