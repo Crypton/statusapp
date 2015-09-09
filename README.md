@@ -53,4 +53,5 @@ ddahl to complete.
 
 Credits
 -------------
-StatusApp is built by @ddahl, @helveticade, @devgeeks, etc etc at SpiderOak.
+StatusApp is built by @daviddahl, @helveticade, @devgeeks, etc etc at SpiderOak.
+

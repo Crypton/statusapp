@@ -138,8 +138,8 @@ app.setCustomEvents = function setCustomEvents () {
     }
   });
 
-  // Mutation Observer for the input textarea whcih helps us re-position the
-  // image and location piece
+  // Mutation Observer for the input textarea which helps us re-position the
+  // image and location piece of the input widget
   (function inputMutationObs() {
     var target = document.querySelector('#post-input-wrapper textarea');
     var observer = new MutationObserver(function(mutations) {
@@ -150,10 +150,34 @@ app.setCustomEvents = function setCustomEvents () {
     });
 
     // configuration of the observer: // XXX: May not need all of these
-    var config = { attributes: true, childList: true, characterData: true };
+    var config = {
+      attributes: true,
+      childList: false,
+      characterData: false
+    };
     
     // pass in the target node, as well as the observer options
     observer.observe(target, config);
+  })();
+
+  (function () {
+    // handle pull to refresh event:
+    var el = $("#my-feed-entries")[0];
+    var startPageY = null;
+    el.addEventListener("touchmove", function (e) {
+      if (!$("#feed").is(":visible")) {
+	return;
+      }
+      if (!startPageY) {
+	startPageY = e.pageY;
+      }
+      if (e.pageY > (startPageY + 80)) {
+	startPageY = null;
+	app.lastTimelineLoad = Date.now();
+	app.loadNewTimeline();
+	return;
+      }
+    }, false);
   })();
 };
 
@@ -386,6 +410,12 @@ app.createInitialItems = function createInitialItems (callback) {
   });
 };
 
+app.hideProgress = function hideProgress() {
+  setTimeout(function () {
+    $('#top-progress-wrapper').hide();
+  }, 1000);
+};
+
 app.feedIsLoading = false;
 
 app.loadNewTimeline = function loadNewTimeline () {
@@ -400,17 +430,20 @@ app.loadNewTimeline = function loadNewTimeline () {
     var options = { limit: 15, afterId: afterId };
     app.session.getTimelineAfter(options, function tlCallback (err, timeline) {
       if (err) {
-  console.error(err);
-  app.feedIsLoading = false;
-  $('#top-progress-wrapper').hide();
-  return app.alert('Cannot get feed', 'info');
+	console.error(err);
+	app.feedIsLoading = false;
+	app.hideProgress();
+	// $('#top-progress-wrapper').hide();
+	return app.alert('Cannot get feed', 'info');
       }
       app.renderTimeline(timeline);
-      $('#top-progress-wrapper').hide();
+      app.hideProgress();
+      // $('#top-progress-wrapper').hide();
       app.feedIsLoading = false;
     });
   } else {
-    $('#top-progress-wrapper').hide();
+    app.hideProgress();
+    // $('#top-progress-wrapper').hide();
     app.feedIsLoading = false;
     console.error('Cannot get afterId');
     app.loadPastTimeline();
@@ -943,7 +976,6 @@ app.setMyStatus = function setMyStatus() {
 app.displayInitialView = function displayInitialView() {
   // Check for first run
   if (!app.firstRunIsNow) {
-    $('#my-avatar')[0].src = app.session.items.avatar.value.avatar;
     app.session.on('message', function (message) {
       console.log('session.on("message") event called', message);
       app.handleMessage(message);

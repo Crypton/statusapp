@@ -8,7 +8,9 @@ document.addEventListener("deviceready", onDeviceReady, false);
 
 function onDeviceReady() {
   $('.header-wrap').hide();
-  
+
+  cordova.plugins.Keyboard.disableScroll(true);
+
   $(function() {
     FastClick.attach(document.body);
   });
@@ -162,7 +164,7 @@ var app = {
 
   URL: 'https://zk.gs',
 
-  VERSION: "0.3.0",
+  VERSION: "0.4.0",
 
   get isNodeWebKit() { return (typeof process == "object"); },
 
