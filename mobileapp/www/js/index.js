@@ -1006,6 +1006,7 @@ var app = {
       if (err) {
         return callback(err);
       }
+      $('#header').show();
       return callback(null, session);
     });
   },

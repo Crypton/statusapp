@@ -472,6 +472,7 @@ input[type="password"]:focus {
    position: fixed;
    top: 0;
    width: 100vw;
+   display: none;
 }
 
 .header-wrap {
