@@ -425,10 +425,11 @@ input[type="password"]:focus {
     font-weight: normal;
     margin: 0.5rem 0;
     -webkit-border-radius: 5px;
+    background-color: whitesmoke;
+    opacity: 0.7;
 }
 
 .btn:hover, .btn:focus {
-    background-color: whitesmoke;
 }
 
 .btn:active {
@@ -824,7 +825,7 @@ blink {
     -webkit-animation-name: blink;
     -webkit-animation-iteration-count: infinite;
     -webkit-animation-timing-function: cubic-bezier(1.0, 0, 0, 1.0);
-    -webkit-animation-duration: 1s;
+    -webkit-animation-duration: 1.5s;
 }
 
 h3 {
@@ -1051,4 +1052,37 @@ body {
 
 #my-options-pane.view.active {
     overflow: scroll;
+}
+
+#account-login {
+    background-image: url('../img/kloak-hoodie.jpg');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: 51% 51%;
+    opacity: 0.8;
+}
+
+#account-login h1 {
+    font-size: 45px;
+    font-family: WorkSans, Roboto;
+    font-weight: bolder;
+}
+
+#account-login h2 {
+    text-align: center;
+    font-size: 16px;
+    font-family: WorkSans, Roboto;
+}
+
+#account-login .logo {
+    text-align: center;
+}
+
+#account-login img {
+    text-align: center;
+    width: 100px;
+}
+
+div .logo { 
+    text-align: center
 }

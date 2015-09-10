@@ -466,14 +466,15 @@ var app = {
     }
 
     $('#create-id-card').click(function () {
-      app.firstRunCreateIdCard( function () {
-        $('#tasks-btn').addClass('active');
-        app.switchView('my-fingerprint-id-wrapper', 'My Contact Card');
+      // app.firstRunCreateIdCard( function () {
+      //  $('#tasks-btn').addClass('active');
+      app.switchView('my-fingerprint-id-wrapper', 'My Contact Card');
 	// need to set this here in order to call the firstRunComplete function properly
-	app.firstRunIsNow = false;
-        app.firstRunComplete();
-      });
+      app.firstRunIsNow = false;
+      app.firstRunComplete();
+      app.newPhotoContactCardSheet();
     });
+    // });
   },
 
   switchView: function switchView (id, name) {
@@ -691,6 +692,7 @@ var app = {
     var quality = 50;
     var cameraDirection = cameraDirectionOptions.BACK;
     var pictureSourceType = navigator.camera.PictureSourceType.CAMERA;
+    var allowEdit = true;
     // navigator.camera.PictureSourceType.SAVEDPHOTOALBUM
     if (options) {
       width = options.width || 320;
@@ -698,6 +700,7 @@ var app = {
       quality = options.quality || 70;
       cameraDirection = options.cameraDirection || cameraDirectionOptions.BACK;
       pictureSourceType = options.pictureSourceType || navigator.camera.PictureSourceType.CAMERA;
+      allowEdit = options.allowEdit || allowEdit;
     }
 
     // via the CAMERA
@@ -931,7 +934,7 @@ var app = {
       return;
     }
 
-    app.switchView('login-progress', '');
+    // app.switchView('login-progress', '');
     $('#top-progress-wrapper').show();
 
     $('.alert').remove();
@@ -1226,8 +1229,10 @@ var app = {
     $('#peer-fingerprint-id').children().remove();
     app.switchView('peer-fingerprint-id', 'Peer Fingerprint');
 
+    var label = app.APPNAME + '  *  ' + username + '  *';
+    
     var canvas =
-      app.card.createIdCard(fingerprint, username, app.contactCardLabel);
+      app.card.createIdCard(fingerprint, username, label);
     $(canvas).css({ width: '290px'});
     $('#peer-fingerprint-id').append(canvas);
   },
@@ -1243,8 +1248,9 @@ var app = {
     // remove ID card
     $('#my-fingerprint-id').children().remove();
     // Re-create the ID card
+    var label = app.APPNAME + '  *  ' + app.username + '  *';
     var canvas =
-      app.card.createIdCard(app.fingerprint, app.username, app.contactCardLabel);
+      app.card.createIdCard(app.fingerprint, app.username, label);
     app.addPhotoToIdCard(canvas, true, function (err, idCard) {
       if (err) {
         return app.alert(err, 'danger');
@@ -1261,7 +1267,6 @@ var app = {
     $(idCard).css({ width: '290px' });
     $('#my-fingerprint-id').append(idCard);
 
-    $('#my-avatar')[0].src = app.session.items.avatar.value.avatar;
     $('#share-my-id-card').click(function () {
       if (app.isNodeWebKit) {
         app.saveIdToDesktop_desktop(idCard);
@@ -1272,7 +1277,8 @@ var app = {
     });
 
     $('#retake-id-picture').click(function () {
-      app.retakeIdPicture();
+      // app.retakeIdPicture();
+      app.newPhotoContactCardSheet();
     });
     if (callback) {
       callback();
@@ -1283,8 +1289,9 @@ var app = {
   displayMyFingerprint: function displayMyFingerprint (withPhoto) {
 
     $('#my-fingerprint-id').children().remove();
+    var label = app.APPNAME + '  *  ' + app.username + '  *';
     var canvas =
-      app.card.createIdCard(app.fingerprint, app.username, app.contactCardLabel);
+      app.card.createIdCard(app.fingerprint, app.username, label);
     if (withPhoto) {
       // override = false here as sensible default?
       app.addPhotoToIdCard(canvas, false, function (err, idCard) {
@@ -1335,18 +1342,19 @@ var app = {
 
         if (!override && avatarItem.value.avatar) {
           // XXXddahl: try ??
-          var photoIdCard = pastePhoto(avatarItem.value.avatar, idCard, 20, 305);
-	  var iconCanvas = document.createElement('canvas');
-	  $(iconCanvas).attr({ width: 120, height: 160 });
-	  // add icon to a canvas
-	  var img = new Image();
-	  var tmpIconCanvas = document.createElement('canvas');
-	  $(tmpIconCanvas).attr({ width: 120, height: 160 });
-	  img.onload = function () {
-	    idCard.getContext('2d').drawImage(img, 150, 305);
-	  };
-	  img.src = 'img/icon.png';
-	  idCard.getContext('2d').fillText(app.APPNAME, 170, 415);
+          var photoIdCard =
+            pastePhoto(avatarItem.value.avatar, idCard, 20, 285, 192, 128);
+	  // var iconCanvas = document.createElement('canvas');
+	  // $(iconCanvas).attr({ width: 120, height: 160 });
+	  // // add icon to a canvas
+	  // var img = new Image();
+	  // var tmpIconCanvas = document.createElement('canvas');
+	  // $(tmpIconCanvas).attr({ width: 120, height: 160 });
+	  // img.onload = function () {
+	  //   idCard.getContext('2d').drawImage(img, 150, 305);
+	  // };
+	  // img.src = 'img/icon.png';
+	  // idCard.getContext('2d').fillText(app.APPNAME, 170, 415);
           return callback(null, idCard);
         }
 
@@ -1363,7 +1371,7 @@ var app = {
 
             // photo is saved to the server
             var photoIdCard =
-              pastePhoto(avatarItem.value.avatar, idCard);
+		  pastePhoto(avatarItem.value.avatar, idCard, 20, 285, 192, 128);
             return callback(null, photoIdCard);
           });
         });
@@ -1524,6 +1532,61 @@ var app = {
     });
   },
 
+  newPhotoContactCardSheet:  function newPhotoContactCardSheet () {
+    var options = {
+      'androidTheme' : window.plugins.actionsheet.ANDROID_THEMES.THEME_HOLO_LIGHT,
+      'buttonLabels': ['Snap Card Photo', 'Choose Card Image'],
+      'addCancelButtonWithLabel': 'Cancel',
+      'androidEnableCancelButton' : true
+    };
+
+  function callback(buttonIdx) {
+    console.log(buttonIdx);
+    switch (buttonIdx) {
+    case 1:
+      // Take Photo
+      app.retakeIdPicture(false);
+      break;
+
+    case 2:
+      // Choose Photo
+      var options =
+	{ cameraDirection: 0,
+	  pictureSourceType: navigator.camera.PictureSourceType.SAVEDPHOTOALBUM,
+	  allowEdit: true
+	};
+      app.getPhoto(options, function imgCallback(err, imgData) {
+	if (err) {
+	  console.error(err);
+	  app.alert('danger', err);
+	  return;
+	}
+	// Do something with the photo
+	app.session.items.avatar.value.avatar = imgData;
+	app.session.items.avatar.value.avatar.updated = Date.now();
+	app.session.items.avatar.save(function (err) {
+	  if (err) {
+            var _err = 'Cannot save avatar data to server';
+            console.error(_err + ' ' + err);
+            return app.alert(_err);
+          }
+	  // re-display ID card:
+	  app.displayMyFingerprint(true);
+	});
+      });
+      break;
+
+    case 3:
+      // Cancel
+      return;
+    default:
+      return;
+    }
+  }
+
+  window.plugins.actionsheet.show(options, callback);
+},
+  
   get isMobile() {
     if (!device) {
       return false;

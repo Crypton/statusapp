@@ -433,17 +433,14 @@ app.loadNewTimeline = function loadNewTimeline () {
 	console.error(err);
 	app.feedIsLoading = false;
 	app.hideProgress();
-	// $('#top-progress-wrapper').hide();
 	return app.alert('Cannot get feed', 'info');
       }
       app.renderTimeline(timeline);
       app.hideProgress();
-      // $('#top-progress-wrapper').hide();
       app.feedIsLoading = false;
     });
   } else {
     app.hideProgress();
-    // $('#top-progress-wrapper').hide();
     app.feedIsLoading = false;
     console.error('Cannot get afterId');
     app.loadPastTimeline();
