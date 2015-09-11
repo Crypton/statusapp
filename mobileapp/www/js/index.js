@@ -717,12 +717,13 @@ var app = {
     // Specify the source to get the photos.
     navigator.camera.getPicture(onSuccess, onFail,
                                 { quality: quality,
+                                  allowEdit: allowEdit,
                                   destinationType:
-                                  Camera.DestinationType.DATA_URL,
+                                    Camera.DestinationType.DATA_URL,
                                   sourceType: pictureSourceType,
                                   targetWidth: width,
                                   targetHeight: height,
-				  cameraDirection: cameraDirection
+                                  cameraDirection: cameraDirection
                                 });
 
   },
