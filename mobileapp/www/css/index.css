@@ -1055,12 +1055,13 @@ body {
     overflow: scroll;
 }
 
-#account-login {
+.intro-graphics {
     background-image: url('../img/kloak-hoodie.jpg');
     background-repeat: no-repeat;
     background-attachment: fixed;
-    background-position: 51% 51%;
-    opacity: 0.8;
+    background-position: 51% 91%;
+    background-size: 300%;
+    opacity: 0.98;
 }
 
 #account-login h1 {
@@ -1079,11 +1080,41 @@ body {
     text-align: center;
 }
 
-#account-login img {
+.intro-graphics img {
     text-align: center;
     width: 100px;
 }
 
 div .logo { 
     text-align: center
+}
+
+#onboarding-create-username {
+    text-align: left;
+    width: 98%;
+    margin-left: 1em;
+    position: fixed;
+    bottom: 20px;
+}
+
+.onboarding-username {
+    width: 90%;
+    font-family: roboto;
+    font-size: 1.6em;
+    padding: 0.4em;
+    opacity: 0.5;
+    border-bottom: 2px solid #000;
+    color: #000; 
+}
+
+#onboarding-check-username {
+    width: 95%;
+    font-size: 1.2em;
+}
+
+.onboarding-link {
+    text-decoration: none;
+    color: #FFF;
+    font-size: 1em;
+    font-family: WorkSans, roboto;
 }
