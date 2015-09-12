@@ -20,7 +20,7 @@ function generatePassphrase() {
     return min + (byteArray[0] % range);
   }
 
-  var passLen = 5;
+  var passLen = 7;
 
   var passphraseArr = [];
 

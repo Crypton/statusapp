@@ -153,15 +153,95 @@ height: 2.5rem;"></a>
 		 autocapitalize="off"
 		 size="12"
 		 maxlength="32"
-		 class="onboarding-username"
+		 class="onboarding-input"
 		 id="onboarding-username-input" type="text" />
-	  <div>
+	  <div class="onboarding-continue-wrapper">
 	    <button class="btn" id="onboarding-check-username">Continue</button>
 	  </div>
 	  <a href="#" class="onboarding-link">Already have an account?</a>
 	</div>
       </div>
 
+
+      <div id="onboarding-no-account-step-2" class="view intro-graphics">
+	<div class="logo">
+	  <img src="img/spideroak_logo.png" />
+	</div>
+	<h1>Kloak</h1>
+
+	<div id="onboarding-create-passphrase">
+	  <h3>Step 2: Passphrase</h3>
+	  
+	  <div id="passphrase-info">
+	    <p>
+	      We have created a strong passphrase for you, please save it into your password wallet or write it down and put it in a safe place! You cannot ask SpiderOak to recover a forgotten passphrase. We <strong>do not</strong> store it outside the device.
+	    </p>
+	    <p>
+	      If your device supports the "Keychain" or "Secure Storage", your passphrase will be automatically securely saved for you and you will be able to recall it in Kloak's Options. 
+	    </p>
+	    <p>
+	      <a href="#"
+		 id="regenerate-passphrase"
+		 class="onboarding-link">Regenerate Passphrase</a>
+	    </p>
+	    <p>
+	      <a href="#"
+		 id="clear-passphrase"
+		 class="onboarding-link">I'll choose my own Passphrase</a>
+	    </p>
+	  </div>
+	  
+	  <textarea placeholder="Enter Passphrase"
+		    autocapitalize="off"
+		    rows="2"
+		    maxlength="256"
+		    class="onboarding-input"
+		    id="onboarding-passphrase-input"></textarea>
+	  <div class="onboarding-continue-wrapper">
+	    <button class="btn" id="onboarding-check-username">Continue</button>
+	  </div>
+	  <a href="#" class="onboarding-link">Cancel</a>
+	</div>
+      </div>
+
+
+
+      <div id="onboarding-no-account-step-3" class="view intro-graphics">
+	<div class="logo">
+	  <img src="img/spideroak_logo.png" />
+	</div>
+	<h1>Kloak</h1>
+
+	<div id="onboarding-account-generation">
+	  <h3>Account Validation & Creation</h3>
+	  
+	  <div id="generation-info">
+	  </div>
+	</div>
+      </div>
+
+      <div id="onboarding-no-account-step-4" class="view intro-graphics">
+	<div class="logo">
+	  <img src="img/spideroak_logo.png" />
+	</div>
+	<h1>Kloak</h1>
+
+	<div id="onboarding-account-generation">
+	  <div id="contact-card-info">
+	    <p>
+	      Kloak generates a 'Contact Card' which you share with others. You can share your status updates, pictures and locations once you have exchanged cards with your contacts.
+	    </p>
+	    <p>
+	      <h4>Your Contact Card</h4>
+	      <div id="onboarding-contact-card-wrapper"></div>
+	    </p>
+	    <div id="onboarding-contact-card-share-buttons">
+	      
+	    </div>
+	  </div>
+	</div>
+      </div>
+      
       <div id="account-login" class="view active intro-graphics">
 	<div class="logo">
 	  <img src="img/spideroak_logo.png" />
