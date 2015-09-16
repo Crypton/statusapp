@@ -173,7 +173,10 @@ var app = {
   get fingerprint() { return app.session.account.fingerprint; },
 
   // Bind Event Listeners
-  bindEvents: function() {
+  bindEvents: function bindEvents() {
+    // onboarding events!!!
+    app.onboarding.bindEvents();
+    
     $('.view').click(function () {
       app.hideMenu();
     });

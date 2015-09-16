@@ -1125,12 +1125,21 @@ input.onboarding-input {
     font-size: 1.2em;
 }
 
+.onboarding-btn {
+    width: 95%;
+    font-size: 1.2em;
+}
+
 .onboarding-link {
     text-decoration: none;
     color: #FFF;
     font-size: 1em;
     font-family: WorkSans, roboto;
     font-weight: bold;
+}
+
+#onboarding-passphrase-input {
+    font-size: 1.2em;
 }
 
 .onboarding-continue-wrapper {

@@ -156,9 +156,9 @@ height: 2.5rem;"></a>
 		 class="onboarding-input"
 		 id="onboarding-username-input" type="text" />
 	  <div class="onboarding-continue-wrapper">
-	    <button class="btn" id="onboarding-check-username">Continue</button>
+	    <button class="btn onboarding-btn" id="onboarding-check-username">Continue</button>
 	  </div>
-	  <a href="#" class="onboarding-link">Already have an account?</a>
+	  <a href="#" id="onboarding-existing-account" class="onboarding-link">Already have an account?</a>
 	</div>
       </div>
 
@@ -193,14 +193,14 @@ height: 2.5rem;"></a>
 	  
 	  <textarea placeholder="Enter Passphrase"
 		    autocapitalize="off"
-		    rows="2"
+		    rows="3"
 		    maxlength="256"
 		    class="onboarding-input"
 		    id="onboarding-passphrase-input"></textarea>
 	  <div class="onboarding-continue-wrapper">
-	    <button class="btn" id="onboarding-check-username">Continue</button>
+	    <button class="btn onboarding-btn" id="onboarding-create-account">Continue</button>
 	  </div>
-	  <a href="#" class="onboarding-link">Cancel</a>
+	  <a href="#" class="onboarding-link" id="onboarding-cancel">Cancel</a>
 	</div>
       </div>
 
@@ -513,6 +513,7 @@ height: 2.5rem;"></a>
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="js/crypton.js"></script>
     <script type="text/javascript" src="js/index.js"></script>
+    <script type="text/javascript" src="js/onboarding.js"></script>
     <script type="text/javascript" src="js/stati.js"></script>
     <script type="text/javascript" src="js/configuration.js"></script>
     <script type="text/javascript" src="js/day-of-year.js"></script>
