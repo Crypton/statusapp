@@ -384,11 +384,11 @@ app.createInitialItems = function createInitialItems (callback) {
       status.value.__meta = { timelineVisible: 't' };
 
       status.save(function (err) {
-  if (err) {
-    console.error(err);
-  }
-  callbackFired = true;
-  callback(null);
+	if (err) {
+	  console.error(err);
+	}
+	callbackFired = true;
+	callback(null);
       });
     }
 
@@ -400,11 +400,11 @@ app.createInitialItems = function createInitialItems (callback) {
 
       if (avatar.value.avatar === undefined) {
         avatar.value = {
-    avatar: null
-  };
+	  avatar: null
+	};
       }
       if (!callbackFired) {
-  callback(null);
+	callback(null);
       }
     });
   });

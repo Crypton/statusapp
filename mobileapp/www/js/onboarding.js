@@ -34,6 +34,10 @@ app.onboarding = {
     $('#onboarding-existing-account').click(function () {
       that.existingLogin();
     });
+
+    $('#onboarding-exit-setup').click(function () {
+      that.exit();
+    });
     
   },
 
@@ -49,7 +53,7 @@ app.onboarding = {
     app.switchView('onboarding-no-account');
     $('#onboarding-username-input').focus();
   },
-
+  
   choosePassword: function choosePassword () {
     if (!$('#onboarding-username-input').val().trim()) {
       app.alert('Please choose a username', 'danger');
@@ -96,16 +100,42 @@ app.onboarding = {
 	that.handleLoginErr(err);
 	return;
       }
+      // XXX: create all app items...
       
       ProgressIndicator.hide();
       app.username = that.username;
       app.session = session;
       window.localStorage.setItem('lastUserLogin', that.username);
+
+      if (app.keyChain.supported) {
+	app.keyChain.init(that.username, function (err) {
+	  if (err) {
+	    return console.error(err);
+	  }
+	  app.keyChain.setPassphrase(that.passphrase, function (err) {
+	    if (err) {
+	      return console.error(err);
+	    }
+	    return console.log('success: passphrase remembered');
+	  });
+	});
+      }
+      
       // XXX: delete username and passphrase after saving to keychain
-			
-      // Display Contact Card onboarding screen:
-      app.switchView('onboarding-no-account-step-4');
-      // XXX: hide progress
+      ProgressIndicator.showSimpleWithLabel(true, that.strings.en_US.CREATE_INITIAL_ITEMS);
+      app.createInitialItems(function initialItemsCB (err) {
+	if (err) {
+	  console.error(err);
+	  ProgressIndicator.hide();
+	  // XXX: 
+	  return;
+	}
+	ProgressIndicator.hide();
+	// Display Contact Card onboarding screen:
+	that.displayContactCard();
+	app.switchView('onboarding-no-account-step-4');
+	// XXX: hide progress
+      });
     });
   },
 
@@ -115,10 +145,28 @@ app.onboarding = {
   
   accountValidationErr: function accountValidationErr (err) {
     // parse errors and change UI
+    if (err == 'Username already taken.') {
+      this.currentErr = err;
+      this.begin();
+      app.alert('Please choose another username', 'danger');
+    }
   },
 
-  manageContactCard: function manageContactCard () {
-
+  exit: function exit () {
+    // Exit onboarding & load the timeline
+    // cleanup first
+    // remove children from onboarding-contact-card-wrapper
+    $('#header').show();
+    app.switchView('feed', 'Feed');
+    app.loadInitialTimeline();
+  },
+  
+  displayContactCard: function displayContactCard () {
+    var label = app.APPNAME + '  *  ' + app.username + '  *';
+    var canvas =
+    app.card.createIdCard(app.fingerprint, app.username, label);
+    $(canvas).css({ width: '290px'});
+    $('#onboarding-contact-card-wrapper').append(canvas);
   },
 
   genPass: function genPass() {
@@ -129,7 +177,8 @@ app.onboarding = {
   strings: {
     en_US:{
       ACCOUNT_GENERATE: 'Generating Account',
-      ACCOUNT_LOGIN: "Logging In"
+      ACCOUNT_LOGIN: 'Logging In',
+      CREATE_INITIAL_ITEMS: 'Loading Datastore'
       // XXX: Add all onboarding strings to this object
     }
   }

@@ -1180,3 +1180,12 @@ input.onboarding-input {
     font-size: 80%;
     color: white;
 }
+
+#onboarding-account-contact-card {
+    color: white;
+    margin-left: 2em;
+}
+
+#onboarding-no-account-step-4 {
+    padding-top: 1rem !important;
+}
