@@ -3,7 +3,7 @@
 ## Getting started
 1. Fork [the repo](https://github.com/Crypton/statusapp)
 2. In your terminal, clone to your desktop - `git clone git@github.com:your_name/statusapp`.
-3. Add our original repository as a remote - `git remote add upstream https://github.com/WhisperSystems/Signal-iOS.git`
+3. Add our original repository as a remote - `git remote add upstream https://github.com/Crypton/statusapp.git`
 
 ## Working on features
 When contributing, it's usually a good idea to base your work off the default branch. We use a lazy sort of `git-flow` approach to our development, designed to make it easy to figure out what each branch actually is at a glance.
