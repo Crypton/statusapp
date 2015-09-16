@@ -38,7 +38,10 @@ app.onboarding = {
     $('#onboarding-exit-setup').click(function () {
       that.exit();
     });
-    
+
+    $('#onboarding-add-photo-btn').click(function () {
+      that.addPhotoToCard();
+    });
   },
 
   existingLogin: function existingLogin() {
@@ -51,7 +54,6 @@ app.onboarding = {
   
   begin: function begin () {
     app.switchView('onboarding-no-account');
-    $('#onboarding-username-input').focus();
   },
   
   choosePassword: function choosePassword () {
@@ -169,6 +171,22 @@ app.onboarding = {
     $('#onboarding-contact-card-wrapper').append(canvas);
   },
 
+  addPhotoToCard: function addPhotoToCard() {
+    // app.getPhoto(null, function addPhotoCB (err, imgData) {
+    //   // save avatar:
+    //   app.session.items.avatar.value.avatar = imgData;
+    //   app.session.items.avatar.save(function (err) {
+    // 	// add photo to the card
+    // 	var idCard = $('#onboarding-contact-card-wrapper canvas')[0];
+    // 	app.pasteAvatar(imgData, idCard);
+    //   });
+    // });
+    app.newPhotoContactCardSheet(function () {
+      $('#header').show();
+    });
+    
+  },
+  
   genPass: function genPass() {
     var pass = generatePassphrase();
     $('#onboarding-passphrase-input').val(pass);

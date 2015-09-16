@@ -285,8 +285,13 @@ app.viewActions = {
 
   feed: function vaFeed () {
     $('.header-wrap').hide();
+    $('#header').show();
     $('#header-timeline').show();
     $('#post-button-floating-wrapper').show();
+    if ($('#my-feed-entries').length == 1) {
+      // load timeline!
+      app.loadInitialTimeline();
+    }
   },
 
   settings: function vaSettings () {
@@ -315,6 +320,10 @@ app.viewActions = {
     $('#post-button-floating-wrapper').hide();
     $('.header-wrap').hide();
     $('#header-settings').show();
+  },
+
+  'onboarding-no-account': function vaOnboardingNoAccount () {
+    $('#onboarding-username-input').focus();
   }
 };
 

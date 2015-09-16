@@ -1058,9 +1058,9 @@ body {
 .intro-graphics {
     background-image: url('../img/kloak-hoodie.jpg');
     background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-position: 25% 71%;
-    background-size: 300%;
+    /* background-attachment: fixed; */
+    background-position: 30% 3%;;
+    background-size: 200%;
     opacity: 0.98;
 }
 
@@ -1093,8 +1093,13 @@ div .logo {
     text-align: left;
     width: 98%;
     margin-left: 1em;
-    position: fixed;
-    bottom: 20px;
+    /* position: absolute; */
+    /* bottom: 20px; */
+    margin-top: 70%
+}
+
+#onboarding-create-username h3 {
+    color: black;
 }
 
 #onboarding-create-passphrase {
@@ -1132,7 +1137,7 @@ input.onboarding-input {
 
 .onboarding-link {
     text-decoration: none;
-    color: #FFF;
+    color: #000;
     font-size: 1em;
     font-family: WorkSans, roboto;
     font-weight: bold;
@@ -1147,7 +1152,7 @@ input.onboarding-input {
 }
 
 #passphrase-info p {
-    color: white;
+    color: black;
     padding-right: 1em;
 }
 
@@ -1160,7 +1165,7 @@ input.onboarding-input {
     margin-left: 1em;
     margin-top: 4em;
     text-align: center;
-    color: white;
+    /* color: white; */
 }
 
 #onboarding-contact-card-wrapper {
@@ -1178,7 +1183,7 @@ input.onboarding-input {
 
 #contact-card-info {
     font-size: 80%;
-    color: white;
+    color: black;
 }
 
 #onboarding-account-contact-card {
@@ -1188,4 +1193,9 @@ input.onboarding-input {
 
 #onboarding-no-account-step-4 {
     padding-top: 1rem !important;
+}
+
+#onboarding-contact-card-share-buttons {
+    margin-top: -18px;
+    width: 290px !important;
 }

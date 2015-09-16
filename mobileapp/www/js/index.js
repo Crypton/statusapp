@@ -1261,6 +1261,8 @@ var app = {
         return app.alert(err, 'danger');
       }
       if (firstRun) {
+	$('#header').show();
+	$('#header-contacts').show();
 	app.displayMyFingerprint(true);
       } else {
 	app.displayIdCard(idCard, callback);
@@ -1348,18 +1350,7 @@ var app = {
         if (!override && avatarItem.value.avatar) {
           // XXXddahl: try ??
           var photoIdCard =
-            pastePhoto(avatarItem.value.avatar, idCard, 20, 285, 192, 128);
-	  // var iconCanvas = document.createElement('canvas');
-	  // $(iconCanvas).attr({ width: 120, height: 160 });
-	  // // add icon to a canvas
-	  // var img = new Image();
-	  // var tmpIconCanvas = document.createElement('canvas');
-	  // $(tmpIconCanvas).attr({ width: 120, height: 160 });
-	  // img.onload = function () {
-	  //   idCard.getContext('2d').drawImage(img, 150, 305);
-	  // };
-	  // img.src = 'img/icon.png';
-	  // idCard.getContext('2d').fillText(app.APPNAME, 170, 415);
+          pastePhoto(avatarItem.value.avatar, idCard, 20, 285, 192, 128);
           return callback(null, idCard);
         }
 
@@ -1537,7 +1528,7 @@ var app = {
     });
   },
 
-  newPhotoContactCardSheet:  function newPhotoContactCardSheet () {
+  newPhotoContactCardSheet:  function newPhotoContactCardSheet (uiCallback) {
     var options = {
       'androidTheme' : window.plugins.actionsheet.ANDROID_THEMES.THEME_HOLO_LIGHT,
       'buttonLabels': ['Snap Card Photo', 'Choose Card Image'],
@@ -1550,7 +1541,11 @@ var app = {
     switch (buttonIdx) {
     case 1:
       // Take Photo
-      app.retakeIdPicture(false);
+      if (!uiCallback) { 
+	app.retakeIdPicture(false);
+      } else {
+	app.retakeIdPicture(true);
+      }
       break;
 
     case 2:
@@ -1576,6 +1571,10 @@ var app = {
             return app.alert(_err);
           }
 	  // re-display ID card:
+	  if (uiCallback) {
+	    $('#header').show();
+	    $('#header-contcts').show();
+	  }
 	  app.displayMyFingerprint(true);
 	});
       });
