@@ -57,9 +57,13 @@ var app = {
   init: function init() {
     console.log('app initializing!: ', arguments);
 
+    $('#my-feed-entries').children().remove();
+    
     // Check explicitly for 1 
     if (window.localStorage.touchIdLoginEnabled == 1){
-      touchid.authenticate(function(){app.login()}, function(err){ alert(err)}, "Login to Kloak!");
+      touchid.authenticate(function () { app.login(); },
+			   function (err) { alert(err); },
+			   "Login to Kloak!");
     }
 
     // Configure the endpoint:
@@ -84,7 +88,7 @@ var app = {
 
     // Check if any user has ever logged in before:
     var lastUser = window.localStorage.getItem('lastUserLogin');
-    if (lastUser) {
+    if (lastUser && app.keyChain.supported) {
       $('#username-login').val(lastUser);
       // initialize keychain
       app.keyChain.init(lastUser, function _keychain_initCB (err) {
@@ -98,8 +102,8 @@ var app = {
 	    // just display the normal login password. something is wrong...
 	    return defaultLoginBehavior();
 	  } else {
-        app.passphraseInKeychain = true;
-      }
+            app.passphraseInKeychain = true;
+	  }
 	  // we have a passphrase!
 	  $('#username-login').hide();
 	  $('#username-placeholder').html(lastUser).show();
@@ -116,9 +120,11 @@ var app = {
 	  $('#login-btn').focus();
 	});
       });
-    } else {
+    } else if (lastUser && !app.keyChain.supported){
       // check if keychain is supported
       defaultLoginBehavior();
+    } else if (!lastUser) {
+      app.onboarding.begin();
     }
     // Offline
     window.Offline.options = {
@@ -203,7 +209,7 @@ var app = {
 
     $("#register-btn").click(function (e) {
       e.preventDefault();
-      app.beginRegistration();
+      app.onboarding.begin();
     });
 
     $("#register-generate-cancel-btn").click(function (e) {
@@ -923,8 +929,6 @@ var app = {
 
   login: function _login () {
 
-    $('#my-feed-entries').children().remove();
-
     var user = $('#username-login').val();
     var pass = $('#password-login').val();
 
@@ -938,9 +942,7 @@ var app = {
       return;
     }
 
-    // app.switchView('login-progress', '');
     $('#top-progress-wrapper').show();
-
     $('.alert').remove();
 
     app.setProgressStatus('Logging in...');
@@ -958,7 +960,7 @@ var app = {
 
       window.localStorage.setItem('lastUserLogin', user);
       // Save passphrase if the checkbox is checked
-      if ($('#remember-credentials')[0].checked && app.keyChain.supported) {
+      if (app.keyChain.supported) {
 	app.keyChain.init(user, function (err) {
 	  if (err) {
 	    return console.error(err);
@@ -978,7 +980,7 @@ var app = {
       // Check for first run
       app.session.getOrCreateItem('_prefs_', function(err, prefsItem) {
         console.log('getting _prefs_');
-        app.customInitialization();
+        // app.customInitialization();
 
         if (err) {
           console.error(err);
@@ -989,20 +991,24 @@ var app = {
 
         $('#tasks-btn').addClass('active');
 	$('#logout-page-title').hide();
-	// $('#header-button-bar').show();
 
         app.username = app.session.account.username;
 	app.setProgressStatus('Loading timeline...');
 	
         if (!prefsItem.value.firstRun) {
           prefsItem.value = { firstRun: Date.now() };
-	  app.firstRunIsNow = true;
-          app.firstRun();
           return;
         }
 
         $('#password-login').val('');
 	$('#password-generate-login').val('');
+
+	app.session.getOrCreateItem('avatar', function (err, avatarItem) {
+	  if (err){
+	    console.error(err);
+	  }
+	  app.displayInitialView();
+	});
       });
     }
 

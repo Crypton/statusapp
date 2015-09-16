@@ -132,11 +132,29 @@ app.onboarding = {
 	  // XXX: 
 	  return;
 	}
-	ProgressIndicator.hide();
-	// Display Contact Card onboarding screen:
-	that.displayContactCard();
-	app.switchView('onboarding-no-account-step-4');
-	// XXX: hide progress
+
+
+	app.session.getOrCreateItem('_prefs_', function(err, prefsItem) {
+          console.log('getting _prefs_');
+
+          if (err) {
+            console.error(err);
+            // return; // XXX: what to do here?
+          }
+	  
+          if (!prefsItem.value.firstRun) {
+            prefsItem.value = { firstRun: Date.now() };
+          }
+	  prefsItem.save(function (err) {
+	    if (err) {
+	      console.error(err);
+	    }
+	    ProgressIndicator.hide();
+	    // Display Contact Card onboarding screen:
+	    that.displayContactCard();
+	    app.switchView('onboarding-no-account-step-4');
+	  });
+	});
       });
     });
   },

@@ -467,9 +467,9 @@ app.loadInitialTimeline = function loadInitialTimeline(callback) {
     return;
   }
   $('#top-progress-wrapper').show();
-  
-  app.switchView('feed', app.FEED_LABEL);
+
   app.feedIsLoading = true;
+  app.switchView('feed', app.FEED_LABEL);
 
   var options = { limit: 15 };
   app.session.getLatestTimeline(options, function tlCallback (err, timeline) {
@@ -837,7 +837,12 @@ app.transformedTimelineElements = {};
 app.massageTimelineUpdate = function massageTimelineUpdate (data) {
   var avatar;
   if (data.creatorUsername == app.session.account.username) {
-    avatar = app.session.items.avatar.value.avatar;
+    try {
+      avatar = app.session.items.avatar.value.avatar;
+    } catch (ex) {
+      console.warn('Avatar is missing!');
+      avatar = null;
+    }
   } else {
     try {
       avatar = app.session.items._trusted_peers.value[data.creatorUsername].avatar;
