@@ -1009,6 +1009,12 @@ var app = {
 	  }
 	  app.displayInitialView();
 	});
+
+	app.session.getOrCreateItem('status', function (err, statusItem) {
+	  if (err){
+	    console.error(err);
+	  }
+	});
       });
     }
 
