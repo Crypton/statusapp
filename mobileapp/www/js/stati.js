@@ -40,7 +40,8 @@ app.resumeEventHandler = function resumeEventHandler () {
 
 app.pauseEventHandler = function pauseEventHandler () {
   app.feedIsLoading = false;
-  $('#top-progress-wrapper').hide();
+  // $('#top-progress-wrapper').hide();
+  app.hideProgress();
 };
 
 app.aboutView = function _aboutView () {
@@ -402,11 +403,13 @@ app.customInitialization = function customInitialization() {
   // XXXddahl: need a indeterminate progress indicator
   app.createInitialItems(function (err) {
     if (err) {
-      $('#top-progress-wrapper').hide();
+      // $('#top-progress-wrapper').hide();
+      app.hideProgress();
       return console.error(err);
     }
     console.log('Initial items fetched or created');
-    $('#top-progress-wrapper').hide();
+    // $('#top-progress-wrapper').hide();
+    app.hideProgress();
     app.displayInitialView();
   });
 };
@@ -454,9 +457,33 @@ app.createInitialItems = function createInitialItems (callback) {
 };
 
 app.hideProgress = function hideProgress() {
+  if (!app.progressVisible) {
+    return;
+  }
+  app.progressVisible = false;
   setTimeout(function () {
     $('#top-progress-wrapper').hide();
+    // ProgressIndicator.hide();
+    app.setProgressStatus('Doing Stuff...');
   }, 1000);
+};
+
+app.progressVisible = false;
+
+app.showProgress = function showProgress(aMessage) {
+  if (app.progressVisible) {
+    return;
+  }
+  app.progressVisible = true;
+  
+  if (!aMessage) {
+    // ProgressIndicator.showSimple();
+    $('#top-progress-wrapper').show();
+  } else {
+    $('#top-progress-wrapper').show();
+    app.setProgressStatus(aMessage);
+    // ProgressIndicator.showSimpleWithLabel(aMessage);
+  }
 };
 
 app.feedIsLoading = false;
@@ -467,7 +494,8 @@ app.loadNewTimeline = function loadNewTimeline () {
   }
   app.feedIsLoading = true;
 
-  $('#top-progress-wrapper').show();
+  // $('#top-progress-wrapper').show();
+  app.showProgress('Loading Timeline...');
   var afterId = $("#my-feed-entries").children().first().attr('id');
   if (typeof parseInt(afterId) == 'number') {
     var options = { limit: 15, afterId: afterId };
@@ -500,7 +528,8 @@ app.loadInitialTimeline = function loadInitialTimeline(callback) {
   if (app.feedIsLoading) {
     return;
   }
-  $('#top-progress-wrapper').show();
+  // $('#top-progress-wrapper').show();
+  app.showProgress('Getting Timeline');
 
   app.feedIsLoading = true;
   app.switchView('feed', app.FEED_LABEL);
@@ -510,11 +539,13 @@ app.loadInitialTimeline = function loadInitialTimeline(callback) {
     if (err) {
       console.error(err);
       app.feedIsLoading = false;
-      $('#top-progress-wrapper').hide();
+      // $('#top-progress-wrapper').hide();
+      app.hideProgress();
       return app.alert('Cannot get feed', 'info');
     }
     app.renderTimeline(timeline);
-    $('#top-progress-wrapper').hide();
+    // $('#top-progress-wrapper').hide();
+    app.hideProgress();
     app.feedIsLoading = false;
     if (!$("#fetch-previous-items").is(":visible")) {
       $("#fetch-previous-items").show();
@@ -545,21 +576,24 @@ app.loadPastTimeline = function loadPastTimeline () {
   }
   app.feedIsLoading = true;
 
-  $('#top-progress-wrapper').show();
+  // $('#top-progress-wrapper').show();
+  app.showProgress('Getting Timeline');
   var beforeId = $("#my-feed-entries").children().last().attr('id');
   if (typeof parseInt(beforeId) == 'number') {
     var emptyItems = $('.empty-timeline-element').length;
     var options = { limit: 15, beforeId: beforeId };
     app.session.getTimelineBefore(options, function tlCallback (err, timeline) {
       if (err) {
-  console.error(err);
-  app.feedIsLoading = false;
-  $('#top-progress-wrapper').hide();
-  return app.alert('Cannot get feed', 'info');
+	console.error(err);
+	app.feedIsLoading = false;
+	// $('#top-progress-wrapper').hide();
+	app.hideProgress();
+	return app.alert('Cannot get feed', 'info');
       }
       // TRY??
       app.renderTimeline(timeline, true);
-      $('#top-progress-wrapper').hide();
+      // $('#top-progress-wrapper').hide();
+      app.hideProgress();
       app.feedIsLoading = false;
       var newEmptyItems = $('.empty-timeline-element').length;
       // if ((newEmptyItems - emptyItems) > 9) {
@@ -567,7 +601,8 @@ app.loadPastTimeline = function loadPastTimeline () {
       // }
     });
   } else {
-    $('#top-progress-wrapper').hide();
+    // $('#top-progress-wrapper').hide();
+    app.hideProgress();
     app.feedIsLoading = false;
     console.error('cannot get beforeId');
   }
@@ -919,7 +954,7 @@ app.setMyStatus = function setMyStatus() {
     return app.alert('Status update is too long, please shorten it', 'danger');
   }
   // update the item
-  app.toggleSetStatusProgress();
+  // app.toggleSetStatusProgress();
   var imageData;
   if ($('#image-data').children().length) {
     imageData = $('#image-data').children()[0].src;
@@ -947,17 +982,21 @@ app.setMyStatus = function setMyStatus() {
   app.session.items.status.value.avatarMeta = updateObj.avatarMeta;
   app.session.items.status.value.__meta = updateObj.__meta;
 
+  app.showProgress('Posting...');
+  
   app.session.items.status.save(function (err) {
     if (err) {
-      app.toggleSetStatusProgress();
+      // app.toggleSetStatusProgress();
+      app.hideProgress();
       console.error(err);
       return app.alert('Cannot update status', 'danger');
     }
+    app.hideProgress();
     app.hidePostUI();
     $('#post-textarea').val('');
     $('#image-data').children().remove();
     $('#post-image-location-wrapper').hide();
-    app.toggleSetStatusProgress();
+    // app.toggleSetStatusProgress();
     app.loadNewTimeline();
   });
 };

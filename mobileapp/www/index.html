@@ -168,37 +168,37 @@ height: 2.5rem;"></a>
 	<h1>Kloak</h1>
 
 	<div id="onboarding-create-passphrase">
-	  <h3>Step 2: Passphrase</h3>
+	  <h3>Passphrase:</h3>
 	  
 	  <div id="passphrase-info">
-	    <p>
+	    <textarea placeholder="Enter Passphrase"
+		      autocapitalize="off"
+		      rows="3"
+		      maxlength="256"
+		      class="onboarding-input"
+		      id="onboarding-passphrase-input"></textarea>
+	    <div class="onboarding-continue-wrapper">
+	      <button class="btn onboarding-btn"
+		      id="onboarding-create-account">Continue</button>
+	      <p>
+		<a href="#"
+		   id="regenerate-passphrase"
+		   class="onboarding-link">Regenerate Passphrase</a>
+	      </p>
+	      <p>
+		<a href="#"
+		   id="clear-passphrase"
+		 class="onboarding-link">I'll choose my own Passphrase</a>
+	      </p>
+	    </div>
+	    <a href="#" class="onboarding-link" id="onboarding-cancel">Cancel</a>
+	    <p class="onboarding-light-copy">
 	      We have created a strong passphrase for you, please save it into your password wallet or write it down and put it in a safe place! You cannot ask SpiderOak to recover a forgotten passphrase. We <strong>do not</strong> store it outside the device.
 	    </p>
-	    <p>
+	    <p class="onboarding-light-copy">
 	      If your device supports the "Keychain" or "Secure Storage", your passphrase will be automatically securely saved for you and you will be able to recall it in Kloak's Options. 
 	    </p>
-	    <p>
-	      <a href="#"
-		 id="regenerate-passphrase"
-		 class="onboarding-link">Regenerate Passphrase</a>
-	    </p>
-	    <p>
-	      <a href="#"
-		 id="clear-passphrase"
-		 class="onboarding-link">I'll choose my own Passphrase</a>
-	    </p>
 	  </div>
-	  
-	  <textarea placeholder="Enter Passphrase"
-		    autocapitalize="off"
-		    rows="3"
-		    maxlength="256"
-		    class="onboarding-input"
-		    id="onboarding-passphrase-input"></textarea>
-	  <div class="onboarding-continue-wrapper">
-	    <button class="btn onboarding-btn" id="onboarding-create-account">Continue</button>
-	  </div>
-	  <a href="#" class="onboarding-link" id="onboarding-cancel">Cancel</a>
 	</div>
       </div>
 
@@ -220,7 +220,7 @@ height: 2.5rem;"></a>
 	<div id="onboarding-account-contact-card">
 	  <div id="contact-card-info">
 	    <p>
-	      <strong>Kloak</strong> generates a 'Contact Card' which you share with contacts. You can share your status updates, photos and location once you have exchanged cards with your contacts.   <a href="#" id="onboarding-add-photo-btn">Add Photo to card</a>
+	      <strong>Kloak</strong> generates a 'Contact Card' which you share with contacts. You can share your status updates, photos and location once you have exchanged cards with your contacts.   <a href="#" id="onboarding-add-photo-btn">Add a photo to your card</a>
 	    </p>
 	    <p>
 	      <div id="onboarding-contact-card-wrapper">

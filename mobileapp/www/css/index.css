@@ -1152,7 +1152,6 @@ input.onboarding-input {
 }
 
 #passphrase-info p {
-    color: black;
     padding-right: 1em;
 }
 
@@ -1198,4 +1197,16 @@ input.onboarding-input {
 #onboarding-contact-card-share-buttons {
     margin-top: -18px;
     width: 290px !important;
+}
+
+.onboarding-light-copy {
+    color: white;
+}
+
+.onboarding-dark-copy {
+    color: black;
+}
+
+onboarding-no-account-step-2 {
+    padding-top: 2em; 
 }

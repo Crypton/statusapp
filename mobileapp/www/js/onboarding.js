@@ -181,6 +181,7 @@ app.onboarding = {
     // cleanup first
     // remove children from onboarding-contact-card-wrapper
     $('#header').show();
+    $('#header-timeline').show();
     app.switchView('feed', 'Feed');
     app.loadInitialTimeline();
   },

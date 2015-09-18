@@ -492,6 +492,10 @@ var app = {
     }
     var htmlId = '#' + id;
 
+    if (!$(htmlId).is(':visible')) {
+      $(htmlId).show();
+    }
+    
     $(htmlId).addClass('active');
     if (htmlId == '#login-progress') { // XXXddahl: special case hack. sigh.
       $('#login-progress').show();
@@ -929,10 +933,9 @@ var app = {
       return;
     }
 
-    $('#top-progress-wrapper').show();
+    //$('#top-progress-wrapper').show();
+    app.showProgress('Logging In...');
     $('.alert').remove();
-
-    app.setProgressStatus('Logging in...');
 
     function callback (err, session) {
       if (err) {
@@ -940,7 +943,8 @@ var app = {
         app.switchView('account-login', 'Account');
         app.clearLoginStatus();
 	$('#top-menu').show();
-	$('#top-progress-wrapper').hide();
+	// $('#top-progress-wrapper').hide();
+	app.hideProgress();
         $('#password-login').val('');
         return;
       }
@@ -962,7 +966,7 @@ var app = {
       }
       app.username = user;
       app.session = session;
-      app.setProgressStatus('Loading contacts and  preferences...');
+      app.showProgress('Loading Application Data');
 
       // Check for first run
       app.session.getOrCreateItem('_prefs_', function(err, prefsItem) {
@@ -972,7 +976,8 @@ var app = {
         if (err) {
           console.error(err);
           app.switchView('account-login', 'Account');
-	  $('#top-progress-wrapper').hide();
+	  // $('#top-progress-wrapper').hide();
+	  app.hideProgress();
           return;
         }
 
@@ -980,7 +985,7 @@ var app = {
 	$('#logout-page-title').hide();
 
         app.username = app.session.account.username;
-	app.setProgressStatus('Loading timeline...');
+	// app.setProgressStatus('Loading timeline...');
 	
         if (!prefsItem.value.firstRun) {
           prefsItem.value = { firstRun: Date.now() };
@@ -989,18 +994,19 @@ var app = {
 
         $('#password-login').val('');
 	$('#password-generate-login').val('');
-
+	
 	app.session.getOrCreateItem('avatar', function (err, avatarItem) {
 	  if (err){
 	    console.error(err);
 	  }
-	  app.displayInitialView();
 	});
 
 	app.session.getOrCreateItem('status', function (err, statusItem) {
-	  if (err){
+	  if (err) {
 	    console.error(err);
 	  }
+	  app.hideProgress();
+	  app.displayInitialView();
 	});
       });
     }
@@ -1272,7 +1278,9 @@ var app = {
   displayIdCard: function (idCard, callback) {
     $(idCard).css({ width: '290px' });
     $('#my-fingerprint-id').append(idCard);
-
+    $('#header').show();
+    $('#header-contacts').show();
+    
     $('#share-my-id-card').click(function () {
       if (app.isNodeWebKit) {
         app.saveIdToDesktop_desktop(idCard);
