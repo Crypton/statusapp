@@ -63,6 +63,23 @@ app.aboutView = function _aboutView () {
 };
 
 app.setCustomEvents = function setCustomEvents () {
+
+  window.addEventListener('native.keyboardhide',
+  function keyboardShowHandler (e) {
+    app.keyboardTopPos = 0;
+    app.repositionInput();
+    console.log('hidden Keyboard height is: ' + e.keyboardHeight);
+  });
+
+  window.addEventListener('native.keyboardshow',
+  function keyboardShowHandler (e) {
+    app.keyboardTopPos = e.keyboardHeight;
+    if ($('#feed').is(':visible')) {
+      app.repositionInput();
+    }
+    console.log('Keyboard height is: ' + e.keyboardHeight);
+  });
+
   app.tz = jstz.determine();
 
   $('#my-stati').click(function () {
@@ -146,8 +163,10 @@ app.setCustomEvents = function setCustomEvents () {
     var target = document.querySelector('#post-input-wrapper textarea');
     var observer = new MutationObserver(function(mutations) {
       mutations.forEach(function(mutation) {
-	var newBottom = mutation.target.parentElement.clientHeight;
-	$('#post-image-location-wrapper').css({ bottom: newBottom + 'px' });
+	// var newBottom = mutation.target.parentElement.clientHeight;
+	// console.log('newBottom: ', newBottom);
+	// $('#post-image-location-wrapper').css({ bottom: newBottom + 'px' });
+	app.repositionInput();
       });
     });
 
@@ -185,9 +204,12 @@ app.setCustomEvents = function setCustomEvents () {
 
 app.keyboardTopPos = 0; // default
 
+app.lastRepositionPoint = null;
+
 app.repositionInput = function repositionInput () {
   console.log('Reposition...');
   console.log('keyboardTopPos: ', app.keyboardTopPos);
+  
   $('#post-input-wrapper').css({ bottom: app.keyboardTopPos + 'px'});
   // Check if the location and image widget is visible and reposition it
   if ($('#post-image-location-wrapper').is(':visible')) {
@@ -202,6 +224,7 @@ app.hidePostUI = function hidePostUI () {
   $('#post-input-wrapper textarea').trigger('input');
   $('#post-button-floating-wrapper').show();
   $('body').removeClass('posting');
+  app.lastRepositionPoint = null;
 };
 
 app.makeNewPost = function makeNewPost() {
@@ -881,62 +904,6 @@ app.toggleSetStatusProgress = function toggleSetStatusProgress() {
     $("#button-row").show();
     $("#top-progress-wrapper").hide();
   }
-};
-
-app.origsetMyStatus = function origsetMyStatus() {
-  // app.toggleSetStatusButton();
-  // validate length of data to be sent
-  var status = $('#set-my-status-textarea').val();
-  status = app.escapeHtml(status);
-
-  if (!status.length) {
-    return app.alert('Please enter a status update', 'danger');
-  }
-  if (status.length > 512) {
-    return app.alert('Status update is too long, please shorten it', 'danger');
-  }
-  // update the item
-  app.toggleSetStatusProgress();
-  var imageData;
-  if ($('#my-image-to-post').children().length) {
-    imageData = $('#my-image-to-post').children()[0].src;
-  }
-   var updateObj= {
-     status: status,
-     location: $('#my-geoloc').text(),
-     timestamp: Date.now(),
-     imageData: null,
-     avatarMeta: {
-       nameHmac: app.session.items.avatar.nameHmac,
-       updated: app.session.items.avatar.value.updated
-     },
-     __meta: { timelineVisible: 't' }
-   };
-  if (imageData) {
-    updateObj.imageData = imageData;
-  }
-
-  app.session.items.status.value.status = updateObj.status;
-  app.session.items.status.value.location = updateObj.location;
-  app.session.items.status.value.timestamp = updateObj.timestamp;
-  app.session.items.status.value.imageData = updateObj.imageData;
-  app.session.items.status.value.tz = app.tz.name();
-  app.session.items.status.value.avatarMeta = updateObj.avatarMeta;
-  app.session.items.status.value.__meta = updateObj.__meta;
-
-  app.session.items.status.save(function (err) {
-    if (err) {
-      app.toggleSetStatusProgress();
-      console.error(err);
-      return app.alert('Cannot update status', 'danger');
-    }
-    $('#set-my-status-textarea').val('');
-    // $('#my-image-to-post').children().remove();
-    $('#post-image-location-wrapper').hide();
-    app.switchView('feed', app.FEED_LABEL);
-    app.toggleSetStatusProgress();
-    app.loadNewTimeline();
-  });
 };
 
 app.setMyStatus = function setMyStatus() {

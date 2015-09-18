@@ -11,16 +11,6 @@ function onDeviceReady() {
 
   cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
   // cordova.plugins.Keyboard.disableScroll(true);
-
-  // MOVE this to stati
-  window.addEventListener('native.keyboardshow',
-  function keyboardShowHandler (e) {
-    app.keyboardTopPos = e.keyboardHeight;
-    if ($('#feed').is(':visible')) {
-      app.repositionInput();
-    }
-    console.log('Keyboard height is: ' + e.keyboardHeight);
-  });
   
   $(function() {
     FastClick.attach(document.body);
