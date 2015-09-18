@@ -106,6 +106,8 @@ app.setCustomEvents = function setCustomEvents () {
 
   $('#post-button-floating').click(function () {
     app.makeNewPost();
+    $('#post-textarea').focus();
+    app.repositionInput();
   });
 
   $('#include-gps-btn').click(function () {
@@ -127,7 +129,7 @@ app.setCustomEvents = function setCustomEvents () {
   $('#post-attach').click(function () {
     app.postingUIActionSheet();
   });
-
+  
   $('#feed').click(function () {
     try {
       $('body').removeClass('posting');
@@ -181,6 +183,21 @@ app.setCustomEvents = function setCustomEvents () {
   })();
 };
 
+app.keyboardTopPos = 0; // default
+
+app.repositionInput = function repositionInput () {
+  console.log('Reposition...');
+  console.log('keyboardTopPos: ', app.keyboardTopPos);
+  $('#post-input-wrapper').css({ bottom: app.keyboardTopPos + 'px'});
+  // Check if the location and image widget is visible and reposition it
+  if ($('#post-image-location-wrapper').is(':visible')) {
+    var inputHeight = $('#post-input-wrapper')[0].offsetHeight;
+    var imgLocWrapBottom = inputHeight + app.keyboardTopPos;
+    $('#post-image-location-wrapper').css({ bottom: imgLocWrapBottom + 'px' });
+  }
+  $('#post-textarea').focus(); //trigger('input');
+};
+
 app.hidePostUI = function hidePostUI () {
   $('#post-input-wrapper textarea').trigger('input');
   $('#post-button-floating-wrapper').show();
@@ -191,19 +208,14 @@ app.makeNewPost = function makeNewPost() {
   // show input UI which will trigger the keyboard
   $('textarea.js-auto-size').textareaAutoSize();
   $('#post-input-wrapper textarea').trigger('input');
+
+  // re-position the inputwrapper above keyboard
+  app.repositionInput();
+  
   $('#post-button-floating-wrapper').hide();
   $('body').addClass('posting');
 
-  // $('#post-textarea').focus(function (e) {
-  //   e.preventDefault();
-  //   e.stopPropagation();
-  //   window.scrollTo(0,0);
-  // });
-
-  $('#post-textarea').focus();
-  setTimeout(function () {
-    $('#post-input-wrapper')[0].scrollIntoView({behavior: "smooth"});
-  }, 0);
+  // $('#post-input-wrapper').click();
 };
 
 app.postingUIActionSheet = function postingUIActionSheet () {
@@ -220,15 +232,10 @@ app.postingUIActionSheet = function postingUIActionSheet () {
     case 1:
       // Add Location
       console.log('Add location!');
-      function addLocationCallback() {
-	// app.makeNewPost();
-	setTimeout(function () { $('#post-textarea').focus(); }, 200);
-      }
       $('#post-image-location-wrapper').show();
-      app.setMyLocation(addLocationCallback);
-      $('#post-textarea').focus();
+      app.repositionInput();
+      app.setMyLocation();
       break;
-
     case 2:
       // Take Photo
       var options =
@@ -245,7 +252,7 @@ app.postingUIActionSheet = function postingUIActionSheet () {
 	$('#image-data').children().remove();
 	$('#image-data').append(img);
 	$('#post-image-location-wrapper').show();
-	$('#post-textarea').focus();
+	app.repositionInput();
       });
       break;
 
@@ -265,13 +272,13 @@ app.postingUIActionSheet = function postingUIActionSheet () {
 	$('#image-data').children().remove();
 	$('#image-data').append(img);
 	$('#post-image-location-wrapper').show();
-	$('#post-textarea').focus();
+	app.repositionInput();
       });
       break;
 
     case 4:
       // Cancel
-      $('#post-textarea').focus();
+      app.repositionInput();
       return;
     default:
       return;
@@ -288,7 +295,7 @@ app.viewActions = {
     $('#header').show();
     $('#header-timeline').show();
     $('#post-button-floating-wrapper').show();
-    if ($('#my-feed-entries').length == 1) {
+    if (!$('#my-feed-entries').children().length) {
       // load timeline!
       app.loadInitialTimeline();
     }
@@ -324,6 +331,10 @@ app.viewActions = {
 
   'onboarding-no-account': function vaOnboardingNoAccount () {
     $('#onboarding-username-input').focus();
+  },
+
+  'account-login': function vaAccountLogin () {
+    $('#username-login').focus();
   }
 };
 
@@ -1336,13 +1347,13 @@ app.setMyLocation = function setMyLocation(callback) {
 	  + '</span>';
     $('#location-data').append($(html));
     $('#post-image-location-wrapper').show();
-    callback();
+    app.repositionInput();
   };
 
   function error (err) {
     console.error('Cannot set location');
     console.error(err);
-    callback(err);
+    app.repositionInput();
   };
 
   navigator.geolocation.getCurrentPosition(success, error, options);

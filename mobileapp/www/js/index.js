@@ -9,8 +9,19 @@ document.addEventListener("deviceready", onDeviceReady, false);
 function onDeviceReady() {
   $('.header-wrap').hide();
 
-  cordova.plugins.Keyboard.disableScroll(true);
+  cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+  // cordova.plugins.Keyboard.disableScroll(true);
 
+  // MOVE this to stati
+  window.addEventListener('native.keyboardshow',
+  function keyboardShowHandler (e) {
+    app.keyboardTopPos = e.keyboardHeight;
+    if ($('#feed').is(':visible')) {
+      app.repositionInput();
+    }
+    console.log('Keyboard height is: ' + e.keyboardHeight);
+  });
+  
   $(function() {
     FastClick.attach(document.body);
   });
@@ -78,11 +89,6 @@ var app = {
     function defaultLoginBehavior () {
       app.enableLoginButtons();
       app.switchView('account-login');
-      // do not show "remember credentials" if keychain is not supported
-      if (!app.keyChain.supported) {
-	$('#remember-credentials')[0].checked = false;
-	$('#remember-credentials-wrapper').hide();
-      }
       $('#username-login').focus();
     }
 
@@ -111,9 +117,6 @@ var app = {
 	  // XXX: hide the login passphrase field, etc
 	  $('#password-login').hide();
 	  $('#password-login').val(passphrase);
-
-	  $('#remember-credentials')[0].checked = false;
-	  $('#remember-credentials-wrapper').hide();
 
 	  app.enableLoginButtons();
 	  app.switchView('account-login');
@@ -570,8 +573,6 @@ var app = {
 	    $('#password-login').show();
 	    $('#username-login').show();
 	    $('#username-placeholder').html('').hide();
-	    $('#remember-credentials')[0].checked = true;
-	    $('#remember-credentials-wrapper').show();
 	    return;
 	  }
 	  // we have a passphrase!
@@ -580,8 +581,6 @@ var app = {
 	  // XXX: hide the login passphrase field
 	  $('#password-login').hide();
 	  $('#password-login').val(passphrase);
-	  $('#remember-credentials')[0].checked = false;
-	  $('#remember-credentials-wrapper').hide();
 	  app.enableLoginButtons();
 	  $('#login-btn').focus();
 	});
@@ -600,8 +599,6 @@ var app = {
     $('#username-login').show().val('');
     $('#username-placeholder').html('').hide();
     $('#password-login').show().val('');
-    $('#remember-credentials')[0].checked = true;
-    $('#remember-credentials').show();
   },
 
   scanQRCode_desktop: function scanQRCode_desktop () {

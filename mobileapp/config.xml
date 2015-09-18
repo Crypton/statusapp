@@ -18,9 +18,15 @@
     <preference name="webviewbounce" value="false" />
     <preference name="UIWebViewBounce" value="false" />
     <preference name="orientation" value="portrait" />
+    <preference name="KeyboardDisplayRequiresUserAction" value="false" />
+    <preference name="SuppressesIncrementalRendering" value="true"/>
+
     <platform name="ios">
         <preference name="SplashScreen" value="screen" />
         <preference name="SplashScreenDelay" value="2000" />
+	<feature name="Keyboard">
+            <param name="ios-package" value="CDVKeyboard" onload="true" />
+        </feature>
     </platform>
     <platform name="android">
         <preference name="android-minSdkVersion" value="14" />

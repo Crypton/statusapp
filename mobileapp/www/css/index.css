@@ -226,7 +226,7 @@ legend {
   border: 0;
 }
 textarea {
-  overflow: auto;
+    overflow: auto;
 }
 optgroup {
   font-weight: bold;
@@ -238,13 +238,13 @@ table {
 td,
 th {
   padding: 0;
-}
 
+}
 
 body {
     -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
     -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
-    -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
+    /* -webkit-user-select: none; */                  /* prevent copy paste, to allow, change 'none' to 'text' */
     font-family: Roboto, 'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, sans-serif ;
     height:100%;
     margin:0px;
@@ -381,8 +381,7 @@ h1 {
 }
 
 #login-form {
-    margin-bottom: 2em;
-    padding: 0px 37px;
+    padding: 0px 10px;
 }
 
 #login-buttons {
@@ -730,10 +729,12 @@ a.header-back {
 #scan-select {
     padding: 40px;
     margin-top: 4rem;
+    display: none;
 }
 
 #scan-select-desktop {
-  padding: 40px;
+    padding: 40px;
+    display: none;
 }
 
 #scan-select-buttons {
@@ -743,7 +744,8 @@ a.header-back {
 }
 
 #verify-user {
-  padding: 20px;
+    display: none;
+    padding: 20px;
 }
 
 #verify-user-buttons {
@@ -885,12 +887,12 @@ a {
     margin-top: 1em;
 }
 
-#register-btn {
-    font-size: smaller ;
+#register-btn-wrapper div {
+    margin-bottom: 1em;
 }
 
 #switch-user-btn {
-    font-size: smaller ;
+
 }
 
 #get-new-passphrase {
@@ -1093,9 +1095,7 @@ div .logo {
     text-align: left;
     width: 98%;
     margin-left: 1em;
-    /* position: absolute; */
-    /* bottom: 20px; */
-    margin-top: 70%
+    margin-top: 2em;
 }
 
 #onboarding-create-username h3 {

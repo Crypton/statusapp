@@ -10,6 +10,10 @@ app.onboarding = {
       that.choosePassword();
     });
 
+    $('#onboarding-existing-account').click(function () {
+      app.switchView('account-login');
+    });
+    
     $('#onboarding-create-account').click(function () {
       that.accountCreationValidation();
     });

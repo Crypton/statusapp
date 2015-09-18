@@ -147,8 +147,6 @@ height: 2.5rem;"></a>
 	<h1>Kloak</h1>
 
 	<div id="onboarding-create-username">
-	  <h3>Create an Account</h3>
-		
 	  <input placeholder="Choose a Username"
 		 autocapitalize="off"
 		 size="12"
@@ -247,32 +245,33 @@ height: 2.5rem;"></a>
 		 autocapitalize="off"
 		 size="12"
 		 maxlength="32"
-		 class="form-control login-input"
+		 class="onboarding-input"
 		 id="username-login" type="text" />
 	  <input placeholder="Passphrase"
 		 size="12"
 		 maxlength="32"
-		 class="form-control login-input"
+		 class="onboarding-input"
 		 id="password-login" type="password"
 		 autocomplete="off" />
-	  <div id="remember-credentials-wrapper">
-	    <input type="checkbox" id="remember-credentials" checked />
-	    <label id="rememeber-credentials-label"
-		   for="remember-credentials">Remember credentials</label>
-	  </div>
 	</form>
 
 	<div id="login-buttons">
 	  <h3 id="username-placeholder"></h3>
-	  <button class="btn btn-success"
+	  <button class="onboarding-btn btn"
 		  id="login-btn">Login</button>
 	</div>
-	<hr />
+
 	<div id="register-btn-wrapper">
-	  <button class="btn btn-primary"
-		  id="switch-user-btn">Switch User</button>
-	  <button class="btn btn-primary"
-		  id="register-btn">Create Account</button>
+	  <!-- <div> -->
+	  <!--   <a href="#" -->
+	  <!--      class="onboarding-link" -->
+	  <!--      id="switch-user-btn">Switch User</a> -->
+	  <!-- </div> -->
+	  <div>
+	    <a href="#"
+	       class="onboarding-link"
+	       id="register-btn">Create Account</a>
+	  </div>
 	</div>
       </div>
 
@@ -422,24 +421,24 @@ height: 2.5rem;"></a>
       <div id="app-about" class="view">
       </div>
 
-      <div id="first-run" class="view">
-	<h3>Initial Setup</h3>
-	<p><strong>Congratulations! You've signed up for Kloak.</strong></p>
-	<p>
-	  Now that you have an account, you need to create your <strong>Contact Card</strong>, which identifies you to other users you would like to communicate with.
-	</p>
-	<p>
-	  Once you share your <strong>Contact Card</strong> with another user, and you have received theirs, you can privately communicate.
-	</p>
-	<p>
-	  The first step is taking a photo for your contact card
-	</p>
-	<br />
-	<p class="text-center">
-	  <button class="btn btn-success"
-		  id="create-id-card">Take Contact Card Photo</button>
-	</p>
-      </div>
+      <!-- <div id="first-run" class="view"> -->
+      <!-- 	<h3>Initial Setup</h3> -->
+      <!-- 	<p><strong>Congratulations! You've signed up for Kloak.</strong></p> -->
+      <!-- 	<p> -->
+      <!-- 	  Now that you have an account, you need to create your <strong>Contact Card</strong>, which identifies you to other users you would like to communicate with. -->
+      <!-- 	</p> -->
+      <!-- 	<p> -->
+      <!-- 	  Once you share your <strong>Contact Card</strong> with another user, and you have received theirs, you can privately communicate. -->
+      <!-- 	</p> -->
+      <!-- 	<p> -->
+      <!-- 	  The first step is taking a photo for your contact card -->
+      <!-- 	</p> -->
+      <!-- 	<br /> -->
+      <!-- 	<p class="text-center"> -->
+      <!-- 	  <button class="btn btn-success" -->
+      <!-- 		  id="create-id-card">Take Contact Card Photo</button> -->
+      <!-- 	</p> -->
+      <!-- </div> -->
 
       <div id="verify-user" class="view">
 	<div id="verify-user-success">
@@ -483,7 +482,7 @@ height: 2.5rem;"></a>
 
     </div>
 
-    <div id="post-image-location-wrapper">
+    <div id="post-image-location-wrapper" class="post-wrapper">
       <div id="image-data"></div>
       <div id="img-location-wrapper">
       	<div id="location-data"></div>
@@ -491,7 +490,7 @@ height: 2.5rem;"></a>
     </div>
 
     <!-- POST INPUT WRAPPER -->
-    <div id="post-input-wrapper">
+    <div id="post-input-wrapper" class="post-wrapper">
       <a id="post-attach" href="#" class="icon icon--attach">Add Attachment...</a>
       <textarea rows="1" id="post-textarea" class="js-auto-size post-textarea" placeholder="Enlighten us, please!"></textarea>
 
