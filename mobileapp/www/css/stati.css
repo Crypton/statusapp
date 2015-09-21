@@ -109,7 +109,7 @@
 /* ====== media ====== */
 
 .media {
-    margin-top: 10px ;
+    padding-top: 10px ;
     font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif ;
     -webkit-font-smoothing: subpixel-antialiased;
 }
@@ -443,4 +443,8 @@
     vertical-align: top;
     margin-top: 0.5em;
     border: 2px solid #fff;
+}
+
+.is-mention {
+    background-color: #D1CCFF;
 }

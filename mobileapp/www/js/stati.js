@@ -621,9 +621,9 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     var _username = timeline[i].creatorUsername;
     if (_username != app.username) {
       try {
-  var contact = app.session.items._trusted_peers.value[_username];
+	var contact = app.session.items._trusted_peers.value[_username];
       } catch (ex) {
-  console.error(ex);
+	console.error(ex);
       }
     }
 
@@ -633,9 +633,9 @@ app.renderTimeline = function renderTimeline (timeline, append) {
       // Ignore this for now, probably a 'trustedAt notification'
       node = app.createEmptyElement(timeline[i]);
       if (append) {
-  $('#my-feed-entries').append(node);
+	$('#my-feed-entries').append(node);
       } else {
-  $('#my-feed-entries').prepend(node);
+	$('#my-feed-entries').prepend(node);
       }
       console.warn('no value, not rendering...');
       continue;
@@ -644,9 +644,9 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     if (timeline[i].value.avatar) {
       node = app.createEmptyElement(timeline[i]);
       if (append) {
-  $('#my-feed-entries').append(node);
+	$('#my-feed-entries').append(node);
       } else {
-  $('#my-feed-entries').prepend(node);
+	$('#my-feed-entries').prepend(node);
       }
       continue; // XXXddahl: going to handle this differently
       // this is some other kind of item, not a status update!
@@ -657,9 +657,9 @@ app.renderTimeline = function renderTimeline (timeline, append) {
       data.itemId = timeline[i].timelineId;
       node = app.createAvatarUpdateElement(data);
       if (append) {
-  $('#my-feed-entries').append(node);
+	$('#my-feed-entries').append(node);
       } else {
-  $('#my-feed-entries').prepend(node);
+	$('#my-feed-entries').prepend(node);
       }
 
       // when we get a new avatar we need to save it to the contacts object
@@ -667,22 +667,22 @@ app.renderTimeline = function renderTimeline (timeline, append) {
       if (!app.session.items._trusted_peers.value[user]) {
         // Let's tell the user about this 1 way connection
         console.warn('User ', user, ' is not trusted - one way connection');
-  console.warn('User ', user, ' is not trusted - Adding this peer to contacts as *untrusted*');
-  // add this user to contacts as an untrusted user
-  app.session.items._trusted_peers.value[user] = { avatar: null,
-                     trustedAt: null,
-               avatarUpdated: null,
-               fingerprint: null
-                   };
-  app.newContactDiscovered = true;
+	console.warn('User ', user, ' is not trusted - Adding this peer to contacts as *untrusted*');
+	// add this user to contacts as an untrusted user
+	app.session.items._trusted_peers.value[user] = { avatar: null,
+							 trustedAt: null,
+							 avatarUpdated: null,
+							 fingerprint: null
+						       };
+	app.newContactDiscovered = true;
       } else {
-  app.session.items._trusted_peers.value[user].avatar = timeline[i].value.avatar;
-  app.session.items._trusted_peers.value[user].avatarUpdated = Date.now();
-  app.session.items._trusted_peers.save(function (err) {
-    if (err) {
-      console.error(err);
-    }
-  });
+	app.session.items._trusted_peers.value[user].avatar = timeline[i].value.avatar;
+	app.session.items._trusted_peers.value[user].avatarUpdated = Date.now();
+	app.session.items._trusted_peers.save(function (err) {
+	  if (err) {
+	    console.error(err);
+	  }
+	});
       }
       continue;
     }
@@ -693,9 +693,9 @@ app.renderTimeline = function renderTimeline (timeline, append) {
       // Ignore this for now, probably a 'trustedAt notification'
       node = app.createEmptyElement(timeline[i]);
       if (append) {
-  $('#my-feed-entries').append(node);
+	$('#my-feed-entries').append(node);
       } else {
-  $('#my-feed-entries').prepend(node);
+	$('#my-feed-entries').prepend(node);
       }
       continue;
     }
@@ -1120,11 +1120,21 @@ function createMediaElement(data, localUser, existingNode) {
                              { className: 'media-link',
                                replaceFn: app.linkOutput });
   }
-
   console.log(status);
-  console.log('data.itemId: ', data.itemId);
+  console.log(data.statusText);
+  // Handle mention background color
+  var mention = '@' + app.username;
+  var mentioned = data.statusText.search(mention);
+  console.log('mentioned: ', mentioned);
+  var isMentionClass = '';
+  if (mentioned > -1) {
+    isMentionClass = 'is-mention';
+  }
   var parentHtml = '<div id="' + data.itemId
-        + '" class="media attribution ' + classId + ' ' + itemId + '"></div>';
+        + '" class="media attribution '
+	+ isMentionClass + ' '
+	+ classId + ' '
+	+ itemId + '"></div>';
 
   var html = '<a class="img">'
            + avatarMarkup
@@ -1151,6 +1161,16 @@ function createMediaElement(data, localUser, existingNode) {
     existingNode.addClass('attribution');
     existingNode.addClass(classId);
     existingNode.addClass(itemId);
+
+    var mention = '@' + app.username;
+    var mentioned = data.statusText.search(mention);
+    console.log('mentioned: ', mentioned);
+    var isMentionClass = '';
+    if (mentioned > -1) {
+      isMentionClass = 'is-mention';
+    }
+    existingNode.addClass(isMentionClass);
+    
     var children = $(html);
     existingNode.children().remove();
     existingNode.append(children);
