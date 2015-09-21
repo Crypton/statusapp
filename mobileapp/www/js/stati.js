@@ -40,7 +40,8 @@ app.resumeEventHandler = function resumeEventHandler () {
 
 app.pauseEventHandler = function pauseEventHandler () {
   app.feedIsLoading = false;
-  $('#top-progress-wrapper').hide();
+  // $('#top-progress-wrapper').hide();
+  app.hideProgress();
 };
 
 app.aboutView = function _aboutView () {
@@ -63,6 +64,23 @@ app.aboutView = function _aboutView () {
 };
 
 app.setCustomEvents = function setCustomEvents () {
+
+  window.addEventListener('native.keyboardhide',
+  function keyboardShowHandler (e) {
+    app.keyboardTopPos = 0;
+    app.repositionInput();
+    console.log('hidden Keyboard height is: ' + e.keyboardHeight);
+  });
+
+  window.addEventListener('native.keyboardshow',
+  function keyboardShowHandler (e) {
+    app.keyboardTopPos = e.keyboardHeight;
+    if ($('#feed').is(':visible')) {
+      app.repositionInput();
+    }
+    console.log('Keyboard height is: ' + e.keyboardHeight);
+  });
+
   app.tz = jstz.determine();
 
   $('#my-stati').click(function () {
@@ -106,6 +124,8 @@ app.setCustomEvents = function setCustomEvents () {
 
   $('#post-button-floating').click(function () {
     app.makeNewPost();
+    $('#post-textarea').focus();
+    app.repositionInput();
   });
 
   $('#include-gps-btn').click(function () {
@@ -127,7 +147,7 @@ app.setCustomEvents = function setCustomEvents () {
   $('#post-attach').click(function () {
     app.postingUIActionSheet();
   });
-
+  
   $('#feed').click(function () {
     try {
       $('body').removeClass('posting');
@@ -138,48 +158,88 @@ app.setCustomEvents = function setCustomEvents () {
     }
   });
 
-  // Mutation Observer for the input textarea whcih helps us re-position the
-  // image and location piece
+  // Mutation Observer for the input textarea which helps us re-position the
+  // image and location piece of the input widget
   (function inputMutationObs() {
     var target = document.querySelector('#post-input-wrapper textarea');
     var observer = new MutationObserver(function(mutations) {
       mutations.forEach(function(mutation) {
-	var newBottom = mutation.target.parentElement.clientHeight;
-	$('#post-image-location-wrapper').css({ bottom: newBottom + 'px' });
+	// var newBottom = mutation.target.parentElement.clientHeight;
+	// console.log('newBottom: ', newBottom);
+	// $('#post-image-location-wrapper').css({ bottom: newBottom + 'px' });
+	app.repositionInput();
       });
     });
 
     // configuration of the observer: // XXX: May not need all of these
-    var config = { attributes: true, childList: true, characterData: true };
+    var config = {
+      attributes: true,
+      childList: false,
+      characterData: false
+    };
     
     // pass in the target node, as well as the observer options
     observer.observe(target, config);
   })();
+
+  (function () {
+    // handle pull to refresh event:
+    var el = $("#my-feed-entries")[0];
+    var startPageY = null;
+    el.addEventListener("touchmove", function (e) {
+      if (!$("#feed").is(":visible")) {
+	return;
+      }
+      if (!startPageY) {
+	startPageY = e.pageY;
+      }
+      if (e.pageY > (startPageY + 80)) {
+	startPageY = null;
+	app.lastTimelineLoad = Date.now();
+	app.loadNewTimeline();
+	return;
+      }
+    }, false);
+  })();
+};
+
+app.keyboardTopPos = 0; // default
+
+app.lastRepositionPoint = null;
+
+app.repositionInput = function repositionInput () {
+  console.log('Reposition...');
+  console.log('keyboardTopPos: ', app.keyboardTopPos);
+  
+  $('#post-input-wrapper').css({ bottom: app.keyboardTopPos + 'px'});
+  // Check if the location and image widget is visible and reposition it
+  if ($('#post-image-location-wrapper').is(':visible')) {
+    var inputHeight = $('#post-input-wrapper')[0].offsetHeight;
+    var imgLocWrapBottom = inputHeight + app.keyboardTopPos;
+    $('#post-image-location-wrapper').css({ bottom: imgLocWrapBottom + 'px' });
+  }
+  $('#post-textarea').focus(); //trigger('input');
 };
 
 app.hidePostUI = function hidePostUI () {
   $('#post-input-wrapper textarea').trigger('input');
   $('#post-button-floating-wrapper').show();
   $('body').removeClass('posting');
+  app.lastRepositionPoint = null;
 };
 
 app.makeNewPost = function makeNewPost() {
   // show input UI which will trigger the keyboard
   $('textarea.js-auto-size').textareaAutoSize();
   $('#post-input-wrapper textarea').trigger('input');
+
+  // re-position the inputwrapper above keyboard
+  app.repositionInput();
+  
   $('#post-button-floating-wrapper').hide();
   $('body').addClass('posting');
 
-  // $('#post-textarea').focus(function (e) {
-  //   e.preventDefault();
-  //   e.stopPropagation();
-  //   window.scrollTo(0,0);
-  // });
-
-  $('#post-textarea').focus();
-  setTimeout(function () {
-    $('#post-input-wrapper')[0].scrollIntoView({behavior: "smooth"});
-  }, 0);
+  // $('#post-input-wrapper').click();
 };
 
 app.postingUIActionSheet = function postingUIActionSheet () {
@@ -196,15 +256,10 @@ app.postingUIActionSheet = function postingUIActionSheet () {
     case 1:
       // Add Location
       console.log('Add location!');
-      function addLocationCallback() {
-	// app.makeNewPost();
-	setTimeout(function () { $('#post-textarea').focus(); }, 200);
-      }
       $('#post-image-location-wrapper').show();
-      app.setMyLocation(addLocationCallback);
-      $('#post-textarea').focus();
+      app.repositionInput();
+      app.setMyLocation();
       break;
-
     case 2:
       // Take Photo
       var options =
@@ -221,7 +276,7 @@ app.postingUIActionSheet = function postingUIActionSheet () {
 	$('#image-data').children().remove();
 	$('#image-data').append(img);
 	$('#post-image-location-wrapper').show();
-	$('#post-textarea').focus();
+	app.repositionInput();
       });
       break;
 
@@ -241,13 +296,13 @@ app.postingUIActionSheet = function postingUIActionSheet () {
 	$('#image-data').children().remove();
 	$('#image-data').append(img);
 	$('#post-image-location-wrapper').show();
-	$('#post-textarea').focus();
+	app.repositionInput();
       });
       break;
 
     case 4:
       // Cancel
-      $('#post-textarea').focus();
+      app.repositionInput();
       return;
     default:
       return;
@@ -261,8 +316,13 @@ app.viewActions = {
 
   feed: function vaFeed () {
     $('.header-wrap').hide();
+    $('#header').show();
     $('#header-timeline').show();
     $('#post-button-floating-wrapper').show();
+    if (!$('#my-feed-entries').children().length) {
+      // load timeline!
+      app.loadInitialTimeline();
+    }
   },
 
   settings: function vaSettings () {
@@ -291,6 +351,14 @@ app.viewActions = {
     $('#post-button-floating-wrapper').hide();
     $('.header-wrap').hide();
     $('#header-settings').show();
+  },
+
+  'onboarding-no-account': function vaOnboardingNoAccount () {
+    $('#onboarding-username-input').focus();
+  },
+
+  'account-login': function vaAccountLogin () {
+    $('#username-login').focus();
   }
 };
 
@@ -335,11 +403,13 @@ app.customInitialization = function customInitialization() {
   // XXXddahl: need a indeterminate progress indicator
   app.createInitialItems(function (err) {
     if (err) {
-      $('#top-progress-wrapper').hide();
+      // $('#top-progress-wrapper').hide();
+      app.hideProgress();
       return console.error(err);
     }
     console.log('Initial items fetched or created');
-    $('#top-progress-wrapper').hide();
+    // $('#top-progress-wrapper').hide();
+    app.hideProgress();
     app.displayInitialView();
   });
 };
@@ -360,11 +430,11 @@ app.createInitialItems = function createInitialItems (callback) {
       status.value.__meta = { timelineVisible: 't' };
 
       status.save(function (err) {
-  if (err) {
-    console.error(err);
-  }
-  callbackFired = true;
-  callback(null);
+	if (err) {
+	  console.error(err);
+	}
+	callbackFired = true;
+	callback(null);
       });
     }
 
@@ -376,14 +446,44 @@ app.createInitialItems = function createInitialItems (callback) {
 
       if (avatar.value.avatar === undefined) {
         avatar.value = {
-    avatar: null
-  };
+	  avatar: null
+	};
       }
       if (!callbackFired) {
-  callback(null);
+	callback(null);
       }
     });
   });
+};
+
+app.hideProgress = function hideProgress() {
+  if (!app.progressVisible) {
+    return;
+  }
+  app.progressVisible = false;
+  setTimeout(function () {
+    $('#top-progress-wrapper').hide();
+    // ProgressIndicator.hide();
+    app.setProgressStatus('Doing Stuff...');
+  }, 1000);
+};
+
+app.progressVisible = false;
+
+app.showProgress = function showProgress(aMessage) {
+  if (app.progressVisible) {
+    return;
+  }
+  app.progressVisible = true;
+  
+  if (!aMessage) {
+    // ProgressIndicator.showSimple();
+    $('#top-progress-wrapper').show();
+  } else {
+    $('#top-progress-wrapper').show();
+    app.setProgressStatus(aMessage);
+    // ProgressIndicator.showSimpleWithLabel(aMessage);
+  }
 };
 
 app.feedIsLoading = false;
@@ -394,23 +494,24 @@ app.loadNewTimeline = function loadNewTimeline () {
   }
   app.feedIsLoading = true;
 
-  $('#top-progress-wrapper').show();
+  // $('#top-progress-wrapper').show();
+  app.showProgress('Loading Timeline...');
   var afterId = $("#my-feed-entries").children().first().attr('id');
   if (typeof parseInt(afterId) == 'number') {
     var options = { limit: 15, afterId: afterId };
     app.session.getTimelineAfter(options, function tlCallback (err, timeline) {
       if (err) {
-  console.error(err);
-  app.feedIsLoading = false;
-  $('#top-progress-wrapper').hide();
-  return app.alert('Cannot get feed', 'info');
+	console.error(err);
+	app.feedIsLoading = false;
+	app.hideProgress();
+	return app.alert('Cannot get feed', 'info');
       }
       app.renderTimeline(timeline);
-      $('#top-progress-wrapper').hide();
+      app.hideProgress();
       app.feedIsLoading = false;
     });
   } else {
-    $('#top-progress-wrapper').hide();
+    app.hideProgress();
     app.feedIsLoading = false;
     console.error('Cannot get afterId');
     app.loadPastTimeline();
@@ -427,21 +528,24 @@ app.loadInitialTimeline = function loadInitialTimeline(callback) {
   if (app.feedIsLoading) {
     return;
   }
-  $('#top-progress-wrapper').show();
-  
-  app.switchView('feed', app.FEED_LABEL);
+  // $('#top-progress-wrapper').show();
+  app.showProgress('Getting Timeline');
+
   app.feedIsLoading = true;
+  app.switchView('feed', app.FEED_LABEL);
 
   var options = { limit: 15 };
   app.session.getLatestTimeline(options, function tlCallback (err, timeline) {
     if (err) {
       console.error(err);
       app.feedIsLoading = false;
-      $('#top-progress-wrapper').hide();
+      // $('#top-progress-wrapper').hide();
+      app.hideProgress();
       return app.alert('Cannot get feed', 'info');
     }
     app.renderTimeline(timeline);
-    $('#top-progress-wrapper').hide();
+    // $('#top-progress-wrapper').hide();
+    app.hideProgress();
     app.feedIsLoading = false;
     if (!$("#fetch-previous-items").is(":visible")) {
       $("#fetch-previous-items").show();
@@ -472,21 +576,24 @@ app.loadPastTimeline = function loadPastTimeline () {
   }
   app.feedIsLoading = true;
 
-  $('#top-progress-wrapper').show();
+  // $('#top-progress-wrapper').show();
+  app.showProgress('Getting Timeline');
   var beforeId = $("#my-feed-entries").children().last().attr('id');
   if (typeof parseInt(beforeId) == 'number') {
     var emptyItems = $('.empty-timeline-element').length;
     var options = { limit: 15, beforeId: beforeId };
     app.session.getTimelineBefore(options, function tlCallback (err, timeline) {
       if (err) {
-  console.error(err);
-  app.feedIsLoading = false;
-  $('#top-progress-wrapper').hide();
-  return app.alert('Cannot get feed', 'info');
+	console.error(err);
+	app.feedIsLoading = false;
+	// $('#top-progress-wrapper').hide();
+	app.hideProgress();
+	return app.alert('Cannot get feed', 'info');
       }
       // TRY??
       app.renderTimeline(timeline, true);
-      $('#top-progress-wrapper').hide();
+      // $('#top-progress-wrapper').hide();
+      app.hideProgress();
       app.feedIsLoading = false;
       var newEmptyItems = $('.empty-timeline-element').length;
       // if ((newEmptyItems - emptyItems) > 9) {
@@ -494,7 +601,8 @@ app.loadPastTimeline = function loadPastTimeline () {
       // }
     });
   } else {
-    $('#top-progress-wrapper').hide();
+    // $('#top-progress-wrapper').hide();
+    app.hideProgress();
     app.feedIsLoading = false;
     console.error('cannot get beforeId');
   }
@@ -513,9 +621,9 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     var _username = timeline[i].creatorUsername;
     if (_username != app.username) {
       try {
-  var contact = app.session.items._trusted_peers.value[_username];
+	var contact = app.session.items._trusted_peers.value[_username];
       } catch (ex) {
-  console.error(ex);
+	console.error(ex);
       }
     }
 
@@ -525,9 +633,9 @@ app.renderTimeline = function renderTimeline (timeline, append) {
       // Ignore this for now, probably a 'trustedAt notification'
       node = app.createEmptyElement(timeline[i]);
       if (append) {
-  $('#my-feed-entries').append(node);
+	$('#my-feed-entries').append(node);
       } else {
-  $('#my-feed-entries').prepend(node);
+	$('#my-feed-entries').prepend(node);
       }
       console.warn('no value, not rendering...');
       continue;
@@ -536,9 +644,9 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     if (timeline[i].value.avatar) {
       node = app.createEmptyElement(timeline[i]);
       if (append) {
-  $('#my-feed-entries').append(node);
+	$('#my-feed-entries').append(node);
       } else {
-  $('#my-feed-entries').prepend(node);
+	$('#my-feed-entries').prepend(node);
       }
       continue; // XXXddahl: going to handle this differently
       // this is some other kind of item, not a status update!
@@ -549,9 +657,9 @@ app.renderTimeline = function renderTimeline (timeline, append) {
       data.itemId = timeline[i].timelineId;
       node = app.createAvatarUpdateElement(data);
       if (append) {
-  $('#my-feed-entries').append(node);
+	$('#my-feed-entries').append(node);
       } else {
-  $('#my-feed-entries').prepend(node);
+	$('#my-feed-entries').prepend(node);
       }
 
       // when we get a new avatar we need to save it to the contacts object
@@ -559,22 +667,22 @@ app.renderTimeline = function renderTimeline (timeline, append) {
       if (!app.session.items._trusted_peers.value[user]) {
         // Let's tell the user about this 1 way connection
         console.warn('User ', user, ' is not trusted - one way connection');
-  console.warn('User ', user, ' is not trusted - Adding this peer to contacts as *untrusted*');
-  // add this user to contacts as an untrusted user
-  app.session.items._trusted_peers.value[user] = { avatar: null,
-                     trustedAt: null,
-               avatarUpdated: null,
-               fingerprint: null
-                   };
-  app.newContactDiscovered = true;
+	console.warn('User ', user, ' is not trusted - Adding this peer to contacts as *untrusted*');
+	// add this user to contacts as an untrusted user
+	app.session.items._trusted_peers.value[user] = { avatar: null,
+							 trustedAt: null,
+							 avatarUpdated: null,
+							 fingerprint: null
+						       };
+	app.newContactDiscovered = true;
       } else {
-  app.session.items._trusted_peers.value[user].avatar = timeline[i].value.avatar;
-  app.session.items._trusted_peers.value[user].avatarUpdated = Date.now();
-  app.session.items._trusted_peers.save(function (err) {
-    if (err) {
-      console.error(err);
-    }
-  });
+	app.session.items._trusted_peers.value[user].avatar = timeline[i].value.avatar;
+	app.session.items._trusted_peers.value[user].avatarUpdated = Date.now();
+	app.session.items._trusted_peers.save(function (err) {
+	  if (err) {
+	    console.error(err);
+	  }
+	});
       }
       continue;
     }
@@ -585,9 +693,9 @@ app.renderTimeline = function renderTimeline (timeline, append) {
       // Ignore this for now, probably a 'trustedAt notification'
       node = app.createEmptyElement(timeline[i]);
       if (append) {
-  $('#my-feed-entries').append(node);
+	$('#my-feed-entries').append(node);
       } else {
-  $('#my-feed-entries').prepend(node);
+	$('#my-feed-entries').prepend(node);
       }
       continue;
     }
@@ -798,7 +906,12 @@ app.transformedTimelineElements = {};
 app.massageTimelineUpdate = function massageTimelineUpdate (data) {
   var avatar;
   if (data.creatorUsername == app.session.account.username) {
-    avatar = app.session.items.avatar.value.avatar;
+    try {
+      avatar = app.session.items.avatar.value.avatar;
+    } catch (ex) {
+      console.warn('Avatar is missing!');
+      avatar = null;
+    }
   } else {
     try {
       avatar = app.session.items._trusted_peers.value[data.creatorUsername].avatar;
@@ -828,62 +941,6 @@ app.toggleSetStatusProgress = function toggleSetStatusProgress() {
   }
 };
 
-app.origsetMyStatus = function origsetMyStatus() {
-  // app.toggleSetStatusButton();
-  // validate length of data to be sent
-  var status = $('#set-my-status-textarea').val();
-  status = app.escapeHtml(status);
-
-  if (!status.length) {
-    return app.alert('Please enter a status update', 'danger');
-  }
-  if (status.length > 512) {
-    return app.alert('Status update is too long, please shorten it', 'danger');
-  }
-  // update the item
-  app.toggleSetStatusProgress();
-  var imageData;
-  if ($('#my-image-to-post').children().length) {
-    imageData = $('#my-image-to-post').children()[0].src;
-  }
-   var updateObj= {
-     status: status,
-     location: $('#my-geoloc').text(),
-     timestamp: Date.now(),
-     imageData: null,
-     avatarMeta: {
-       nameHmac: app.session.items.avatar.nameHmac,
-       updated: app.session.items.avatar.value.updated
-     },
-     __meta: { timelineVisible: 't' }
-   };
-  if (imageData) {
-    updateObj.imageData = imageData;
-  }
-
-  app.session.items.status.value.status = updateObj.status;
-  app.session.items.status.value.location = updateObj.location;
-  app.session.items.status.value.timestamp = updateObj.timestamp;
-  app.session.items.status.value.imageData = updateObj.imageData;
-  app.session.items.status.value.tz = app.tz.name();
-  app.session.items.status.value.avatarMeta = updateObj.avatarMeta;
-  app.session.items.status.value.__meta = updateObj.__meta;
-
-  app.session.items.status.save(function (err) {
-    if (err) {
-      app.toggleSetStatusProgress();
-      console.error(err);
-      return app.alert('Cannot update status', 'danger');
-    }
-    $('#set-my-status-textarea').val('');
-    // $('#my-image-to-post').children().remove();
-    $('#post-image-location-wrapper').hide();
-    app.switchView('feed', app.FEED_LABEL);
-    app.toggleSetStatusProgress();
-    app.loadNewTimeline();
-  });
-};
-
 app.setMyStatus = function setMyStatus() {
   // app.toggleSetStatusButton();
   // validate length of data to be sent
@@ -897,7 +954,7 @@ app.setMyStatus = function setMyStatus() {
     return app.alert('Status update is too long, please shorten it', 'danger');
   }
   // update the item
-  app.toggleSetStatusProgress();
+  // app.toggleSetStatusProgress();
   var imageData;
   if ($('#image-data').children().length) {
     imageData = $('#image-data').children()[0].src;
@@ -925,17 +982,21 @@ app.setMyStatus = function setMyStatus() {
   app.session.items.status.value.avatarMeta = updateObj.avatarMeta;
   app.session.items.status.value.__meta = updateObj.__meta;
 
+  app.showProgress('Posting...');
+  
   app.session.items.status.save(function (err) {
     if (err) {
-      app.toggleSetStatusProgress();
+      // app.toggleSetStatusProgress();
+      app.hideProgress();
       console.error(err);
       return app.alert('Cannot update status', 'danger');
     }
+    app.hideProgress();
     app.hidePostUI();
     $('#post-textarea').val('');
     $('#image-data').children().remove();
     $('#post-image-location-wrapper').hide();
-    app.toggleSetStatusProgress();
+    // app.toggleSetStatusProgress();
     app.loadNewTimeline();
   });
 };
@@ -943,7 +1004,6 @@ app.setMyStatus = function setMyStatus() {
 app.displayInitialView = function displayInitialView() {
   // Check for first run
   if (!app.firstRunIsNow) {
-    $('#my-avatar')[0].src = app.session.items.avatar.value.avatar;
     app.session.on('message', function (message) {
       console.log('session.on("message") event called', message);
       app.handleMessage(message);
@@ -1060,11 +1120,21 @@ function createMediaElement(data, localUser, existingNode) {
                              { className: 'media-link',
                                replaceFn: app.linkOutput });
   }
-
   console.log(status);
-  console.log('data.itemId: ', data.itemId);
+  console.log(data.statusText);
+  // Handle mention background color
+  var mention = '@' + app.username;
+  var mentioned = data.statusText.search(mention);
+  console.log('mentioned: ', mentioned);
+  var isMentionClass = '';
+  if (mentioned > -1) {
+    isMentionClass = 'is-mention';
+  }
   var parentHtml = '<div id="' + data.itemId
-        + '" class="media attribution ' + classId + ' ' + itemId + '"></div>';
+        + '" class="media attribution '
+	+ isMentionClass + ' '
+	+ classId + ' '
+	+ itemId + '"></div>';
 
   var html = '<a class="img">'
            + avatarMarkup
@@ -1091,6 +1161,16 @@ function createMediaElement(data, localUser, existingNode) {
     existingNode.addClass('attribution');
     existingNode.addClass(classId);
     existingNode.addClass(itemId);
+
+    var mention = '@' + app.username;
+    var mentioned = data.statusText.search(mention);
+    console.log('mentioned: ', mentioned);
+    var isMentionClass = '';
+    if (mentioned > -1) {
+      isMentionClass = 'is-mention';
+    }
+    existingNode.addClass(isMentionClass);
+    
     var children = $(html);
     existingNode.children().remove();
     existingNode.append(children);
@@ -1293,13 +1373,13 @@ app.setMyLocation = function setMyLocation(callback) {
 	  + '</span>';
     $('#location-data').append($(html));
     $('#post-image-location-wrapper').show();
-    callback();
+    app.repositionInput();
   };
 
   function error (err) {
     console.error('Cannot set location');
     console.error(err);
-    callback(err);
+    app.repositionInput();
   };
 
   navigator.geolocation.getCurrentPosition(success, error, options);

@@ -70,47 +70,7 @@ height: 2.5rem;"></a>
 
     <div id="app" class="app container-fluid">
       <div id="alerts"></div>
-
-      <ul id="top-menu" class="menu nav nav-stacked">
-	<li class="main-btn" id="my-feed">
-	  <a href="#">
-	    <img src="svg/sync-dark.svg" />
-	    <span>Feed</span>
-	  </a>
-	</li>
-	<li class="main-btn" id="my-contacts">
-	  <a href="#">
-	    <img src="svg/contacts.svg" />
-	    Contacts
-	  </a>
-	</li>
-	<li class="main-btn" id="my-options">
-	  <a href="#">
-	    <img src="svg/setting.svg" />
-	    Options
-	  </a>
-	</li>
-      </ul>
-
-      <div id="stati" class="view">
-	<div id="set-my-status-form">
-	  <div id="status-update-wrapper">
-	    <textarea placeholder="Enlighten us, please!"
-		      id="set-my-status-textarea"></textarea>
-	  </div>
-	  <br />
-	  <div id="button-row">
-	    <img id="my-avatar" src="img/avatars/franklin-4.png">
-	    <img id="take-a-photo-btn" src="svg/camera.svg" />
-	    <img id="pick-an-image-btn" src="svg/media.svg" />
-	    <img id="include-gps-btn" src="svg/location.svg" />
-	    <img id="set-my-status-btn" src="svg/send.svg" />
-	  </div>
-	  <div id="my-geoloc"></div>
-	  <div id="my-image-to-post"></div>
-	</div>
-      </div>
-
+      
       <div id="capture-avatar" class="view">
 	<canvas id="capture-canvas" width="200" height="200"
 		style="display:none;">
@@ -179,39 +139,139 @@ height: 2.5rem;"></a>
 	  </div>
 	</form>
       </div>
+      
+      <div id="onboarding-no-account" class="view intro-graphics">
+	<div class="logo">
+	  <img src="img/spideroak_logo.png" />
+	</div>
+	<h1>Kloak</h1>
 
-      <div id="account-login" class="view active">
+	<div id="onboarding-create-username">
+	  <input placeholder="Choose a Username"
+		 autocapitalize="off"
+		 size="12"
+		 maxlength="32"
+		 class="onboarding-input"
+		 id="onboarding-username-input" type="text" />
+	  <div class="onboarding-continue-wrapper">
+	    <button class="btn onboarding-btn" id="onboarding-check-username">Continue</button>
+	  </div>
+	  <a href="#" id="onboarding-existing-account" class="onboarding-link">Already have an account?</a>
+	</div>
+      </div>
+
+
+      <div id="onboarding-no-account-step-2" class="view intro-graphics">
+	<div class="logo">
+	  <img src="img/spideroak_logo.png" />
+	</div>
+	<h1>Kloak</h1>
+
+	<div id="onboarding-create-passphrase">
+	  <h3>Passphrase:</h3>
+	  
+	  <div id="passphrase-info">
+	    <textarea placeholder="Enter Passphrase"
+		      autocapitalize="off"
+		      rows="3"
+		      maxlength="256"
+		      class="onboarding-input"
+		      id="onboarding-passphrase-input"></textarea>
+	    <div class="onboarding-continue-wrapper">
+	      <button class="btn onboarding-btn"
+		      id="onboarding-create-account">Continue</button>
+	      <p>
+		<a href="#"
+		   id="regenerate-passphrase"
+		   class="onboarding-link">Regenerate Passphrase</a>
+	      </p>
+	      <p>
+		<a href="#"
+		   id="clear-passphrase"
+		 class="onboarding-link">I'll choose my own Passphrase</a>
+	      </p>
+	    </div>
+	    <a href="#" class="onboarding-link" id="onboarding-cancel">Cancel</a>
+	    <p class="onboarding-light-copy">
+	      We have created a strong passphrase for you, please save it into your password wallet or write it down and put it in a safe place! You cannot ask SpiderOak to recover a forgotten passphrase. We <strong>do not</strong> store it outside the device.
+	    </p>
+	    <p class="onboarding-light-copy">
+	      If your device supports the "Keychain" or "Secure Storage", your passphrase will be automatically securely saved for you and you will be able to recall it in Kloak's Options. 
+	    </p>
+	  </div>
+	</div>
+      </div>
+
+      <div id="onboarding-no-account-step-3" class="view intro-graphics">
+	<div class="logo">
+	  <img src="img/spideroak_logo.png" />
+	</div>
+	<h1>Kloak</h1>
+
+	<div id="onboarding-account-generation">
+	  <h3>Account Validation & Creation</h3>
+	  
+	  <div id="generation-info">
+	  </div>
+	</div>
+      </div>
+
+      <div id="onboarding-no-account-step-4" class="view intro-graphics">
+	<div id="onboarding-account-contact-card">
+	  <div id="contact-card-info">
+	    <p>
+	      <strong>Kloak</strong> generates a 'Contact Card' which you share with contacts. You can share your status updates, photos and location once you have exchanged cards with your contacts.   <a href="#" id="onboarding-add-photo-btn">Add a photo to your card</a>
+	    </p>
+	    <p>
+	      <div id="onboarding-contact-card-wrapper">
+	      </div>
+	    </p>
+	    <div id="onboarding-contact-card-share-buttons">
+	      <button class="btn onboarding-btn"
+		      id="onboarding-exit-setup">Start Kloak</button>
+	    </div>
+	  </div>
+	</div>
+      </div>
+      
+      <div id="account-login" class="view active intro-graphics">
+	<div class="logo">
+	  <img src="img/spideroak_logo.png" />
+	</div>
+	<h1>Kloak</h1>
+	<h2>A Social Network You Own</h2>
 	<form id="login-form" class="input-group input-group-lg">
 	  <input placeholder="Username"
 		 autocapitalize="off"
 		 size="12"
 		 maxlength="32"
-		 class="form-control login-input"
+		 class="onboarding-input"
 		 id="username-login" type="text" />
 	  <input placeholder="Passphrase"
 		 size="12"
 		 maxlength="32"
-		 class="form-control login-input"
+		 class="onboarding-input"
 		 id="password-login" type="password"
 		 autocomplete="off" />
-	  <div id="remember-credentials-wrapper">
-	    <input type="checkbox" id="remember-credentials" checked />
-	    <label id="rememeber-credentials-label"
-		   for="remember-credentials">Remember credentials</label>
-	  </div>
 	</form>
 
 	<div id="login-buttons">
 	  <h3 id="username-placeholder"></h3>
-	  <button class="btn btn-success"
+	  <button class="onboarding-btn btn"
 		  id="login-btn">Login</button>
 	</div>
-	<hr />
+
 	<div id="register-btn-wrapper">
-	  <button class="btn btn-primary"
-		  id="switch-user-btn">Switch User</button>
-	  <button class="btn btn-primary"
-		  id="register-btn">Create Account</button>
+	  <!-- <div> -->
+	  <!--   <a href="#" -->
+	  <!--      class="onboarding-link" -->
+	  <!--      id="switch-user-btn">Switch User</a> -->
+	  <!-- </div> -->
+	  <div>
+	    <a href="#"
+	       class="onboarding-link"
+	       id="register-btn">Create Account</a>
+	  </div>
 	</div>
       </div>
 
@@ -351,7 +411,7 @@ height: 2.5rem;"></a>
 	</div>
 	<div id="contact-card-menu">
 	  <img class="card-btns" id="retake-id-picture" src="svg/camera.svg" />
-	  <img class="card-btns" id="share-my-id-card" src="svg/share.svg" />
+	  <img class="card-btns" id="share-my-id-card" src="svg/share-black.svg" />
 	</div>
       </div>
 
@@ -361,24 +421,24 @@ height: 2.5rem;"></a>
       <div id="app-about" class="view">
       </div>
 
-      <div id="first-run" class="view">
-	<h3>Initial Setup</h3>
-	<p><strong>Congratulations! You've signed up for Kloak.</strong></p>
-	<p>
-	  Now that you have an account, you need to create your <strong>Contact Card</strong>, which identifies you to other users you would like to communicate with.
-	</p>
-	<p>
-	  Once you share your <strong>Contact Card</strong> with another user, and you have received theirs, you can privately communicate.
-	</p>
-	<p>
-	  The first step is taking a photo for your contact card
-	</p>
-	<br />
-	<p class="text-center">
-	  <button class="btn btn-success"
-		  id="create-id-card">Take Contact Card Photo</button>
-	</p>
-      </div>
+      <!-- <div id="first-run" class="view"> -->
+      <!-- 	<h3>Initial Setup</h3> -->
+      <!-- 	<p><strong>Congratulations! You've signed up for Kloak.</strong></p> -->
+      <!-- 	<p> -->
+      <!-- 	  Now that you have an account, you need to create your <strong>Contact Card</strong>, which identifies you to other users you would like to communicate with. -->
+      <!-- 	</p> -->
+      <!-- 	<p> -->
+      <!-- 	  Once you share your <strong>Contact Card</strong> with another user, and you have received theirs, you can privately communicate. -->
+      <!-- 	</p> -->
+      <!-- 	<p> -->
+      <!-- 	  The first step is taking a photo for your contact card -->
+      <!-- 	</p> -->
+      <!-- 	<br /> -->
+      <!-- 	<p class="text-center"> -->
+      <!-- 	  <button class="btn btn-success" -->
+      <!-- 		  id="create-id-card">Take Contact Card Photo</button> -->
+      <!-- 	</p> -->
+      <!-- </div> -->
 
       <div id="verify-user" class="view">
 	<div id="verify-user-success">
@@ -422,7 +482,7 @@ height: 2.5rem;"></a>
 
     </div>
 
-    <div id="post-image-location-wrapper">
+    <div id="post-image-location-wrapper" class="post-wrapper">
       <div id="image-data"></div>
       <div id="img-location-wrapper">
       	<div id="location-data"></div>
@@ -430,7 +490,7 @@ height: 2.5rem;"></a>
     </div>
 
     <!-- POST INPUT WRAPPER -->
-    <div id="post-input-wrapper">
+    <div id="post-input-wrapper" class="post-wrapper">
       <a id="post-attach" href="#" class="icon icon--attach">Add Attachment...</a>
       <textarea rows="1" id="post-textarea" class="js-auto-size post-textarea" placeholder="Enlighten us, please!"></textarea>
 
@@ -446,6 +506,7 @@ height: 2.5rem;"></a>
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="js/crypton.js"></script>
     <script type="text/javascript" src="js/index.js"></script>
+    <script type="text/javascript" src="js/onboarding.js"></script>
     <script type="text/javascript" src="js/stati.js"></script>
     <script type="text/javascript" src="js/configuration.js"></script>
     <script type="text/javascript" src="js/day-of-year.js"></script>

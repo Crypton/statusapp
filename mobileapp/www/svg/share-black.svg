@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="18px" height="25px" viewBox="0 0 18 25" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <!-- Generator: Sketch 3.3.3 (12072) - http://www.bohemiancoding.com/sketch -->
+    <title>Share</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="Spideroak-Social-Copy-9" sketch:type="MSArtboardGroup" transform="translate(-112.000000, -26.000000)" fill="#000000">
+            <g id="Share" sketch:type="MSLayerGroup" transform="translate(112.000000, 26.000000)">
+                <path d="M10,3.79709594 L10,8.5483871 L10,9 L8,9 L8,8.5483871 L8,3.79709594 L8,3.79709594 L5.49564317,6.30145279 L4.79709596,7 L3.40000153,5.6029056 L4.09854873,4.90435838 L7.60290558,1.40000151 L7.59999847,1.3970944 L8.99709291,0 L9,0.00290708968 L9.00290709,0 L10.4000015,1.3970944 L10.3970944,1.40000151 L13.9014513,4.90435838 L14.5999985,5.6029056 L13.202904,7 L12.5043568,6.30145279 L10,3.79709594 Z M0,10.9940603 C0,9.8927712 0.892622799,9 1.99508929,9 L16.0049107,9 C17.1067681,9 18,9.89451376 18,10.9940603 L18,23.0059397 C18,24.1072288 17.1073772,25 16.0049107,25 L1.99508929,25 C0.893231902,25 0,24.1054862 0,23.0059397 L0,10.9940603 Z M8,9 L10,9 L10,19 L8,19 L8,9 Z" id="Share-Shape" sketch:type="MSShapeGroup"></path>
+            </g>
+        </g>
+    </g>
+</svg>
