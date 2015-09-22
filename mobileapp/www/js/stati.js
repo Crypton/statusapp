@@ -463,6 +463,7 @@ app.hideProgress = function hideProgress() {
   app.progressVisible = false;
   setTimeout(function () {
     $('#top-progress-wrapper').hide();
+    $('.overlay').hide();
     // ProgressIndicator.hide();
     app.setProgressStatus('Doing Stuff...');
   }, 1000);
@@ -475,6 +476,8 @@ app.showProgress = function showProgress(aMessage) {
     return;
   }
   app.progressVisible = true;
+
+  $('.overlay').show();
   
   if (!aMessage) {
     // ProgressIndicator.showSimple();
@@ -948,13 +951,12 @@ app.setMyStatus = function setMyStatus() {
   status = app.escapeHtml(status);
 
   if (!status.length) {
-    return app.alert('Please enter a status update', 'danger');
+    status = ' ';
   }
   if (status.length > 512) {
     return app.alert('Status update is too long, please shorten it', 'danger');
   }
   // update the item
-  // app.toggleSetStatusProgress();
   var imageData;
   if ($('#image-data').children().length) {
     imageData = $('#image-data').children()[0].src;
@@ -974,6 +976,10 @@ app.setMyStatus = function setMyStatus() {
     updateObj.imageData = imageData;
   }
 
+  if ((updateObj.status == ' ') && !updateObj.imageData && !updateObj.location) {
+    return app.alert('Status update requires text, location or photo', 'danger');
+  }
+  
   app.session.items.status.value.status = updateObj.status;
   app.session.items.status.value.location = updateObj.location;
   app.session.items.status.value.timestamp = updateObj.timestamp;
