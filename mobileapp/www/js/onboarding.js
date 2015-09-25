@@ -46,6 +46,18 @@ app.onboarding = {
     $('#onboarding-add-photo-btn').click(function () {
       that.addPhotoToCard();
     });
+
+    $('#onboarding-username-input').keyup(function (e) {
+      this.value = this.value.toLowerCase();
+    });
+
+    $('#onboarding-username-input').keypress(function (e) {
+      if (e.which == 13) {
+	that.choosePassword();
+	return false;
+      }
+    });
+    
   },
 
   existingLogin: function existingLogin() {
@@ -80,6 +92,7 @@ app.onboarding = {
     var that = this;
 
     ProgressIndicator.showSimpleWithLabel(true, this.strings.en_US.ACCOUNT_GENERATE);
+    this.username = this.username.toLowerCase();
     // create account
     crypton.generateAccount(this.username, this.passphrase,
       function onboardCreateAcctCB (err) {

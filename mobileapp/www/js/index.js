@@ -539,10 +539,14 @@ var app = {
                                                   + message
                                                   + '</div>';
     var node = $(html);
+    if (!$('.overlay').is(':visible')) {
+      $('.overlay').show();
+    }
     $('#alerts').prepend(node);
     window.setTimeout(function () {
       node.slideUp(100, function () {
         node.remove();
+	$('.overlay').hide();
       });
     }, 3500);
   },

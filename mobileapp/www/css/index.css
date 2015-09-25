@@ -313,8 +313,8 @@ h1 {
 }
 
 .blink {
-    animation:fade 3000ms infinite;
-    -webkit-animation:fade 3000ms infinite;
+    animation:fade 20000ms infinite;
+    -webkit-animation:fade 20000ms infinite;
 }
 
 .view {
@@ -776,35 +776,51 @@ a.header-back {
 
 #alerts {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    /* bottom: 0; */
+    /* left: 0; */
+    /* right: 0; */
+    top: 100px;
+    left: 7%;
+    z-index: 25000;
+    width: 100%;
 }
 
 .alert {
-    background: #323232 ;
-    border: none ;
-    border-radius: 2px ;
+    background: #323232;
+    border: none;
+    border-radius: 2px;
     color: #fff;
-    margin: 2em ;
+    margin: 2em;
     text-align: center;
-    padding: 15px 20px ;
+    padding: 15px 20px;
+    width: 60%;
 }
 
 .alert-danger {
     background: #e51c23 ;
-    color: #fff ;
+    color: #fff;
 }
 
 .alert-info {
-    color: #fff ;
+    color: black;
+    background: white;
+}
+
+.alert-success {
+    color: black;
+    background: whitesmoke;
+}
+
+.alert-warning {
+    background: yellow;
+    color: black;
 }
 
 #top-progress-wrapper {
     display: none;
-    height: 3em;
+    height: 6em;
     border-radius: 2em;
-    z-index: 100;
+    z-index: 11000;
     padding: 0.5em;
     color: whitesmoke;
     background-color: rgba(50, 50, 50, 0.85);
@@ -820,7 +836,7 @@ a.header-back {
         opacity: 1.0;
     }
     to {
-        opacity: 0.0;
+        opacity: 0.1;
     }
 }
 
@@ -828,7 +844,11 @@ blink {
     -webkit-animation-name: blink;
     -webkit-animation-iteration-count: infinite;
     -webkit-animation-timing-function: cubic-bezier(1.0, 0, 0, 1.0);
-    -webkit-animation-duration: 1.5s;
+    -webkit-animation-duration: 2.5s;
+}
+
+#blink-wrapper {
+    margin-top: 1.5em;
 }
 
 h3 {
@@ -849,8 +869,8 @@ strong {
     left:0;
     right:0;
     background-color:#000;
-    opacity:0.8;
-    z-index:15;
+    opacity:0.3;
+    z-index:10500;
 }
 
 a {
