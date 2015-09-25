@@ -794,6 +794,7 @@ a.header-back {
     text-align: center;
     padding: 15px 20px;
     width: 60%;
+    z-axis: 30000;
 }
 
 .alert-danger {
