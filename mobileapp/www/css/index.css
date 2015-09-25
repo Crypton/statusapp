@@ -398,7 +398,6 @@ input[type="password"] {
     box-shadow: none;
     display: block;
     margin: 10px 0;
-    background-color: whitesmoke;
 }
 
 input[type="text"]:focus,
@@ -406,13 +405,11 @@ input[type="password"]:focus {
     font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif ;
     box-shadow: none ;
     outline: 0;
-    /*border-bottom: 1px solid #787878;*/
     border-bottom-width: 2px;
-    background-color: whitesmoke;
 }
 
 ::-webkit-input-placeholder {
-    color: #aaa ;
+    color: #000;
 }
 
 /* Bootstrap, more like Poopstrap */
@@ -424,15 +421,14 @@ input[type="password"]:focus {
     font-weight: normal;
     margin: 0.5rem 0;
     -webkit-border-radius: 5px;
-    background-color: whitesmoke;
-    opacity: 0.7;
 }
 
 .btn:hover, .btn:focus {
 }
 
 .btn:active {
-    background-color: #d1d1d1;
+    background-color: #FFF;
+    opacity: 0.3;
 }
 
 .btn-primary .btn-success {
@@ -788,7 +784,7 @@ a.header-back {
 .alert {
     background: #323232;
     border: none;
-    border-radius: 2px;
+    border-radius: 5px;
     color: #fff;
     margin: 2em;
     text-align: center;
@@ -803,8 +799,8 @@ a.header-back {
 }
 
 .alert-info {
-    color: black;
-    background: white;
+    color: white;
+    background: black;
 }
 
 .alert-success {
@@ -815,6 +811,11 @@ a.header-back {
 .alert-warning {
     background: yellow;
     color: black;
+}
+
+.company-logo {
+    height: 30px !important;
+    margin-right: 2em;
 }
 
 #top-progress-wrapper {
@@ -924,11 +925,9 @@ a {
     text-align: center;
 }
 
-#username-placehoder {
-    text-align: center ;
-    display: none;
-    border-bottom: 1px solid gray;
-    margin: 1em ;
+#username-placeholder {
+    color: currentColor;
+    margin-top: 2em;
 }
 
 .option {
@@ -946,6 +945,11 @@ a {
 
 .option-text {
     margin: 0 10px;
+    font-size: 90%;
+}
+
+.option-btn {
+    width: 98%;
 }
 
 #options-controls {
@@ -1079,7 +1083,7 @@ body {
 }
 
 .intro-graphics {
-    background-image: url('../img/kloak-hoodie.jpg');
+    background-image: url('../img/canal.png');
     background-repeat: no-repeat;
     /* background-attachment: fixed; */
     background-position: 30% 3%;;
@@ -1097,6 +1101,8 @@ body {
     text-align: center;
     font-size: 16px;
     font-family: WorkSans, Roboto;
+    color: white;
+    margin-top: 2em;
 }
 
 #account-login .logo {
@@ -1105,11 +1111,12 @@ body {
 
 .intro-graphics img {
     text-align: center;
-    width: 100px;
+    height: 80px;
 }
 
 div .logo { 
-    text-align: center
+    text-align: center;
+    margin-top: -2em;
 }
 
 #onboarding-create-username {
@@ -1120,7 +1127,8 @@ div .logo {
 }
 
 #onboarding-create-username h3 {
-    color: black;
+    color: white;
+    
 }
 
 #onboarding-create-passphrase {
@@ -1134,7 +1142,6 @@ div .logo {
 
 .onboarding-input{
     width: 90%;
-    font-family: roboto;
     font-size: 1.6em;
     padding: 0.4em;
     opacity: 0.5;
@@ -1143,7 +1150,8 @@ div .logo {
 }
 
 input.onboarding-input { 
-    -webkit-border-radius: 5px;
+    /* -webkit-border-radius: 5px; */
+    background-color: transparent !important;
 }
 
 #onboarding-check-username {
@@ -1158,14 +1166,15 @@ input.onboarding-input {
 
 .onboarding-link {
     text-decoration: none;
-    color: #000;
+    color: #FFF;
     font-size: 1em;
-    font-family: WorkSans, roboto;
+    font-family: WorkSans, Roboto;
     font-weight: bold;
 }
 
 #onboarding-passphrase-input {
     font-size: 1.2em;
+    background-color: transparent !important;   
 }
 
 .onboarding-continue-wrapper {
@@ -1179,13 +1188,14 @@ input.onboarding-input {
 #onboarding-create-passphrase h3 {
     font-size: 1em;
     margin-top: 10px;
+    color: white;
 }
 
 #onboarding-account-generation {
     margin-left: 1em;
     margin-top: 4em;
     text-align: center;
-    /* color: white; */
+    color: white;
 }
 
 #onboarding-contact-card-wrapper {
@@ -1222,10 +1232,12 @@ input.onboarding-input {
 
 .onboarding-light-copy {
     color: white;
+    font-size: 90%;
 }
 
 .onboarding-dark-copy {
     color: black;
+    font-size: 90%;
 }
 
 onboarding-no-account-step-2 {

@@ -179,14 +179,28 @@ app.onboarding = {
   handleLoginErr: function handleLoginError (err) {
     app.alert(err, 'danger');
   },
+
+  currentErr: [],
   
   accountValidationErr: function accountValidationErr (err) {
     // parse errors and change UI
+    var error = { error: err, time: Date.now() };
+    this.currentErr.push(error);
+
     if (err == 'Username already taken.') {
-      this.currentErr = err;
       this.begin();
       app.alert('Please choose another username', 'danger');
+      return;
     }
+
+    if (err == 'Username is not valid: it is not alphanumeric!') {
+      this.begin();
+      app.alert('Usernames must be alphanumeric', 'danger');
+      return;
+    }
+    
+    this.begin();
+    app.alert(err, 'danger');
   },
 
   exit: function exit () {
