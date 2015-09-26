@@ -790,7 +790,7 @@ var app = {
       callback(null, dataURL);
     }
   },
-
+  
   getInitialAvatar: function getInitialAvatar (dataUrl) {
     // 85, 325
     // create canvas
