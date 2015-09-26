@@ -1,0 +1,16 @@
+com.crypho.plugins.securestorage
+com.ionic.keyboard
+com.phonegap.plugins.barcodescanner
+com.telerik.plugins.wkwebview
+cordova-plugin-touchid
+cordova-plugin-webserver
+cordova-plugin-whitelist
+nl.x-services.plugins.actionsheet
+nl.x-services.plugins.socialsharing
+org.apache.cordova.camera
+org.apache.cordova.device
+org.apache.cordova.geolocation
+org.apache.cordova.inappbrowser
+org.apache.cordova.statusbar
+org.devgeeks.privacyscreen
+org.pbernasconi.progressindicator
