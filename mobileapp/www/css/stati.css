@@ -349,6 +349,7 @@
     z-index: 1000;
     width: 100%;
     text-align: center;
+    padding-top: 0.5em;
 }
 
 #post-outer-wrapper {
@@ -372,6 +373,7 @@
     -webkit-box-pack: justify;
     -webkit-justify-content: space-between;
     justify-content: space-between;
+    padding-bottom: 0.5em;
 }
 
 .posting #post-input-wrapper {

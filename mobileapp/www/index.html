@@ -143,9 +143,10 @@ height: 2.5rem;"></a>
       
       <div id="onboarding-no-account" class="view intro-graphics">
 	<div class="logo">
-	  <img src="img/spideroak_logo.png" />
+	  <img class="company-logo" src="img/spideroak-white.png" />
+	  <img src="svg/kloak-logo.svg" />
+	  <!-- <h1>Kloak</h1> -->
 	</div>
-	<h1>Kloak</h1>
 
 	<div id="onboarding-create-username">
 	  <input placeholder="Choose a Username"
@@ -164,9 +165,10 @@ height: 2.5rem;"></a>
 
       <div id="onboarding-no-account-step-2" class="view intro-graphics">
 	<div class="logo">
-	  <img src="img/spideroak_logo.png" />
+	  <img class="company-logo" src="img/spideroak-white.png" />
+	  <img src="svg/kloak-logo.svg" />
+	  <!-- <h1>Kloak</h1> -->
 	</div>
-	<h1>Kloak</h1>
 
 	<div id="onboarding-create-passphrase">
 	  <h3>Passphrase:</h3>
@@ -205,9 +207,10 @@ height: 2.5rem;"></a>
 
       <div id="onboarding-no-account-step-3" class="view intro-graphics">
 	<div class="logo">
-	  <img src="img/spideroak_logo.png" />
+	  <img class="company-logo" src="img/spideroak-white.png" />
+	  <img src="svg/kloak-logo.svg" />
+	  <!-- <h1>Kloak</h1> -->
 	</div>
-	<h1>Kloak</h1>
 
 	<div id="onboarding-account-generation">
 	  <h3>Account Validation & Creation</h3>
@@ -237,9 +240,11 @@ height: 2.5rem;"></a>
       
       <div id="account-login" class="view active intro-graphics">
 	<div class="logo">
-	  <img src="img/spideroak_logo.png" />
+	  <img class="company-logo" src="img/spideroak-white.png" />
+	  <img src="svg/kloak-logo.svg" />
+	  <!-- <h1>Kloak</h1> -->
 	</div>
-	<h1>Kloak</h1>
+
 	<h2>A Social Network You Own</h2>
 	<form id="login-form" class="input-group input-group-lg">
 	  <input placeholder="Username"
@@ -360,9 +365,13 @@ height: 2.5rem;"></a>
       <div id="my-options-pane" class="view">
 	<div id="options-controls">
 	  <p class="option">
-	    <a href="#" id="about">
-	      <img src="svg/info.svg" />
-	    </a>
+
+	    <button type="button"
+		    id="about"
+		    class="btn btn-success option-btn">About Kloak</button>
+	    <!-- <a href="#" id="about"> -->
+	    <!--   <img src="svg/info.svg" /> -->
+	    <!-- </a> -->
 	  </p>
 	  <p class="option option-text">
 	    By default (on supported devices), your credentials are securely remembered to allow for fast login
@@ -370,24 +379,24 @@ height: 2.5rem;"></a>
 	  <p class="option">
 	    <button type="button"
 		    id="forget-credentials"
-		    class="btn btn-success">Forget credentials</button>
+		    class="btn btn-success option-btn btn-danger">Forget credentials</button>
 	  </p>
       <div id="touchid-wrapper">
         <p class="option">
         <button type="button"
           id="use-touchid"
-          class="btn btn-success">Toggle Touch ID</button>
+          class="btn btn-success option-btn">Toggle Touch ID</button>
         </p>
       </div>
 	  <p class="option">
 	    <button type="button"
 		    id="display-passphrase"
-		    class="btn btn-success">Display passphrase</button>
+		    class="btn btn-success option-btn">Display passphrase</button>
 	  </p>
 	  <p class="option">
 	    <button disabled type="button"
 		    id="change-passphrase"
-		    class="btn btn-success">Change passphrase</button>
+		    class="btn btn-success option-btn">Change passphrase</button>
 	  </p>
 
 	  <!-- <p class="option option-text"> 148 46 244
