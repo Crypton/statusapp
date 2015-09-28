@@ -788,7 +788,7 @@ var app = {
       // get canvas contents as a data URL (returns png format by default)
       var dataURL = canvas.toDataURL();
       callback(null, dataURL);
-    }
+    };
   },
   
   getInitialAvatar: function getInitialAvatar (dataUrl) {
