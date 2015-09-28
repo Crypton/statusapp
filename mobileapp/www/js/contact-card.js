@@ -21,6 +21,7 @@ app.contactCard = {
     var that = this;
     
     app.switchView('hidden-utility-nodes');
+    // XXX make sure the avatar exists
     $('#contact-card-photo')[0].src = app.session.items.avatar.value.avatar;
     $('#contact-card-photo')[0].onload = function contactCardOnload() {
       that.assembleContactCard();
@@ -83,7 +84,7 @@ app.contactCard = {
     
     // set font + size
     this.ctx.fillStyle = '#000000';
-    this.ctx.font = "16px monospace";
+    this.ctx.font = '16px "PT Mono", monospace';
     var x = 32;
     var y = 315;
     this.ctx.fillText(app.username, x, y);
@@ -95,7 +96,7 @@ app.contactCard = {
   },
 
   writeBio: function writeBio () {
-    this.ctx.font = "13px monospace";
+    this.ctx.font = '13px "PT Mono", monospace';
     var LINE_LENGTH = 32;
     var lineCount = 1;
     if (this.bio.length <= LINE_LENGTH) {
