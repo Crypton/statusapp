@@ -9,6 +9,8 @@ document.addEventListener("deviceready", onDeviceReady, false);
 function onDeviceReady() {
   $('.header-wrap').hide();
 
+  window.open = cordova.InAppBrowser.open;
+  
   cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
   // cordova.plugins.Keyboard.disableScroll(true);
   

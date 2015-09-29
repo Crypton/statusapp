@@ -36,4 +36,5 @@
     <plugin name="org.apache.cordova.dialogs" spec="^0.3.0" />
     <plugin name="com.telerik.plugins.wkwebview" spec="https://github.com/Telerik-Verified-Plugins/WKWebView" />
     <plugin name="cordova-plugin-webserver" spec="^1.0.3" />
+    <plugin name="cordova-plugin-inappbrowser" spec="https://github.com/apache/cordova-plugin-inappbrowser" />
 </widget>
