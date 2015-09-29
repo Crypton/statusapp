@@ -290,7 +290,7 @@ var app = {
     });
 
     $('.icon--contact-card').click(function () {
-      app.displayMyFingerprint(true);
+      // app.displayMyFingerprint(true);
       app.switchView('my-fingerprint-id-wrapper', 'My Contact Card');
     });
     
@@ -332,6 +332,21 @@ var app = {
       app.displayMyFingerprint(true);
     });
 
+    $('#share-my-id-card').click(function () {
+      var idCard = $('.current-contact-card-canvas')[0];
+      if (app.isNodeWebKit) {
+        app.saveIdToDesktop_desktop(idCard);
+      } else {
+	var _base64Img = idCard.toDataURL("image/png");
+        window.plugins.socialsharing.share(app.sharingMessage, app.sharingTitle, _base64Img, app.sharingUrl);
+      }
+    });
+    
+    $('#retake-id-picture').click(function () {
+      // app.newPhotoContactCardSheet();
+      app.contactCard.newPhotoContactCardSheet();
+    });
+    
     $('.icon--settings').click(function () {
       // disable forget credentials if not supported
       if (!app.keyChain.supported) {
@@ -693,7 +708,7 @@ var app = {
 
     var width = 120;
     var height = 160;
-    var quality = 50;
+    var quality = 75;
     var cameraDirection = cameraDirectionOptions.BACK;
     var pictureSourceType = navigator.camera.PictureSourceType.CAMERA;
     var allowEdit = true;
@@ -1295,8 +1310,8 @@ var app = {
     });
 
     $('#retake-id-picture').click(function () {
-      // app.retakeIdPicture();
-      app.newPhotoContactCardSheet();
+      // app.newPhotoContactCardSheet();
+      app.contactCard.newPhotoContactCardSheet();
     });
     if (callback) {
       callback();
@@ -1584,7 +1599,7 @@ var app = {
 	  // re-display ID card:
 	  if (uiCallback) {
 	    $('#header').show();
-	    $('#header-contcts').show();
+	    $('#header-contacts').show();
 	  }
 	  app.displayMyFingerprint(true);
 	});

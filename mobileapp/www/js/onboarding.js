@@ -44,7 +44,8 @@ app.onboarding = {
     });
 
     $('#onboarding-add-photo-btn').click(function () {
-      that.addPhotoToCard();
+      // that.addPhotoToCard();
+      app.contactCard.newPhotoContactCardSheet();
     });
 
     $('#onboarding-username-input').keyup(function (e) {
@@ -168,7 +169,7 @@ app.onboarding = {
 	    }
 	    ProgressIndicator.hide();
 	    // Display Contact Card onboarding screen:
-	    that.displayContactCard();
+	    // that.displayContactCard();
 	    app.switchView('onboarding-no-account-step-4');
 	  });
 	});

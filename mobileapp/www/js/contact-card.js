@@ -6,27 +6,80 @@ app.contactCard = {
 
   bio: null,
   
-  init: function init (bio) {
-    // Set up all of the basic information here
-    if (typeof bio == 'string') {
-      if (bio.length > 96) {
-	var err = 'Bio is too long, 96 chatracters Max';
-	console.error(err);
-	app.alert(err, 'danger');
-	return;
+  init: function init (parentNodeId) {
+    $('.current-contact-card-canvas').remove();
+    this.parentNodeId = parentNodeId;
+    var that = this;
+    this.usingDefaultPhoto = false;
+
+    function bioCallback() {
+    
+      var contactCardPhotoData = app.session.items.avatar.value.avatar;
+      if (contactCardPhotoData) {
+	$('#contact-card-photo')[0].src = app.session.items.avatar.value.avatar;
+      } else {
+      $('#contact-card-photo')[0].src = $('#contact-card-photo-default')[0].src;
+	this.usingDefaultPhoto = true;
       }
-      this.bio = bio;
+
+      $('#contact-card-photo')[0].onload = function contactCardOnload() {
+	that.assembleContactCard();
+	$("#" + that.parentNodeId).append($(that.contactCardCanvas));
+      };
     }
 
+    this.captureBio(bioCallback);
+  },
+
+  displayCard: function displayCard (parentNodeId) {
     var that = this;
-    
-    app.switchView('hidden-utility-nodes');
-    // XXX make sure the avatar exists
+    this.parentNodeId = parentNodeId;
+
+    $('.current-contact-card-canvas').remove();
+
+    var contactCardPhotoData = app.session.items.avatar.value.avatar;
+
     $('#contact-card-photo')[0].src = app.session.items.avatar.value.avatar;
-    $('#contact-card-photo')[0].onload = function contactCardOnload() {
-      that.assembleContactCard();
-      $("#hidden-utility-nodes").append($(that.contactCardCanvas));
-    };
+    
+    that.assembleContactCard();
+    $("#" + that.parentNodeId).append($(that.contactCardCanvas));
+    
+    // $('#contact-card-photo').load(function contactCardOnload() {
+    //   that.assembleContactCard();
+    //   $("#" + that.parentNodeId).append($(that.contactCardCanvas));
+    // });
+    
+    // if (contactCardPhotoData) {
+    
+    // } else {
+    //  $('#contact-card-photo')[0].src = $('#contact-card-photo-default')[0].src;
+    //  this.usingDefaultPhoto = true;
+    // }
+  },
+  
+  captureBio: function captureBio (callback) {
+    var that = this;
+    function onPrompt(results) {
+      if (results.input1.length > 96) {
+	app.alert('Sorry, your Biography is too long. 96 Characters Maximum.', 'danger');
+	return;
+      }
+      that.bio = results.input1;
+      localStorage.setItem('bio-' + app.username, results.input1);
+      if (typeof callback === 'function') {
+	callback();
+      }
+    }
+
+    var bio = localStorage.getItem('bio-' + app.username);
+    
+    navigator.notification.prompt(
+      'Please enter a short Biography, maximum of 96 characters', // message
+      onPrompt,                                                   // callback to invoke
+      'Enter Biography',                                          // title
+      ['Save', 'Cancel'],                                         // buttonLabels
+      bio || 'Privacy Enthusiast (since forever!)'                // defaultText
+    );
   },
   
   getContactCardTemplate: function getContactCardTemplate () {
@@ -67,7 +120,7 @@ app.contactCard = {
       app.alert('Card creation error.');
       return;
     }
-    
+
     // Create the card, get the QR code only
     this.qrCodeCanvas =
     this.createQRCode(fingerArr, app.session.account.username, app.APPNAME);
@@ -75,7 +128,7 @@ app.contactCard = {
     this.cardPhoto = this.getAvatarImage();
     
     this.contactCardCanvas = this.getContactCardTemplate();
-
+    $(this.contactCardCanvas).addClass('current-contact-card-canvas');
     this.fillCardTemplate();
   },
   
@@ -89,7 +142,16 @@ app.contactCard = {
     var y = 315;
     this.ctx.fillText(app.username, x, y);
     this.ctx.drawImage(this.qrCodeCanvas, 224, 118);
-    this.ctx.drawImage(this.cardPhoto, 45, 118);
+    x = 45;
+    y = 118;
+    if (this.usingDefaultPhoto) {
+      x = x + 20;
+      y = y + 20;
+    }
+    this.ctx.drawImage(this.cardPhoto, x, y);
+    if (!this.bio) {
+      this.bio = localStorage.getItem('bio-' + app.username);
+    }
     if (this.bio) {
       this.writeBio();
     }
@@ -148,5 +210,97 @@ app.contactCard = {
     });
   
     return qrCodeCanvas;
+  },
+
+  updatePhoto: function updatePhoto () {
+    app.getPhoto({ width: 120, height: 160 }, function (err, imageData) {
+      var avatarItem = app.session.items.avatar;
+      avatarItem.value.avatar = imageData;
+      avatarItem.value.updated = Date.now();
+
+      app.alert('Saving photo to server...', 'info');
+      
+      avatarItem.save(function (err) {
+        if (err) {
+          var _err = 'Cannot save photo to server';
+          console.error(_err + ' ' + err);
+          return app.alert(_err, 'danger');
+        }
+	
+        // photo is saved to the server
+	// $('.current-contact-card-canvas').remove();
+	$('#contact-card-photo')[0].src = imageData;
+	this.cardPhoto = this.getAvatarImage();
+	// this.contactCardCanvas = this.getContactCardTemplate();
+	// this.fillCardTemplate();
+
+	// JUST NEED TO write the new photo over
+	this.ctx.drawImage(this.cardPhoto, 45, 118);
+	
+      });
+    });
+  },
+
+  newPhotoContactCardSheet:  function newPhotoContactCardSheet (uiCallback) {
+    var options = {
+      'androidTheme' : window.plugins.actionsheet.ANDROID_THEMES.THEME_HOLO_LIGHT,
+      'buttonLabels': ['Snap Card Photo', 'Choose Card Image'],
+      'addCancelButtonWithLabel': 'Cancel',
+      'androidEnableCancelButton' : true
+    };
+
+    var that = this;
+
+    function callback(buttonIdx) {
+      console.log(buttonIdx);
+      switch (buttonIdx) {
+      case 1:
+	// Take Photo
+	that.updatePhoto();
+	break;
+
+      case 2:
+	// Choose Photo
+	var options =
+	  { cameraDirection: 0,
+	    pictureSourceType: navigator.camera.PictureSourceType.SAVEDPHOTOALBUM,
+	    allowEdit: true,
+	    width: 120,
+	    height: 160 
+	  };
+	app.getPhoto(options, function imgCallback(err, imgData) {
+	  if (err) {
+	    console.error(err);
+	    app.alert('danger', err);
+	    return;
+	  }
+	  // Do something with the photo
+	  app.session.items.avatar.value.avatar = imgData;
+	  app.session.items.avatar.value.avatar.updated = Date.now();
+	  app.session.items.avatar.save(function (err) {
+	    if (err) {
+              var _err = 'Cannot save avatar data to server';
+              console.error(_err + ' ' + err);
+              return app.alert(_err);
+            }
+	    $('.current-contact-card-canvas').remove();
+	    $('#contact-card-photo')[0].src = imgData;
+	    that.cardPhoto = that.getAvatarImage();
+	    // this.contactCardCanvas = this.getContactCardTemplate();
+	    // this.fillCardTemplate();
+	    that.ctx.drawImage(that.cardPhoto, 45, 118);
+	    
+	  });
+	});
+	break;
+	
+      case 3:
+	// Cancel
+	return;
+      default:
+	return;
+      }
+    }
+    window.plugins.actionsheet.show(options, callback);
   }
 };

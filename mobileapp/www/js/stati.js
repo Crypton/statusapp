@@ -359,6 +359,16 @@ app.viewActions = {
 
   'account-login': function vaAccountLogin () {
     $('#username-login').focus();
+  },
+
+  'onboarding-no-account-step-4': function vaOnboardingNoAccount3 () {
+    // show the card
+    app.contactCard.init('onboarding-contact-card-wrapper');
+  },
+
+  'my-fingerprint-id-wrapper': function vaMyContactCard () {
+    // display the card
+    app.contactCard.displayCard('my-fingerprint-id');
   }
 };
 

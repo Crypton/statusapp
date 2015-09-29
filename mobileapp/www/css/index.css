@@ -1199,10 +1199,7 @@ input.onboarding-input {
 }
 
 #onboarding-contact-card-wrapper {
-    width: 290px;
-    height: 480px;
-    background-color: whitesmoke;
-    opacity: 0.9;
+
 }
 
 #onboarding-account-generation-card {
@@ -1217,8 +1214,8 @@ input.onboarding-input {
 }
 
 #onboarding-account-contact-card {
-    color: white;
-    margin-left: 2em;
+    margin-left: 1em;
+    margin-right: 1em;
 }
 
 #onboarding-no-account-step-4 {
@@ -1242,4 +1239,8 @@ input.onboarding-input {
 
 onboarding-no-account-step-2 {
     padding-top: 2em; 
+}
+
+#onboarding-contact-card-wrapper canvas {
+    width: 99%;
 }

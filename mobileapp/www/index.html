@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: wss: data: gap: android-webview-video-poster: https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: wss: data: gap: android-webview-video-poster: https://*.crypton.io https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" />
     <link rel="stylesheet" type="text/css" href="css/index.css" />
     <link rel="stylesheet" type="text/css" href="css/stati.css" />
     <link rel="stylesheet" type="text/css" href="css/vendor/animated.css" />
@@ -231,10 +231,11 @@ height: 2.5rem;"></a>
 	    <p>
 	      <strong>Kloak</strong> generates a 'Contact Card' which you share with contacts. You can share your status updates, photos and location once you have exchanged cards with your contacts.</p>
 	    <p>
-	      <a href="#" id="onboarding-add-photo-btn">Add a photo to your card</a> or <a href="#" id="onboarding-exit-setup">Start Kloak</>
+	      <a href="#" id="onboarding-add-photo-btn">Add a photo to your card</a> or <a href="#" id="onboarding-exit-setup">Start Kloak</a>
 	    </p>
 	    <p>
 	      <div id="onboarding-contact-card-wrapper">
+		
 	      </div>
 	    </p>
 	    <!-- <div id="onboarding-contact-card-share-buttons"> -->
@@ -521,8 +522,15 @@ height: 2.5rem;"></a>
     </nav>
 
     <div id="hidden-utility-nodes" class="view">
-      <img style="display: none;" id="contact-card-template" src="img/contact-template.png" />
+      <img style="display: none;"
+	   id="contact-card-template"
+	   src="img/contact-template.png" />
+      
       <img style="display: none;" id="contact-card-photo" />
+
+      <img style="display: none;"
+	   src="svg/card-black.svg"
+	   id="contact-card-photo-default" />
     </div>
     
     <script type="text/javascript" src="cordova.js"></script>
