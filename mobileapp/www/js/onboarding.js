@@ -223,15 +223,6 @@ app.onboarding = {
   },
 
   addPhotoToCard: function addPhotoToCard() {
-    // app.getPhoto(null, function addPhotoCB (err, imgData) {
-    //   // save avatar:
-    //   app.session.items.avatar.value.avatar = imgData;
-    //   app.session.items.avatar.save(function (err) {
-    // 	// add photo to the card
-    // 	var idCard = $('#onboarding-contact-card-wrapper canvas')[0];
-    // 	app.pasteAvatar(imgData, idCard);
-    //   });
-    // });
     app.newPhotoContactCardSheet(function () {
       $('#header').show();
     });

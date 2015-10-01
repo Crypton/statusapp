@@ -14,11 +14,11 @@ function onDeviceReady() {
   cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
   // cordova.plugins.Keyboard.disableScroll(true);
   
-  $(function() {
+  $(function () {
     FastClick.attach(document.body);
   });
 
-    //Check for touchID localstorage
+  //Check for touchID localstorage
   if(!window.localStorage.touchIdLoginEnabled) {
      window.localStorage.setItem('touchIdLoginEnabled', 0);
   }
@@ -27,7 +27,7 @@ function onDeviceReady() {
   app.init();
 
   document.addEventListener('resume', function() {
-    setTimeout(function(){
+    setTimeout(function () {
       console.log('Application Resume Event!');
       if (app.resumeEventHandler &&
 	  (typeof app.resumeEventHandler == 'function')) {
@@ -297,9 +297,22 @@ var app = {
     });
     
     $('#header-contacts .header-back').click(function () {
-      app.switchView('feed', 'Timeline');
+      if ($('#contacts-list-wrapper').is(':visible')) {
+	app.switchView('feed', 'Contacts');
+      } else {
+	app.switchView('contacts', 'Contacts');
+      }
     });
 
+    $('#header-contacts #header--title').click(function () {
+      app.switchView('contacts', 'Contacts');
+    });
+
+    $('#header-timeline #header--title').click(function () {
+      // $('#feed')[0].scrollTop = 0;
+      $('#feed').animate({ scrollTop: 0 }, "fast");
+    });
+    
     $('#header-settings .header-back').click(function () {
       app.switchView('feed', 'Timeline');
     });
@@ -347,6 +360,12 @@ var app = {
     $('#retake-id-picture').click(function () {
       // app.newPhotoContactCardSheet();
       app.contactCard.newPhotoContactCardSheet();
+    });
+
+    $('#update-bio').click(function () {
+      app.contactCard.captureBio(function captureBioCB () {
+	app.contactCard.displayCard('my-fingerprint-id');
+      });
     });
     
     $('.icon--settings').click(function () {
@@ -505,7 +524,8 @@ var app = {
       app.viewActions[id]();
     } catch (ex) {
       console.error(ex);
-      console.warn('No defined action in app.viewActions object that handles ' + id);
+      console.error(ex.stack);
+      console.warn('No defined action in app.viewActions object that handles ' + id + ' or exception inside handler');
     }
     var htmlId = '#' + id;
 
@@ -1512,13 +1532,15 @@ var app = {
       $('.contact-record').click(function () {
         var contact = $(this).attr('id').split('-')[1];
         console.log(contact);
-        app.contactDetails(contact);
+        // app.contactDetails(contact);
+	app.switchView('contact-details', contact);
+	app.contactCard.displayCard('contact-details', contact);
       });
 
     });
   },
 
-  contactDetails: function (name) {
+  contactDetails: function contactDetails (name) {
     var contact = app._contacts[name];
     // display the contact's fingerprint ID card:
     var fingerprint = contact.fingerprint || '0000000000000000000000000000000000000000000000000000000000000000';

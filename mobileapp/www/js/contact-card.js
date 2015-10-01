@@ -31,30 +31,23 @@ app.contactCard = {
     this.captureBio(bioCallback);
   },
 
-  displayCard: function displayCard (parentNodeId) {
+  displayCard: function displayCard (parentNodeId, name) {
     var that = this;
     this.parentNodeId = parentNodeId;
+    if (!name) {
+      name = app.username;
+    }
+    if (name !== app.username) {
+      this.username = name;
+    }
 
     $('.current-contact-card-canvas').remove();
 
-    var contactCardPhotoData = app.session.items.avatar.value.avatar;
-
-    $('#contact-card-photo')[0].src = app.session.items.avatar.value.avatar;
+    // var contactCardPhotoData = app.session.items.avatar.value.avatar;
+    // $('#contact-card-photo')[0].src = app.session.items.avatar.value.avatar;
     
-    that.assembleContactCard();
-    $("#" + that.parentNodeId).append($(that.contactCardCanvas));
-    
-    // $('#contact-card-photo').load(function contactCardOnload() {
-    //   that.assembleContactCard();
-    //   $("#" + that.parentNodeId).append($(that.contactCardCanvas));
-    // });
-    
-    // if (contactCardPhotoData) {
-    
-    // } else {
-    //  $('#contact-card-photo')[0].src = $('#contact-card-photo-default')[0].src;
-    //  this.usingDefaultPhoto = true;
-    // }
+    this.assembleContactCard(this.username);
+    $("#" + this.parentNodeId).append($(that.contactCardCanvas));
   },
   
   captureBio: function captureBio (callback) {
@@ -65,10 +58,19 @@ app.contactCard = {
 	return;
       }
       that.bio = results.input1;
-      localStorage.setItem('bio-' + app.username, results.input1);
-      if (typeof callback === 'function') {
-	callback();
-      }
+
+      // save bio to avatar item
+      app.session.items.avatar.value.biography = results.input1;
+      app.session.items.avatar.save(function saveBioCB(err) {
+	if (err) {
+	  console.error('Could not save bio!');
+	}
+	// save it locally too for now...
+	localStorage.setItem('bio-' + app.username, results.input1);
+	if (typeof callback === 'function') {
+	  callback();
+	}
+      });
     }
 
     var bio = localStorage.getItem('bio-' + app.username);
@@ -95,41 +97,100 @@ app.contactCard = {
     return canvas;
   },
 
-  getAvatarImage: function getAvatarImage () {
-    var img = document.getElementById('contact-card-photo');
-    // Create an empty canvas element
-    var canvas = document.createElement("canvas");
-    canvas.width = img.width;
-    canvas.height = img.height;
-
-    // Copy the image contents to the canvas
-    var ctx = canvas.getContext("2d");
-    ctx.drawImage(img, 0, 0);
+  base64UrlToCanvas: function base64UrlToCanvas (base64Url) {
+    if (!base64Url) {
+      console.warn('No base64Url, getting generic base64Url');
+      // we need to get a generic one here
+      base64Url = this.genericAvatar;
+    }
+    var canvas = $('<canvas></canvas>')[0];
+    canvas.width = 120;
+    canvas.height = 120;
+    
+    var ctx = canvas.getContext("2d");    
+    var image = new Image();
+    image.src = base64Url;
+    // image.onload = function () {
+    ctx.drawImage(image, 0, 0);
+    this.cardPhoto = canvas;
+    // };
+    
     return canvas;
   },
   
-  qrCodeCanvas: null,
+  getContactAvatarImage: function getContactAvatarImage () {
+    var imgData = app._contacts[this.username].avatar;
+    // this.bio = app._contacts[this.username].biography;
+    return this.base64UrlToCanvas(imgData);
+  },
   
-  assembleContactCard: function assembleContactCard () {
+  getAvatarImage: function getAvatarImage () {
+    if (this.username !== app.username) {
+      return this.getContactAvatarImage(this.username);
+    }
+
+    var imgData = app.session.items.avatar.value.avatar;
+    // this.bio = app._contacts[this.username].biography;
+    if (!imgData) {
+      return null;
+    }
+    return this.base64UrlToCanvas(imgData);
+
+    // var img = document.getElementById('contact-card-photo');
+    // // Create an empty canvas element
+    // var canvas = document.createElement("canvas");
+    // canvas.width = img.width;
+    // canvas.height = img.height;
+
+    // // Copy the image contents to the canvas
+    // var ctx = canvas.getContext("2d");
+    // ctx.drawImage(img, 0, 0);
+    // return canvas;
+  },
+  
+  qrCodeCanvas: null,
+
+  getFingerprintArr: function getFingerprintArr (contactName) {
     var fingerArr;
+    var fingerprint;
+    if (!contactName || contactName === app.username) {
+      fingerprint = app.session.account.fingerprint;
+      this.username = app.session.account.username;
+    } else {
+      if (app._contacts[contactName]) {
+	fingerprint = app._contacts[contactName].fingerprint;
+	this.username = contactName;
+      }
+    }
     try {
-      fingerArr =
-      app.card.createFingerprintArr(app.session.account.fingerprint);
+      return app.card.createFingerprintArr(fingerprint);
     } catch (ex) {
       console.log(ex);
       app.alert('Card creation error.');
-      return;
+      return null;
     }
+  },
+  
+  assembleContactCard: function assembleContactCard (contactName) {
 
+    var fingerArr = this.getFingerprintArr(contactName);
     // Create the card, get the QR code only
     this.qrCodeCanvas =
-    this.createQRCode(fingerArr, app.session.account.username, app.APPNAME);
+    this.createQRCode(fingerArr, this.username, app.APPNAME);
 
-    this.cardPhoto = this.getAvatarImage();
-    
+    this.getAvatarImage(contactName);
+    this.getBio();
     this.contactCardCanvas = this.getContactCardTemplate();
     $(this.contactCardCanvas).addClass('current-contact-card-canvas');
     this.fillCardTemplate();
+  },
+
+  getBio: function getBio () {
+    if (this.username !== app.username) {
+      this.bio = app._contacts[this.username].biography;
+    } else {
+      this.bio = app.session.items.avatar.value.biography;
+    }
   },
   
   fillCardTemplate: function fillCardTemplate () {
@@ -140,17 +201,14 @@ app.contactCard = {
     this.ctx.font = '16px "PT Mono", monospace';
     var x = 32;
     var y = 315;
-    this.ctx.fillText(app.username, x, y);
+    this.ctx.fillText(this.username, x, y);
     this.ctx.drawImage(this.qrCodeCanvas, 224, 118);
+
     x = 45;
     y = 118;
-    if (this.usingDefaultPhoto) {
-      x = x + 20;
-      y = y + 20;
-    }
-    this.ctx.drawImage(this.cardPhoto, x, y);
-    if (!this.bio) {
-      this.bio = localStorage.getItem('bio-' + app.username);
+
+    if (this.cardPhoto) {
+      this.ctx.drawImage(this.cardPhoto, x, y);
     }
     if (this.bio) {
       this.writeBio();
@@ -302,5 +360,21 @@ app.contactCard = {
       }
     }
     window.plugins.actionsheet.show(options, callback);
-  }
+  },
+
+  contactDetails: function contactDetails (name) {
+    var contact = app._contacts[name];
+    var fingerprint = contact.fingerprint || '0000000000000000000000000000000000000000000000000000000000000000';
+    var bio = contact.biography || '';
+    var avatar = contact[name].avatar; // || get a generic base64url avatar
+    // make card canvas
+    
+    // paste avatar
+    
+  },
+
+  // Generic Contact Card SVG converted to PNG for ease of use and fewer DOM errors
+  genericAvatar:
+  "data:image/png;base64,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"
+
 };

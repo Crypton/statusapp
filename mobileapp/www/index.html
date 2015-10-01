@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -85,7 +86,7 @@ height: 2.5rem;"></a>
 	<button class="btn" id="capture-picture">Capture</button>
       </div>
 
-      <div id="feed" class="view">
+      <div id="feed" class="view" name="feed">
 
 	<div id="first-run-empty-feed-msg">
 	  <p>Your feed is empty. Say something or connect with contacts to fill your feed</p>
@@ -428,8 +429,15 @@ height: 2.5rem;"></a>
 	<div id="my-fingerprint-id">
 	</div>
 	<div id="contact-card-menu">
-	  <img class="card-btns" id="retake-id-picture" src="svg/camera.svg" />
-	  <img class="card-btns" id="share-my-id-card" src="svg/share-black.svg" />
+	  <div id="update-bio-wrapper">
+	    <a href="#" id="update-bio">Update Biography</a>
+	  </div>
+	  <a href="#" id="retake-id-picture">
+	    <img class="card-btns" src="svg/camera.svg" />
+	  </a>
+	  <a href="#" id="share-my-id-card">
+	    <img class="card-btns" src="svg/share-black.svg" />
+	  </a>
 	</div>
       </div>
 

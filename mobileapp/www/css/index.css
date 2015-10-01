@@ -715,11 +715,12 @@ a.header-back {
     text-align: center;
     height: 90%;
     overflow: scroll;
-    margin-top: 0.5em;
+    margin: 1em;
 }
 
 #my-fingerprint-id canvas {
-  margin-bottom: 20px;
+    margin-bottom: 1em;
+    width: 100%;
 }
 
 #scan-select {
@@ -826,9 +827,9 @@ a.header-back {
     padding: 0.5em;
     color: whitesmoke;
     background-color: rgba(50, 50, 50, 0.85);
-    width: 75%;
+    width: 92%;
     position: fixed;
-    left: 10%;
+    left: 0.3em;
     bottom: 50%;
     text-align: center;
 }
@@ -1062,19 +1063,21 @@ body {
 }
 
 #contact-card-menu {
-    position: absolute;
-    bottom: 0;
-    right: 0;
     width: 100%;
-    height: 60px;
-    padding-top: 0.5em;
-    padding-left: 60%;
     text-align: center;
+}
+
+#contact-card-menu a {
+    text-decoration: none;
 }
 
 #contact-card-menu img {
     margin-right: 1em;
     margin-left: 0.5em;
+    margin-bottom: 1em;
+}
+
+#update-bio-wrapper {
     margin-bottom: 1em;
 }
 
@@ -1243,4 +1246,8 @@ onboarding-no-account-step-2 {
 
 #onboarding-contact-card-wrapper canvas {
     width: 99%;
+}
+
+.current-contact-card-canvas {
+    width: 90%;
 }

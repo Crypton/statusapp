@@ -2564,7 +2564,8 @@ Autolinker.match.Twitter = Autolinker.Util.extend( Autolinker.match.Match, {
 	 * @return {String}
 	 */
 	getAnchorHref : function() {
-		return 'https://twitter.com/' + this.twitterHandle;
+	  // return 'https://twitter.com/' + this.twitterHandle;
+	  return '#';
 	},
 
 
