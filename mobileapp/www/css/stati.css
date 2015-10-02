@@ -279,7 +279,7 @@
 .media-link-url { color: gray }
 .media-link-email { color: gray }
 .media-link-phone { color: red; }
-.media-link-twitter { color: blue; }
+.media-link-twitter { color: blue; text-decoration: none; }
 .media-link-hashtag { color: purple; }
 
 #about-view {

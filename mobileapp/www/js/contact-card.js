@@ -103,7 +103,9 @@ app.contactCard = {
       console.warn('No base64Url, getting generic base64Url');
       // we need to get a generic one here
       base64Url = this.genericAvatar;
+      this.defaultAvatar = true;
     }
+    this.defaultAvatar = false;
     var canvas = $('<canvas></canvas>')[0];
     canvas.width = 120;
     canvas.height = 120;
@@ -121,7 +123,6 @@ app.contactCard = {
   
   getContactAvatarImage: function getContactAvatarImage () {
     var imgData = app._contacts[this.username].avatar;
-    // this.bio = app._contacts[this.username].biography;
     return this.base64UrlToCanvas(imgData);
   },
   
@@ -131,22 +132,11 @@ app.contactCard = {
     }
 
     var imgData = app.session.items.avatar.value.avatar;
-    // this.bio = app._contacts[this.username].biography;
+    
     if (!imgData) {
       return null;
     }
     return this.base64UrlToCanvas(imgData);
-
-    // var img = document.getElementById('contact-card-photo');
-    // // Create an empty canvas element
-    // var canvas = document.createElement("canvas");
-    // canvas.width = img.width;
-    // canvas.height = img.height;
-
-    // // Copy the image contents to the canvas
-    // var ctx = canvas.getContext("2d");
-    // ctx.drawImage(img, 0, 0);
-    // return canvas;
   },
   
   qrCodeCanvas: null,
@@ -209,6 +199,10 @@ app.contactCard = {
     y = 118;
 
     if (this.cardPhoto) {
+      if (this.defaultAvatar) {
+	x = 65;
+	y = 138;
+      }
       this.ctx.drawImage(this.cardPhoto, x, y);
     }
     if (this.bio) {

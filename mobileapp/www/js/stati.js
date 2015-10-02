@@ -1207,12 +1207,21 @@ app.linkOutput = function linkOutput(autolinker, match) {
   var href = match.getAnchorHref();
 
   function makeLink(url, klass) {
-    var link = '<a href="#" class="media-link media-link-'
-             + klass
-             + '" onclick="'
-             + 'window.open(\'' + url  + '\', \'_system\', \'\')">'
-             + text
-             + '</a>';
+    var link;
+    if (klass === 'twitter') {
+      link = '<a href="#" class="media-link media-link-'
+            + klass
+            + '">'
+            + text
+            + '</a>';
+    } else {
+      link = '<a href="#" class="media-link media-link-'
+            + klass
+            + '" onclick="'
+            + 'window.open(\'' + url  + '\', \'_system\', \'\')">'
+            + text
+            + '</a>';
+    }
     return link;
   }
 
