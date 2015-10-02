@@ -720,6 +720,7 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     data.itemId = timeline[i].timelineId;
     console.log('rendered timelineid: ', timeline[i].timelineId);
     node = app.createMediaElement(data, localUser);
+    console.log('avatarMeta: ', timeline[i].value.avatarMeta);
     if (!localUser && timeline[i].value.avatarMeta) {
       app.handleAvatar(timeline[i].creatorUsername, timeline[i].value.avatarMeta);
     }
@@ -748,61 +749,61 @@ app.handleAvatar = function handleAvatar(peerName, avatarMeta) {
     var avatarMetaName = peerName + '-avatar-meta';
     if (app.session.items[avatarMetaName]) {
       if (avatarMeta.updated > app.session.items[avatarMetaName].value.updated) {
-  // update the avatarMeta!
-  app.session.items[avatarMetaName].value.updated = avatarMeta.updated;
-  app.session.getOrCreateItem(avatarMetaName, function (err, item) {
-    if (err) {
-      console.error(err);
-      return;
-    }
+	// update the avatarMeta!
+	app.session.items[avatarMetaName].value.updated = avatarMeta.updated;
+	app.session.getOrCreateItem(avatarMetaName, function (err, item) {
+	  if (err) {
+	    console.error(err);
+	    return;
+	  }
 
-    app.session.getPeer(peerName, function (err, peer) {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      app.session.getSharedItem(avatarMeta.nameHmac, peer,
-      function (err, sharedItem) {
-        if (err) {
-    console.error(err);
-    return;
-        }
-        item.value = {
-    updated: avatarMeta.updated,
-    nameHmac: avatarMeta.nameHmac,
-    avatar: sharedItem.value.avatar
-        };
-
-      });
-    });
-  });
+	  app.session.getPeer(peerName, function (err, peer) {
+	    if (err) {
+              console.error(err);
+              return;
+	    }
+	    app.session.getSharedItem(avatarMeta.nameHmac, peer,
+	    function (err, sharedItem) {
+	      if (err) {
+		console.error(err);
+		return;
+              }
+	      item.value = {
+		updated: avatarMeta.updated,
+		nameHmac: avatarMeta.nameHmac,
+		avatar: sharedItem.value.avatar
+              };
+	      
+	    });
+	  });
+	});
       }
     } else {
       // add meta to the object
       app.session.getOrCreateItem(avatarMetaName, function (err, item) {
-  if (err) {
-    console.error(err);
-    return;
-  }
-  app.session.getPeer(peerName, function (err, peer) {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    app.session.getSharedItem(avatarMeta.nameHmac, peer,
-    function (err, sharedItem) {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      item.value = {
-        updated: avatarMeta.updated,
-        nameHmac: avatarMeta.nameHmac,
-        avatar: sharedItem.value.avatar
-      };
-      // XXX: update all avatars in the feed?
-    });
-  });
+	if (err) {
+	  console.error(err);
+	  return;
+	}
+	app.session.getPeer(peerName, function (err, peer) {
+	  if (err) {
+	    console.error(err);
+	    return;
+	  }
+	  app.session.getSharedItem(avatarMeta.nameHmac, peer,
+          function (err, sharedItem) {
+	    if (err) {
+	      console.error(err);
+              return;
+	    }
+	    item.value = {
+              updated: avatarMeta.updated,
+              nameHmac: avatarMeta.nameHmac,
+              avatar: sharedItem.value.avatar
+	    };
+	    // XXX: update all avatars in the feed?
+	  });
+	});
       });
     }
   }

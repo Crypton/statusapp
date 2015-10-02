@@ -33,6 +33,7 @@ app.contactCard = {
 
   displayCard: function displayCard (parentNodeId, name) {
     var that = this;
+    this.username = null;
     this.parentNodeId = parentNodeId;
     if (!name) {
       name = app.username;
