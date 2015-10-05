@@ -64,7 +64,7 @@ app.aboutView = function _aboutView () {
 };
 
 app.setCustomEvents = function setCustomEvents () {
-
+  
   window.addEventListener('native.keyboardhide',
   function keyboardShowHandler (e) {
     app.keyboardTopPos = 0;
@@ -164,9 +164,6 @@ app.setCustomEvents = function setCustomEvents () {
     var target = document.querySelector('#post-input-wrapper textarea');
     var observer = new MutationObserver(function(mutations) {
       mutations.forEach(function(mutation) {
-	// var newBottom = mutation.target.parentElement.clientHeight;
-	// console.log('newBottom: ', newBottom);
-	// $('#post-image-location-wrapper').css({ bottom: newBottom + 'px' });
 	app.repositionInput();
       });
     });
@@ -193,7 +190,7 @@ app.setCustomEvents = function setCustomEvents () {
       if (!startPageY) {
 	startPageY = e.pageY;
       }
-      if (e.pageY > (startPageY + 80)) {
+      if (e.pageY > (startPageY + 70)) {
 	startPageY = null;
 	app.lastTimelineLoad = Date.now();
 	app.loadNewTimeline();
@@ -201,6 +198,19 @@ app.setCustomEvents = function setCustomEvents () {
       }
     }, false);
   })();
+};
+
+app.setOnSharedItemSync = function setOnSharedItemSync () {
+  app.session.events.onSharedItemSync = function (item) {
+    console.log('onSharedItemSync()', item);
+
+    if (item.value.avatar) {
+      // this is an avatar update
+      console.log('we were handed an avatar Item!', item.value);
+      app.updateContactAvatar(item.creator.username, item.value);
+      return;
+    }
+  };
 };
 
 app.keyboardTopPos = 0; // default
@@ -410,15 +420,12 @@ app.customInitialization = function customInitialization() {
   console.log('customInitialization()');
   var that = this;
 
-  // XXXddahl: need a indeterminate progress indicator
   app.createInitialItems(function (err) {
     if (err) {
-      // $('#top-progress-wrapper').hide();
       app.hideProgress();
       return console.error(err);
     }
     console.log('Initial items fetched or created');
-    // $('#top-progress-wrapper').hide();
     app.hideProgress();
     app.displayInitialView();
   });
@@ -459,10 +466,24 @@ app.createInitialItems = function createInitialItems (callback) {
 	  avatar: null
 	};
       }
+
+      // Lazy Get Avatar Hmacs
+      app.getAvatarHmacs();
+      
       if (!callbackFired) {
 	callback(null);
       }
     });
+  });
+};
+
+app.getAvatarHmacs = function getAvatarHmacs () {
+  console.log('Getting Avatar HMACS');
+  app.session.getOrCreateItem('avatarHmacs', function (err, list) {
+    if (err) {
+      return console.error('Cannot get avatarHmacs');
+    }
+    console.log('FetchedAvatar HMACS');
   });
 };
 
@@ -720,11 +741,17 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     data.itemId = timeline[i].timelineId;
     console.log('rendered timelineid: ', timeline[i].timelineId);
     node = app.createMediaElement(data, localUser);
+    
     console.log('avatarMeta: ', timeline[i].value.avatarMeta);
+    console.log('timeline object: ', timeline[i]);
+
+    // XXXddahl: add each avatarMeta + updated time + creatorUsername to an array
+    // During "idle times", we go through the list and snatch the shared avatar
+    // Also save the nameHmac for the shared avatar data into the trustedPeers
+    
     if (!localUser && timeline[i].value.avatarMeta) {
       app.handleAvatar(timeline[i].creatorUsername, timeline[i].value.avatarMeta);
     }
-
 
     // Make sure to hide the "empty feed message"
     if ($("#first-run-empty-feed-msg").is(":visible")) {
@@ -797,7 +824,7 @@ app.handleAvatar = function handleAvatar(peerName, avatarMeta) {
               return;
 	    }
 	    item.value = {
-              updated: avatarMeta.updated,
+              updated: avatarMeta.updated || 0,
               nameHmac: avatarMeta.nameHmac,
               avatar: sharedItem.value.avatar
 	    };
@@ -886,18 +913,18 @@ app.updateEmptyTimelineElements = function updateEmptyTimelineElements () {
     for (var i = 0; i < empties.length; i++) {
       var status;
       try {
-  status = history[empties[i]].value.status;
+	status = history[empties[i]].value.status;
       } catch (ex) {
-  console.warn('timelineItem has no status property: ', history[empties[i]]);
-  continue;
+	console.warn('timelineItem has no status property: ', history[empties[i]]);
+	continue;
       }
       if (status) {
-  // we have unknown update data
-  app.transformEmptyTimelineElement(empties[i], history[empties[i]]);
-  app.transformedTimelineElements[empties[i]] = Date.now();
+	// we have unknown update data
+	app.transformEmptyTimelineElement(empties[i], history[empties[i]]);
+	app.transformedTimelineElements[empties[i]] = Date.now();
       }
       if (i == (empties.length -1)) {
-  app.deferUpdateFeedAvatars();
+	app.deferUpdateFeedAvatars();
       }
     }
   }, 2000);
@@ -933,8 +960,16 @@ app.massageTimelineUpdate = function massageTimelineUpdate (data) {
       avatar = null;
     }
   }
+  console.log('massage: ', data);
+  var avatarMeta = {};
+  if (data.value.avatarMeta) {
+    avatarMeta.nameHmac = data.value.avatarMeta.nameHmac;
+    avatarMeta.updated = data.value.avatarMeta.updated;
+    avatarMeta.username = data.creatorUsername;
+  }
 
   return {
+    avatarMeta: avatarMeta,
     avatar: avatar,
     location: data.value.location,
     statusText: data.value.status,
@@ -956,7 +991,6 @@ app.toggleSetStatusProgress = function toggleSetStatusProgress() {
 };
 
 app.setMyStatus = function setMyStatus() {
-  // app.toggleSetStatusButton();
   // validate length of data to be sent
   var status = $('#post-textarea').val();
   status = app.escapeHtml(status);
@@ -1020,6 +1054,7 @@ app.setMyStatus = function setMyStatus() {
 
 app.displayInitialView = function displayInitialView() {
   // Check for first run
+  // XXX: this is probably deprecated now
   if (!app.firstRunIsNow) {
     app.session.on('message', function (message) {
       console.log('session.on("message") event called', message);
@@ -1076,18 +1111,18 @@ function createAvatarUpdateElement(data) {
 
   var timestamp = app.formatDate(data.timestamp || data.updated, data.tz);
   var html = '<div id="' + data.itemId
-           + '" class="media attribution">'
-     + '<a class="img">'
-           + '<img class="media-avatar" src="' + data.avatar
-           + '" />'
-       + '</a>'
-           + '  <div class="bd media-metadata">'
-     + '    <span class="media-username">' + data.username + '</span>'
-     + '    <div class="media-avatar-update">'
-     + 'avatar updated ' + timestamp
-           + '</div>'
-           + '  </div>'
-           + '</div>';
+        + '" class="media attribution">'
+	+ '<a class="img">'
+        + '<img class="media-avatar" src="' + data.avatar
+        + '" />'
+	+ '</a>'
+        + '  <div class="bd media-metadata">'
+	+ '    <span class="media-username">' + data.username + '</span>'
+	+ '    <div class="media-avatar-update">'
+	+ 'avatar updated ' + timestamp
+        + '</div>'
+        + '  </div>'
+        + '</div>';
   return $(html);
 };
 
@@ -1103,16 +1138,38 @@ function createMediaElement(data, localUser, existingNode) {
 
   var avatarMetaName = data.username + '-avatar-meta';
   if (app.session.items[avatarMetaName]) {
-    data.avatar = app.session.items[avatarMetaName].value.avatar;
+    data.avatar = app.session.items[avatarMetaName].value.avatar ||
+      app.avatars[data.username].avatar;
   }
 
+  console.log('Data: ', data);
+  
+  var avatarDataMarkup;
+  var avatarHmac;
+  if (data.avatarMeta) {
+    avatarHmac = data.avatarMeta.nameHmac;
+    var avatarName = data.avatarMeta.username;
+    avatarDataMarkup = ' data-avatarHmac="' + avatarHmac
+	  + '" data-avatarName="' + avatarName + '" ';
+  }
+  
   var avatarMarkup;
   if (!data.avatar) {
     // Make a stand-in avatar
-    avatarMarkup = '<span class="media-generic-avatar" '
-      + 'data-username="' + data.username + '">'
+    avatarMarkup = '<span class="media-generic-avatar ' + avatarHmac + '" '
+      + 'data-username="' + data.username + avatarDataMarkup + '">'
       + data.username[0].toUpperCase()
       + '</span>';
+
+    // store the hmac + name in our avatarHmacs object
+    if (app.session.items.avatarHmacs) {
+      if (!app.session.items.avatarHmacs.value[data.username]) {
+	app.session.items.avatarHmacs.value[data.username] = {
+	  avatarHmac: avatarHmac,
+	  updated: data.avatarMeta.updated
+	};
+      }
+    }
   } else {
     var avatarData;
     if (localUser) {
@@ -1120,7 +1177,8 @@ function createMediaElement(data, localUser, existingNode) {
     } else {
       avatarData  = data.avatar;
     }
-    avatarMarkup = '<img class="media-avatar" src="' + avatarData + '"/>';
+    avatarMarkup = '<img class="media-avatar"'
+      + avatarDataMarkup  + 'src="' + avatarData + '"/>';
   }
 
   var imageHtml;
@@ -1154,18 +1212,18 @@ function createMediaElement(data, localUser, existingNode) {
 	+ itemId + '"></div>';
 
   var html = '<a class="img">'
-           + avatarMarkup
-       + '  </a>'
-           + '  <div class="bd media-metadata">'
-           + '    <div class="status-block">'
-       + '    <div class="media-username">@' + data.username + '</div>'
-     + '    <span class="media-status">'
-     + status
-           + '</span></div>'
-     + '<footer class="media-footer"> <span class="media-timestamp">'
-           + data.humaneTimestamp + '</span>'
-           + '    <span class="media-location">'
-           + gps + '</span></footer>';
+        + avatarMarkup
+	+ '  </a>'
+        + '  <div class="bd media-metadata">'
+        + '    <div class="status-block">'
+	+ '    <div class="media-username">@' + data.username + '</div>'
+	+ '    <span class="media-status">'
+	+ status
+        + '</span></div>'
+	+ '<footer class="media-footer"> <span class="media-timestamp">'
+        + data.humaneTimestamp + '</span>'
+        + '    <span class="media-location">'
+        + gps + '</span></footer>';
   if (imageHtml) {
     html = html + imageHtml;
   }
@@ -1201,6 +1259,101 @@ function createMediaElement(data, localUser, existingNode) {
     return parent;
   }
 };
+
+app.fetchAvatar = function fetchAvatar (username, callback) {
+  app.session.getPeer(username, function (err, peer) {
+    if (err) {
+      if (typeof callback === 'function') {
+	console.error('Cannot get peer (for avatar)');
+      }
+      return;
+    }
+    var nameHmac = app.getAvatarHmac(username);
+    if (!nameHmac) {
+      if (typeof callback === 'function') {
+	callback('Cannot fetch avatar');
+      }
+      return;
+    }
+    app.session.getSharedItem(nameHmac, peer, function (err, avatar) {
+      if (err) {
+	var error = 'Cannot fetch ' + username + '\'s avatar!';
+	console.error(error);
+	if (typeof callback === 'function') {
+	  callback(error);
+	}
+	return; 
+      }
+
+      app.avatars[username] = avatar.value.avatar;
+      app.session.items._trusted_peers.value[username].biography =
+        avatar.value.biograpy || '';
+      
+      var newAvatar = app.createAvatar(avatar.value.avatar, username, nameHmac);
+      $('span.' + nameHmac).replaceWith(newAvatar);
+
+      var contactAvatar = '<img class="user-avatar" src="' + avatar.value.avatar  + '">';
+      // Replace contacts avatar too
+      $('#contact-' + username + ' img').replaceWith($(contactAvatar));
+      
+      if (typeof callback === 'function') {
+	callback(null, 'avatar fetched');
+      }
+      return;
+    });
+  }); 
+};
+
+app.avatars = {};
+
+app.createAvatar = function createAvatar (avatar, username, nameHmac) {
+  var avatarHmac = nameHmac;
+  var avatarName = username;
+  var avatarDataMarkup = ' data-avatarHmac="' + avatarHmac
+    + '" data-avatarName="' + avatarName + '" ';
+  
+  var avatarMarkup = '<img class="media-avatar"'
+	+ avatarDataMarkup  + 'src="' + avatar + '"/>';
+  return $(avatarMarkup);
+};
+
+app.getAvatars = function getAvatars (usernames) {
+  if (app.gettingAvatars) {
+    return;
+  }
+  if (!usernames || !usernames.length) {
+    return;
+  }
+  var that = this;
+  app.gettingAvatars = true;
+  var idx = 0;
+  this.avatarInterval = setInterval(function () {
+    if (!usernames[idx]) {
+      app.gettingAvatars = false;
+      clearInterval(that.avatarInterval);
+      return;
+    }
+    app.fetchAvatar(usernames[idx], function fetchCB(err, message){
+      if (err) {
+	console.error(err);
+      } else {
+	console.log(message);
+      }
+      idx++;
+      if ((idx -1) === usernames.length ) {
+	app.gettingAvatars = false;
+	clearInterval(that.avatarInterval);
+	app.session.items.avatarHmacs.save(function (err) {
+	  if (err) {
+	    console.error(err);
+	  }
+	});
+      }
+    });
+  }, 5000);
+},
+
+app.gettingAvatars = false;
 
 app.linkOutput = function linkOutput(autolinker, match) {
   var text = match.getAnchorText();
@@ -1256,11 +1409,11 @@ app.shareStatus = function shareStatus (peerObj) {
     }
     if (app.session.items.avatar) {
       app.session.items.avatar.share(peerObj, function (err) {
-  if (err) {
-    console.error(err);
-    console.error('cannot share avatar with ' + peerObj.username);
-  }
-  console.log('avatar shared with ' + peerObj.username);
+	if (err) {
+	  console.error(err);
+	  console.error('cannot share avatar with ' + peerObj.username);
+	}
+	console.log('avatar shared with ' + peerObj.username);
       });
     } else {
       console.error('app.session.items.avatar does not exist');

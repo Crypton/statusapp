@@ -159,13 +159,28 @@ var app = {
 
   },
 
+  getItem: function getItem (itemName) {
+    if (app.session.items[itemName]) {
+      return app.session.items[itemName].value;
+    }
+    return null;
+  },
+
+  getAvatarHmac: function getAvatarHmac (username) {
+    var avatarHmacs = app.getItem('avatarHmacs');
+    if (avatarHmacs) {
+      return avatarHmacs[username].avatarHmac;
+    }
+    return null;
+  },
+  
   APPNAME: 'Kloak',
 
   get contactCardLabel() { return app.APPNAME + ' contact card'; },
 
   URL: 'https://zk.gs',
 
-  VERSION: "0.4.0",
+  VERSION: "0.5.0",
 
   get isNodeWebKit() { return (typeof process == "object"); },
 
@@ -289,6 +304,13 @@ var app = {
     
     $('.icon--contacts').click(function () {
       app.displayContacts();
+      if (app.session.items.avatarHmacs) {
+	var usernames = Object.keys(app.getItem('avatarHmacs'));
+	console.log('usernames: ', usernames);
+	if (usernames) {
+	  app.getAvatars(usernames);
+	}
+      }
     });
 
     $('.icon--contact-card').click(function () {
@@ -322,7 +344,6 @@ var app = {
     });
     
     $('#header-btn-contacts').click(function () {
-      app.hideMenu();
       app.displayContacts();
     });
 
@@ -984,14 +1005,14 @@ var app = {
         app.switchView('account-login', 'Account');
         app.clearLoginStatus();
 	$('#top-menu').show();
-	// $('#top-progress-wrapper').hide();
 	app.hideProgress();
         $('#password-login').val('');
         return;
       }
 
       window.localStorage.setItem('lastUserLogin', user);
-      // Save passphrase if the checkbox is checked
+      
+      // Save passphrase if the keychain is supported
       if (app.keyChain.supported) {
 	app.keyChain.init(user, function (err) {
 	  if (err) {
@@ -1017,16 +1038,11 @@ var app = {
         if (err) {
           console.error(err);
           app.switchView('account-login', 'Account');
-	  // $('#top-progress-wrapper').hide();
 	  app.hideProgress();
           return;
         }
 
-        $('#tasks-btn').addClass('active');
-	$('#logout-page-title').hide();
-
         app.username = app.session.account.username;
-	// app.setProgressStatus('Loading timeline...');
 	
         if (!prefsItem.value.firstRun) {
           prefsItem.value = { firstRun: Date.now() };
@@ -1046,6 +1062,7 @@ var app = {
 	  if (err) {
 	    console.error(err);
 	  }
+	  app.getAvatarHmacs();
 	  app.hideProgress();
 	  app.displayInitialView();
 	});

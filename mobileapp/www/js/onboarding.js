@@ -151,7 +151,6 @@ app.onboarding = {
 	  return;
 	}
 
-
 	app.session.getOrCreateItem('_prefs_', function(err, prefsItem) {
           console.log('getting _prefs_');
 
@@ -169,7 +168,6 @@ app.onboarding = {
 	    }
 	    ProgressIndicator.hide();
 	    // Display Contact Card onboarding screen:
-	    // that.displayContactCard();
 	    app.switchView('onboarding-no-account-step-4');
 	  });
 	});
