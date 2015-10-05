@@ -44,9 +44,6 @@ app.contactCard = {
 
     $('.current-contact-card-canvas').remove();
 
-    // var contactCardPhotoData = app.session.items.avatar.value.avatar;
-    // $('#contact-card-photo')[0].src = app.session.items.avatar.value.avatar;
-    
     this.assembleContactCard(this.username);
     $("#" + this.parentNodeId).append($(that.contactCardCanvas));
   },
@@ -123,6 +120,9 @@ app.contactCard = {
   
   getContactAvatarImage: function getContactAvatarImage () {
     var imgData = app._contacts[this.username].avatar;
+    if (!imgData) {
+      imgData = app.avatars[this.username];
+    }
     return this.base64UrlToCanvas(imgData);
   },
   

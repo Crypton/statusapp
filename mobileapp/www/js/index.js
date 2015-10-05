@@ -1519,15 +1519,21 @@ var app = {
 	}
 
 	var userAvatar;
+	var avatar;
 	if (app.session.items._trusted_peers.value[contactNames[i]]) {
-	  var avatar = app.session.items._trusted_peers.value[contactNames[i]].avatar;
+	  avatar = app.session.items._trusted_peers.value[contactNames[i]].avatar;
 	  if (!avatar) {
 	    var avatarMetaName = contactNames[i] + '-avatar-meta';
 	    if (app.session.items[avatarMetaName]) {
-	      var _avatar = app.session.items[avatarMetaName].value.avatar;
-	      userAvatar = '<img class="user-avatar" src="' + _avatar  + '" />';
+	      avatar = app.session.items[avatarMetaName].value.avatar;
 	    }
 	  }
+	  if (!avatar) {
+	    if (app.avatars[contactNames[i]]) {
+	      avatar = app.avatars[contactNames[i]];
+	    }
+	  }
+	  
 	  if (!avatar) {
 	    userAvatar = '<img class="user-avatar-generic" src="svg/contact.svg" />';
 	  } else {

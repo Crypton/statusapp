@@ -1138,9 +1138,8 @@ function createMediaElement(data, localUser, existingNode) {
   }
 
   var avatarMetaName = data.username + '-avatar-meta';
-  if (app.session.items[avatarMetaName]) {
-    data.avatar = app.session.items[avatarMetaName].value.avatar ||
-      app.avatars[data.username].avatar;
+  if (app.avatars[data.username]) {
+    data.avatar = app.avatars[data.username].avatar;
   }
 
   console.log('Data: ', data);
