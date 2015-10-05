@@ -50,15 +50,16 @@ app.aboutView = function _aboutView () {
   var info = 'Kloak is an <strong>*experiment*</strong> in social networking that is un-dataminable. All data sent to the server is "end to end" encrypted and unreadable by the server operator. <br /> Kloak is in beta and <strong>should not be used to hide communications from well-equipped potential attackers</strong> <p><a onclick="window.open(\'https://github.com/Crypton/statusapp\', \'_system\')" class="media-link media-link-url">Kloak issue tracker</a> <br />Kloak is built with <a onclick="window.open(\'https://crypton.io\', \'_system\')" class="media-link media-link-url">Crypton</a> by <a onclick="window.open(\'https://spideroak.com\', \'_system\')" class="media-link media-link-url">SpiderOak</a></p>';
 
   var html = '<div id="about-view"><h4>'
-  + header
+	+ header
         + '</h4>'
-  + '<p>'
+	+ '<p>'
         + info
-  + '</p>'
-  + '<p>'
-  + logos
-  + '</p>'
-  + '</div>';
+	+ '</p>'
+	+ '<p>'
+	+ logos
+	+ '</p>'
+	+ '<p class="build-string">Build: ' + app.buildString + '</p>'
+	+ '</div>';
   $('#app-about').children().remove();
   $('#app-about').append($(html));
 };
