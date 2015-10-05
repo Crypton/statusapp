@@ -1550,6 +1550,7 @@ var app = {
 	      + followingStatus || ''
               + '</li>';
         $('#contacts-list').append($(html));
+	avatar = null;
       }
 
       $('.contact-record').click(function () {
