@@ -1512,9 +1512,10 @@ var app = {
 	}
 
 	var userAvatar = '<img class="user-avatar-generic" src="svg/contact.svg" />';;
-	if (app.session.items._trusted_peers.value[contactNames[i]]) {
-	  console.log('contactNames[i]: ', i, contactNames[i]);
-	  var avatar = app.session.items._trusted_peers.value[contactNames[i]].avatar;
+	console.warn(contactNames[i]);
+	var cName = app.contactNameMap[contactNames[i]];
+	if (app.session.items._trusted_peers.value[cName]) {
+	  var avatar = app.session.items._trusted_peers.value[cName].avatar;
 	  if (avatar) {
 	    userAvatar = '<img class="user-avatar" src="' + avatar + '" />';
 	  }
