@@ -2,23 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-@font-face {
-    font-family: WorkSans;
-    src: url(fonts/WorkSans-Regular.ttf);
-    font-weight: normal;
-}
-
-@font-face {
-    font-family: WorkSans;
-    src: url(fonts/WorkSans-Light.ttf);
-    font-weight: light;
-}
-
-@font-face {
-    font-family: WorkSans;
-    src: url(fonts/WorkSans-Medium.ttf);
-    font-weight: bold;
-}
 
 @font-face {
     font-family: Hack;
@@ -245,7 +228,7 @@ body {
     -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
     -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
     /* -webkit-user-select: none; */                  /* prevent copy paste, to allow, change 'none' to 'text' */
-    font-family: Roboto, 'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, sans-serif ;
+    font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif ;
     height:100%;
     margin:0px;
     padding:0px;
@@ -362,7 +345,7 @@ h1 {
 }
 
 #login-title {
-    font-family: WorkSans;
+    font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif ;
     padding: 1rem;
     font-size: 1.5em;
     font-weight: bold;
@@ -393,7 +376,8 @@ input[type="text"],
 input[type="password"] {
     border: 0;
     border-radius: 0 ;
-    border-bottom: 1px solid gray;
+    border: none;
+    border-bottom: 1px solid white;
     outline: 0;
     box-shadow: none;
     display: block;
@@ -409,18 +393,17 @@ input[type="password"]:focus {
 }
 
 ::-webkit-input-placeholder {
-    color: #000;
+    color: white;
 }
 
 /* Bootstrap, more like Poopstrap */
 .btn {
-    border: 1px solid currentColor;
+    border: 2px solid currentColor;
     background-color: transparent;
-    font-family: WorkSans;
-    padding: 1rem;
+    font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif ;
+    padding: 0.8rem;
     font-weight: normal;
     margin: 0.5rem 0;
-    -webkit-border-radius: 5px;
 }
 
 .btn:hover, .btn:focus {
@@ -506,7 +489,7 @@ input[type="password"]:focus {
 a.header-back {
     flex-shrink: 1;
     font-size: 18px;
-    font-family: WorkSans;
+    font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif ;
     font-weight: bold;
     text-decoration: none;
     color: white;
@@ -515,7 +498,7 @@ a.header-back {
 .header-wrap #header--title {
     flex-shrink: 1;
     font-size: 18px;
-    font-family: WorkSans;
+    font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif ;
     font-weight: bold;
     text-decoration: none;
 }
@@ -816,7 +799,6 @@ a.header-back {
 
 .company-logo {
     height: 30px !important;
-    margin-right: 2em;
 }
 
 #top-progress-wrapper {
@@ -1086,24 +1068,21 @@ body {
 }
 
 .intro-graphics {
-    background-image: url('../img/canal.png');
-    background-repeat: no-repeat;
-    /* background-attachment: fixed; */
-    background-position: 30% 3%;;
-    background-size: 200%;
-    opacity: 0.98;
+    background: linear-gradient(to bottom, #620271 0%,#c444e1 45%,#f094b1 100%);
+    color: white;
+    text-align: center;
 }
 
 #account-login h1 {
     font-size: 45px;
-    font-family: WorkSans, Roboto;
+    font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif ;
     font-weight: bolder;
 }
 
 #account-login h2 {
     text-align: center;
     font-size: 16px;
-    font-family: WorkSans, Roboto;
+    font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif ;
     color: white;
     margin-top: 2em;
 }
@@ -1112,14 +1091,8 @@ body {
     text-align: center;
 }
 
-.intro-graphics img {
+div .logo {
     text-align: center;
-    height: 80px;
-}
-
-div .logo { 
-    text-align: center;
-    margin-top: -2em;
 }
 
 #onboarding-create-username {
@@ -1131,7 +1104,7 @@ div .logo {
 
 #onboarding-create-username h3 {
     color: white;
-    
+
 }
 
 #onboarding-create-passphrase {
@@ -1145,16 +1118,23 @@ div .logo {
 
 .onboarding-input{
     width: 90%;
-    font-size: 1.6em;
-    padding: 0.4em;
-    opacity: 0.5;
-    border-bottom: 2px solid #000;
-    color: #000;
+    font-size: 1em;
+    padding: 0.6em;
+    color: white;
 }
 
-input.onboarding-input { 
+input.onboarding-input {
     /* -webkit-border-radius: 5px; */
     background-color: transparent !important;
+}
+
+input.onboarding-input:before {
+    position: absolute;
+    content: '@';
+    left: 0;
+    font-size: 1.2em;
+    top: 0;
+    display: block;
 }
 
 #onboarding-check-username {
@@ -1164,20 +1144,35 @@ input.onboarding-input {
 
 .onboarding-btn {
     width: 95%;
-    font-size: 1.2em;
+    font-size: 1em;
 }
 
 .onboarding-link {
     text-decoration: none;
     color: #FFF;
-    font-size: 1em;
-    font-family: WorkSans, Roboto;
+    font-size: 0.9em;
+    font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif ;
     font-weight: bold;
+    text-decoration: underline;
+}
+
+.onboarding-header-container {
+    text-align:center;
+    color: white;
+}
+.onboarding-header-container img {
+    height: 128px;
+
+}
+.onboarding-header-container p {
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: -0.035rem;
 }
 
 #onboarding-passphrase-input {
     font-size: 1.2em;
-    background-color: transparent !important;   
+    background-color: transparent !important;
 }
 
 .onboarding-continue-wrapper {
@@ -1240,8 +1235,8 @@ input.onboarding-input {
     font-size: 90%;
 }
 
-onboarding-no-account-step-2 {
-    padding-top: 2em; 
+#onboarding-no-account-step-2 {
+    padding-top: 2em;
 }
 
 #onboarding-contact-card-wrapper canvas {
