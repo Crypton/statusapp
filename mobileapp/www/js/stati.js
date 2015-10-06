@@ -586,6 +586,9 @@ app.loadInitialTimeline = function loadInitialTimeline(callback) {
       $("#fetch-previous-items").show();
     }
     app.updateEmptyTimelineElements();
+    if (!app.fetchContactMetadataInterval) {
+      app.fetchContactMetadata();
+    }
   });
 };
 
@@ -1138,9 +1141,6 @@ function createMediaElement(data, localUser, existingNode) {
   }
 
   var avatarMetaName = data.username + '-avatar-meta';
-  if (app.avatars[data.username]) {
-    data.avatar = app.avatars[data.username].avatar;
-  }
 
   console.log('Data: ', data);
   
@@ -1266,63 +1266,6 @@ function createMediaElement(data, localUser, existingNode) {
   }
 };
 
-app.fetchAvatar = function fetchAvatar (username, callback) {
-
-  if (app.avatars[username]) {
-    var nameHmac = app.session.items.avatarHmacs.value[username].avatarHmac;
-    var newAvatar = app.createAvatar(app.avatars[username], username, nameHmac);
-    $('span.' + nameHmac).replaceWith(newAvatar);
-    if (typeof callback == 'function') {
-      callback(null, 'Found cached avatar');
-    }
-    return;
-  }
-  
-  app.session.getPeer(username, function (err, peer) {
-    if (err) {
-      if (typeof callback === 'function') {
-	console.error('Cannot get peer (for avatar)');
-      }
-      return;
-    }
-    var nameHmac = app.getAvatarHmac(username);
-    if (!nameHmac) {
-      if (typeof callback === 'function') {
-	callback('Cannot fetch avatar');
-      }
-      return;
-    }
-    app.session.getSharedItem(nameHmac, peer, function (err, avatar) {
-      if (err) {
-	var error = 'Cannot fetch ' + username + '\'s avatar!';
-	console.error(error);
-	if (typeof callback === 'function') {
-	  callback(error);
-	}
-	return; 
-      }
-
-      app.avatars[username] = avatar.value.avatar;
-      app.session.items._trusted_peers.value[username].biography =
-        avatar.value.biograpy || '';
-      
-      var newAvatar = app.createAvatar(avatar.value.avatar, username, nameHmac);
-      $('span.' + nameHmac).replaceWith(newAvatar);
-
-      var contactAvatar = '<img class="user-avatar" src="' + avatar.value.avatar  + '">';
-      // Replace contacts avatar too
-      $('#contact-' + username + ' img').replaceWith($(contactAvatar));
-      
-      if (typeof callback === 'function') {
-	callback(null, 'avatar fetched');
-      }
-      return;
-    });
-  }); 
-};
-
-app.avatars = {};
-
 app.createAvatar = function createAvatar (avatar, username, nameHmac) {
   var avatarHmac = nameHmac;
   var avatarName = username;
@@ -1333,45 +1276,6 @@ app.createAvatar = function createAvatar (avatar, username, nameHmac) {
 	+ avatarDataMarkup  + 'src="' + avatar + '"/>';
   return $(avatarMarkup);
 };
-
-app.getAvatars = function getAvatars (usernames) {
-  if (app.gettingAvatars) {
-    return;
-  }
-  if (!usernames || !usernames.length) {
-    return;
-  }
-  var that = this;
-  app.gettingAvatars = true;
-  var idx = 0;
-  this.avatarInterval = setInterval(function () {
-    console.log('idx: ', idx, usernames[idx]);
-    if (!usernames[idx]) {
-      app.gettingAvatars = false;
-      clearInterval(that.avatarInterval);
-      return;
-    }
-    app.fetchAvatar(usernames[idx], function fetchCB(err, message){
-      if (err) {
-	console.error(err);
-      } else {
-	console.log(message);
-      }
-      idx++;
-      if (idx === usernames.length ) {
-	app.gettingAvatars = false;
-	clearInterval(that.avatarInterval);
-	app.session.items.avatarHmacs.save(function (err) {
-	  if (err) {
-	    console.error(err);
-	  }
-	});
-      }
-    });
-  }, 5000);
-},
-
-app.gettingAvatars = false;
 
 app.linkOutput = function linkOutput(autolinker, match) {
   var text = match.getAnchorText();
@@ -1502,72 +1406,7 @@ app.updateFeedAvatar = function updateFeedAvatar (avatar, username, avatarHmac) 
 // };
 
 app.handleMessage = function handleMessage (message) {
-  // just add the shared container hmac + username to the feed container
-  console.log('handleMessage();', arguments);
-
-  // XXXddahl: we no longer use the 'feed' item or depend on web sockets for the sharing of
-  //           status messages. Need to re-tool this for DMs or avatars
-
-  // if (message.headers.notification != 'sharedItem') {
-  //   return;
-  // }
-
-  // var itemNameHmac = message.payload.itemNameHmac;
-  // var username = message.payload.from;
-  // // cache the hmac sent to us!
-  // var newFeedHmac = {
-  //   fromUser: username,
-  //   itemNameHmac: itemNameHmac,
-  //   timestamp: Date.now()
-  // };
-
-  // if (app.session.items.feed.value.feedHmacs[itemNameHmac]) {
-  //   app.session.getPeer(username, function (err, peer) {
-  //     if (err) {
-  //       console.error(err);
-  //       return;
-  //     }
-  //     // We need to load and watch this container
-  //     app.session.getSharedItem(itemNameHmac, peer, function (err, statusItem) {
-  //       if (err) {
-  //         console.error(err);
-  //         return;
-  //       }
-  //       // delete this inbox message
-  //       app.deleteInboxMessage(message.messageId);
-  //  // If this is an avatar, save to contacts
-  //  if (statusItem.value.avatar) {
-  //    app.updateContactAvatar(username, statusItem.value);
-  //    // XXXddahl: Update timeline with a "new avatar message??"
-  //  } else {
-  //         // create status item, prepend to the top of the list
-  //         app.updatePeerStatus(username, statusItem.value);
-  //       }
-  //     });
-  //   });
-  // } else {
-  //   app.session.items.feed.value.feedHmacs[itemNameHmac] = newFeedHmac;
-  //   app.session.items.feed.save(function saveCallback (err) {
-  //     if (err) {
-  //       console.error(err);
-  //     }
-  //     app.session.getPeer(username, function (err, peer) {
-  //       if (err) {
-  //         console.error(err);
-  //         return;
-  //       }
-  //       // We need to load and watch this container
-  //       app.session.getSharedItem(itemNameHmac, peer, function (err, statusItem) {
-  //         if (err) {
-  //           console.error(err);
-  //           return;
-  //         }
-  //         // delete this inbox message
-  //         app.deleteInboxMessage(message.messageId);
-  //       });
-  //     });
-  //   });
-  // }
+  console.log('noop handleMessage();', arguments);
 };
 
 app.deleteInboxMessage = function (messageId) {
