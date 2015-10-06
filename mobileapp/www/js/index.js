@@ -304,13 +304,6 @@ var app = {
     
     $('.icon--contacts').click(function () {
       app.displayContacts();
-      if (app.session.items.avatarHmacs) {
-	var usernames = Object.keys(app.getItem('avatarHmacs'));
-	console.log('usernames: ', usernames);
-	if (usernames) {
-	  app.getAvatars(usernames);
-	}
-      }
     });
 
     $('.icon--contact-card').click(function () {
@@ -1518,25 +1511,11 @@ var app = {
 	  followingStatus = ' <span class="following-not-complete"> Follow Back?</span>';
 	}
 
-	var userAvatar;
-	var avatar;
+	var userAvatar = '<img class="user-avatar-generic" src="svg/contact.svg" />';;
 	if (app.session.items._trusted_peers.value[contactNames[i]]) {
-	  avatar = app.session.items._trusted_peers.value[contactNames[i]].avatar;
-	  if (!avatar) {
-	    var avatarMetaName = contactNames[i] + '-avatar-meta';
-	    if (app.session.items[avatarMetaName]) {
-	      avatar = app.session.items[avatarMetaName].value.avatar;
-	    }
-	  }
-	  if (!avatar) {
-	    if (app.avatars[contactNames[i]]) {
-	      avatar = app.avatars[contactNames[i]];
-	    }
-	  }
-	  
-	  if (!avatar) {
-	    userAvatar = '<img class="user-avatar-generic" src="svg/contact.svg" />';
-	  } else {
+	  console.log('contactNames[i]: ', i, contactNames[i]);
+	  var avatar = app.session.items._trusted_peers.value[contactNames[i]].avatar;
+	  if (avatar) {
 	    userAvatar = '<img class="user-avatar" src="' + avatar + '" />';
 	  }
 	}

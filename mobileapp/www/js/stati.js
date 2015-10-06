@@ -1161,6 +1161,12 @@ function createMediaElement(data, localUser, existingNode) {
       + data.username[0].toUpperCase()
       + '</span>';
 
+    var unfetched = { username: data.username,
+		      avatarHmac: data.avatarMeta.nameHmac };
+    
+    app.unfetchedContactList[data.username] = { username: data.username,
+						avatarHmac: data.avatarMeta.nameHmac };
+    
     // store the hmac + name in our avatarHmacs object
     if (app.session.items.avatarHmacs) {
       if (!app.session.items.avatarHmacs.value[data.username]) {
@@ -1261,6 +1267,17 @@ function createMediaElement(data, localUser, existingNode) {
 };
 
 app.fetchAvatar = function fetchAvatar (username, callback) {
+
+  if (app.avatars[username]) {
+    var nameHmac = app.session.items.avatarHmacs.value[username].avatarHmac;
+    var newAvatar = app.createAvatar(app.avatars[username], username, nameHmac);
+    $('span.' + nameHmac).replaceWith(newAvatar);
+    if (typeof callback == 'function') {
+      callback(null, 'Found cached avatar');
+    }
+    return;
+  }
+  
   app.session.getPeer(username, function (err, peer) {
     if (err) {
       if (typeof callback === 'function') {
@@ -1328,6 +1345,7 @@ app.getAvatars = function getAvatars (usernames) {
   app.gettingAvatars = true;
   var idx = 0;
   this.avatarInterval = setInterval(function () {
+    console.log('idx: ', idx, usernames[idx]);
     if (!usernames[idx]) {
       app.gettingAvatars = false;
       clearInterval(that.avatarInterval);
@@ -1340,7 +1358,7 @@ app.getAvatars = function getAvatars (usernames) {
 	console.log(message);
       }
       idx++;
-      if ((idx -1) === usernames.length ) {
+      if (idx === usernames.length ) {
 	app.gettingAvatars = false;
 	clearInterval(that.avatarInterval);
 	app.session.items.avatarHmacs.save(function (err) {
@@ -1407,18 +1425,76 @@ app.shareStatus = function shareStatus (peerObj) {
       console.error(err, 'Cannot shareStatus!');
       return;
     }
-    if (app.session.items.avatar) {
-      app.session.items.avatar.share(peerObj, function (err) {
+
+    app.session.items.avatar.share(peerObj, function (err) {
+      if (err) {
+	console.error(err);
+	console.error('cannot share avatar with ' + peerObj.username);
+      }
+      console.log('avatar shared with ' + peerObj.username);
+    });
+
+  });
+};
+
+app.getContactMetadata = function getContactMetadata(contactName, avatarHmac, callback) {
+  if (!avatarHmac || !contactName) {
+    return;
+  }
+  app.session.getPeer(contactName, function getPeerCB (err, peer) {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    app.session.getSharedItem(avatarHmac, peer, function getSharedCB(err, item) {
+      if (err) {
+	return console.error(err);
+      }
+      app.session.items._trusted_peers.value[contactName].avatar = item.value.avatar;
+      app.session.items._trusted_peers.value[contactName].biography = item.value.biography;
+      app.session.items._trusted_peers.value[contactName].updated = Date.now();
+      app.session.items._trusted_peers.save(function (err) {
 	if (err) {
 	  console.error(err);
-	  console.error('cannot share avatar with ' + peerObj.username);
 	}
-	console.log('avatar shared with ' + peerObj.username);
+	if (typeof callback === 'function') {
+	  callback(err);
+	}
       });
-    } else {
-      console.error('app.session.items.avatar does not exist');
-    }
+    });
   });
+};
+
+app.unfetchedContactList = {}; // { username, hmac }
+
+app.fetchContactMetadata = function fetchContactMetadata () {
+
+  var contactList = Object.keys(app.unfetchedContactList);
+  
+  app.fetchContactMetadataInterval = setInterval(function contactMetadataLoop () {
+    if (!contactList.length) {
+      return;
+    }
+    var prop = contactList.pop();
+    var contact = app.unfetchedContactList[prop];
+    if (contact.username && contact.avatarHmac) {
+      app.getContactMetadata(contact.username, contact.avatarHmac, function (err) {
+	if (!err) {
+	  app.updateFeedAvatar(
+	    app.session.items._trusted_peers.value[contact.username].avatar,
+	    contact.username,
+	    contact.avatarHmac
+	  );
+	  delete app.unfetchedContactList[contact.username];
+	}
+      });
+    }
+  }, 10000);
+};
+
+app.updateFeedAvatar = function updateFeedAvatar (avatar, username, avatarHmac) {
+  var newAvatar = app.createAvatar(avatar, username, avatarHmac);
+  $('span.' + avatarHmac).replaceWith(newAvatar);
 };
 
 // app.revokeSharedStatus = function revokeSharedStatus(peer) {
