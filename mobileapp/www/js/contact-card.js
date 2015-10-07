@@ -120,9 +120,6 @@ app.contactCard = {
   
   getContactAvatarImage: function getContactAvatarImage () {
     var imgData = app._contacts[this.username].avatar;
-    if (!imgData) {
-      imgData = app.avatars[this.username];
-    }
     return this.base64UrlToCanvas(imgData);
   },
   

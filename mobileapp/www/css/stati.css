@@ -432,7 +432,7 @@
 }
 
 #post-send {
-    font-family: WorkSans;
+    font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif ;
     color: white;
     text-decoration: none;
     padding: 0 0.65rem 0.65rem 0.24rem
