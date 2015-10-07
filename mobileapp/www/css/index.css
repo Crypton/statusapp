@@ -1236,6 +1236,7 @@ input.onboarding-input {
 
 #onboarding-no-account-step-2 {
     padding-top: 2em;
+    display: none;
 }
 
 #onboarding-contact-card-wrapper canvas {

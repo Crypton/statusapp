@@ -368,6 +368,14 @@ app.viewActions = {
     $('#onboarding-username-input').focus();
   },
 
+  'onboarding-no-account-step-2': function vaOnboardingNoAccount2 () {
+    $('#onboarding-no-account-step-2').show()();
+  },
+  
+  'onboarding-no-account-step-3': function vaOnboardingNoAccount3 () {
+    $('#onboarding-no-account-step-2').hide();
+  },
+  
   'account-login': function vaAccountLogin () {
     $('#username-login').focus();
   },
