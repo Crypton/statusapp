@@ -1176,6 +1176,15 @@ input.onboarding-input {
     padding-right: 1em;
 }
 
+#change-passphrase-info p {
+    padding-right: 1em;
+}
+
+#change-passphrase-info {
+    margin: 1em;
+}
+
+
 #onboarding-create-passphrase h3 {
     font-size: 1em;
     margin-top: 10px;
@@ -1239,6 +1248,20 @@ input.onboarding-input {
 
 .current-contact-card-canvas {
     width: 90%;
+}
+
+textarea#old-pass-change-passphrase-input.onboarding-input {
+    font-size: 1.2em !important;
+    width: 100% !important;
+}
+
+textarea#change-passphrase-input.onboarding-input {
+    font-size: 1.2em;
+    width: 100% !important;
+}
+
+button#change-passphrase-continue.btn.onboarding-btn {
+    width: 100% !important;
 }
 
 /* Spinning Cube thx to @tobiasahlin. */
