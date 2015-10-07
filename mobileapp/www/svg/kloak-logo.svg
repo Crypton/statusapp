@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg width="22px" height="32px" viewBox="0 0 22 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+<svg width="52px" height="79px" viewBox="0 0 52 79" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
     <!-- Generator: Sketch 3.3.3 (12072) - http://www.bohemiancoding.com/sketch -->
-    <title>icon-kloak</title>
+    <title>Imported Layers</title>
     <desc>Created with Sketch.</desc>
     <defs></defs>
     <g id="Page-2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
-        <g id="Spideroak-Social-Copy-15" sketch:type="MSArtboardGroup" transform="translate(-196.000000, -23.000000)" fill="#FFFFFF">
-            <g id="Header-2-Copy" sketch:type="MSLayerGroup" transform="translate(196.000000, 23.000000)">
-                <g id="Kloak-+-Imported-Layers" sketch:type="MSShapeGroup">
-                    <g id="Imported-Layers" transform="translate(0.250000, 0.000000)">
-                        <path d="M10.9388905,0.00443802085 L0.161659698,10.665636 L10.9388905,10.665636 L10.9388905,0.00443802085 L10.9388905,0.00443802085 Z M21.7161213,10.665636 L10.9388905,21.3268528 L10.9388905,10.665636 L21.7161213,10.665636 L21.7161213,10.665636 Z M0.161659698,10.665636 L10.9388905,21.3268528 L10.9388905,10.665636 L0.161659698,10.665636 L0.161659698,10.665636 Z M0.161659698,21.3268528 L10.9388905,31.9880508 L10.9388905,21.3268528 L0.161659698,21.3268528 L0.161659698,21.3268528 Z M10.9388905,21.3268528 L0.161659698,10.665636 L0.161659698,21.3268528 L10.9388905,21.3268528 L10.9388905,21.3268528 Z M10.9388905,21.3268528 L21.7161213,31.9880508 L10.9388905,31.9880508 L10.9388905,21.3268528 L10.9388905,21.3268528 Z M0.161659698,31.9880508 L0.161659698,21.3268528 L5.55027531,26.6574516 L0.161659698,31.9880508 Z" id="icon-kloak"></path>
+        <g id="iPhone-6-Copy-3" sketch:type="MSArtboardGroup" transform="translate(-161.000000, -107.000000)" fill="#FFFFFF">
+            <g id="kloak-hoodie-+-Status-Bar-/-Black-2-+-Group-+-Header-2-+-Header-2-Copy-+-Bitmap-+-a-+-Line-+-Imported-Layers-Mask" sketch:type="MSLayerGroup" transform="translate(-1.000000, -1.000000)">
+                <g id="Header-2-Copy-+-Imported-Layers" transform="translate(32.000000, 108.000000)" sketch:type="MSShapeGroup">
+                    <g id="Imported-Layers" transform="translate(129.636671, 0.267606)">
+                        <path d="M26.3527817,0.0108176758 L0.389452908,25.9974877 L26.3527817,25.9974877 L26.3527817,0.0108176758 Z M26.3527817,51.9842037 L26.3527817,25.9974877 L52.3161104,25.9974877 L26.3527817,51.9842037 Z M0.389452908,25.9974877 L26.3527817,51.9842037 L26.3527817,25.9974877 L0.389452908,25.9974877 Z" id="Fill-1" fill-opacity="0.764294611"></path>
+                        <path d="M0.389452908,51.9842037 L26.3527817,77.9708737 L26.3527817,51.9842037 L0.389452908,51.9842037 Z M26.3527817,51.9842037 L0.389452908,25.9974877 L0.389452908,51.9842037 L26.3527817,51.9842037 Z M26.3527817,51.9842037 L52.3161104,77.9708737 L26.3527817,77.9708737 L26.3527817,51.9842037 Z" id="Fill-3"></path>
+                        <path d="M26.3527817,51.9842037 L0.389452908,77.9708737 L0.389452908,51.9842037 L26.3527817,51.9842037 L26.3527817,51.9842037 Z" id="Fill-4" fill-opacity="0.767493207"></path>
                     </g>
                 </g>
             </g>

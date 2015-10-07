@@ -21,7 +21,7 @@
     <link rel="stylesheet" type="text/css" href="fonts/ptmono/stylesheet.css" />
     <link rel="stylesheet" type="text/css" href="fonts/ptmono/PTM55F_stylesheet.css" />
     <link rel="stylesheet" type="text/css" href="fonts/ptmono/PTM75F_stylesheet.css" />
-    
+
     <title>Kloak</title>
   </head>
   <body class="logged-out">
@@ -77,7 +77,7 @@ height: 2.5rem;"></a>
 
     <div id="app" class="app container-fluid">
       <div id="alerts"></div>
-      
+
       <div id="capture-avatar" class="view">
 	<canvas id="capture-canvas" width="200" height="200"
 		style="display:none;">
@@ -146,27 +146,25 @@ height: 2.5rem;"></a>
 	  </div>
 	</form>
       </div>
-      
-      <div id="onboarding-no-account" class="view intro-graphics">
-	<div class="logo">
-	  <img class="company-logo" src="img/spideroak-white.png" />
-	  <img src="svg/kloak-logo.svg" />
-	  <!-- <h1>Kloak</h1> -->
-	</div>
 
-	<div id="onboarding-create-username">
-	  <input placeholder="Choose a Username"
-		 autocapitalize="off"
-		 size="12"
-		 maxlength="32"
-		 class="onboarding-input"
-		 id="onboarding-username-input" type="text" />
-	  <div class="onboarding-continue-wrapper">
-	    <button class="btn onboarding-btn" id="onboarding-check-username">Continue</button>
-	  </div>
-	  <a href="#" id="onboarding-existing-account" class="onboarding-link">Already have an account?</a>
-	</div>
-      </div>
+<div id="onboarding-no-account" class="view intro-graphics">
+  <div class="onboarding-header-container">
+    <img src="svg/kloak-full-logo.svg" />
+    <p>A social network you own.</p>
+  </div>
+  <div id="onboarding-create-username">
+      <form class="input-group input-group-lg">
+        <input placeholder="Choose a Username" autocapitalize="off" size="12" maxlength="32" class="onboarding-input" id="onboarding-username-input" type="text" />
+      </form>
+    <div class="onboarding-continue-wrapper">
+      <button class="btn onboarding-btn" id="onboarding-check-username">Join Kloak</button>
+    </div>
+  </div>
+  <div id="register-btn-wrapper">
+    <a href="#" class="onboarding-link" id="onboarding-existing-account">Already have an account?</a>
+  </div>
+  <img class="company-logo" src="img/spideroak-white.png" />
+</div>
 
 
       <div id="onboarding-no-account-step-2" class="view intro-graphics">
@@ -178,7 +176,7 @@ height: 2.5rem;"></a>
 
 	<div id="onboarding-create-passphrase">
 	  <h3>Passphrase:</h3>
-	  
+
 	  <div id="passphrase-info">
 	    <textarea placeholder="Enter Passphrase"
 		      autocapitalize="off"
@@ -205,7 +203,7 @@ height: 2.5rem;"></a>
 	      We have created a strong passphrase for you, please save it into your password wallet or write it down and put it in a safe place! You cannot ask SpiderOak to recover a forgotten passphrase. We <strong>do not</strong> store it outside the device.
 	    </p>
 	    <p class="onboarding-light-copy">
-	      If your device supports the "Keychain" or "Secure Storage", your passphrase will be automatically securely saved for you and you will be able to recall it in Kloak's Options. 
+	      If your device supports the "Keychain" or "Secure Storage", your passphrase will be automatically securely saved for you and you will be able to recall it in Kloak's Options.
 	    </p>
 	  </div>
 	</div>
@@ -219,8 +217,8 @@ height: 2.5rem;"></a>
 	</div>
 
 	<div id="onboarding-account-generation">
-	  <h3>Account Validation & Creation</h3>
-	  
+	  <h3>Account Validation &amp; Creation</h3>
+
 	  <div id="generation-info">
 	  </div>
 	</div>
@@ -236,7 +234,7 @@ height: 2.5rem;"></a>
 	    </p>
 	    <p>
 	      <div id="onboarding-contact-card-wrapper">
-		
+
 	      </div>
 	    </p>
 	    <!-- <div id="onboarding-contact-card-share-buttons"> -->
@@ -246,49 +244,26 @@ height: 2.5rem;"></a>
 	  </div>
 	</div>
       </div>
-      
-      <div id="account-login" class="view active intro-graphics">
-	<div class="logo">
-	  <img class="company-logo" src="img/spideroak-white.png" />
-	  <img src="svg/kloak-logo.svg" />
-	  <!-- <h1>Kloak</h1> -->
+
+  <div id="account-login" class="view active intro-graphics">
+    <div class="onboarding-header-container">
+      <img src="svg/kloak-full-logo.svg" />
+      <p>A social network you own.</p>
+    </div>
+    <form id="login-form" class="input-group input-group-lg">
+      <input placeholder="Username" autocapitalize="off" size="12" maxlength="32" class="onboarding-input" id="username-login" type="text" />
+      <input placeholder="Passphrase" size="12" maxlength="32" class="onboarding-input" id="password-login" type="password" autocomplete="off" />
+    </form>
+    <div id="login-buttons">
+      <h3 id="username-placeholder"></h3>
+      <button class="onboarding-btn btn" id="login-btn">Welcome back!</button>
 	</div>
 
-	<h2>A Social Network You Own</h2>
-	<form id="login-form" class="input-group input-group-lg">
-	  <input placeholder="Username"
-		 autocapitalize="off"
-		 size="12"
-		 maxlength="32"
-		 class="onboarding-input"
-		 id="username-login" type="text" />
-	  <input placeholder="Passphrase"
-		 size="12"
-		 maxlength="32"
-		 class="onboarding-input"
-		 id="password-login" type="password"
-		 autocomplete="off" />
-	</form>
-
-	<div id="login-buttons">
-	  <h3 id="username-placeholder"></h3>
-	  <button class="onboarding-btn btn"
-		  id="login-btn">Login</button>
-	</div>
-
-	<div id="register-btn-wrapper">
-	  <!-- <div> -->
-	  <!--   <a href="#" -->
-	  <!--      class="onboarding-link" -->
-	  <!--      id="switch-user-btn">Switch User</a> -->
-	  <!-- </div> -->
-	  <div>
-	    <a href="#"
-	       class="onboarding-link"
-	       id="register-btn">Create Account</a>
-	  </div>
-	</div>
-      </div>
+  <div id="register-btn-wrapper">
+    <a href="#" class="onboarding-link" id="register-btn">Need an account?</a>
+  </div>
+  <img class="company-logo" src="img/spideroak-white.png" />
+  </div>
 
       <div id="login-progress" class="view">
 	<div id="login-status">
@@ -581,14 +556,14 @@ height: 2.5rem;"></a>
       <img style="display: none;"
 	   id="contact-card-template"
 	   src="img/contact-template.png" />
-      
+
       <img style="display: none;" id="contact-card-photo" />
 
       <img style="display: none;"
 	   src="svg/card-black.svg"
 	   id="contact-card-photo-default" />
     </div>
-    
+
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="js/crypton.js"></script>
     <script type="text/javascript" src="js/index.js"></script>
