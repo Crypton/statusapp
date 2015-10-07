@@ -490,7 +490,7 @@ var app = {
       $('#confirm-delete-contact-wrapper').hide();
       $('#top-progress-wrapper').show();
       // unshare status feed
-      var username = $('#page-title').text();
+      var username = app.currentContact;
       if (!username) {
 	console.error('Cannot delete and unshare without a username!');
 	$('#contact-details-buttons').show();
@@ -511,6 +511,7 @@ var app = {
 	    $('#contact-details-buttons').show();
 	    $('#top-progress-wrapper').hide();
 	    return;
+	    // XXX: also need to unshare avatar!!!
 	  }
 	  // delete user from trusted contacts
 	  delete app.session.items._trusted_peers.value[peer.username];
@@ -1499,6 +1500,7 @@ var app = {
   },
 
   displayContacts: function () {
+    app.currentContact = null;
     app.switchView('contacts', 'Contacts');
     console.log("displayContacts()");
 
@@ -1557,6 +1559,7 @@ var app = {
       $('.contact-record').click(function () {
         var contact = $(this).attr('id').split('-')[1];
         console.log(contact);
+	app.currentContact = contact;
         // app.contactDetails(contact);
 	app.switchView('contact-details', contact);
 	app.contactCard.displayCard('contact-details', contact);
@@ -1565,8 +1568,11 @@ var app = {
     });
   },
 
+  currentContact: null,
+  
   contactDetails: function contactDetails (name) {
     var contact = app._contacts[name];
+    app.currentContact = name;
     // display the contact's fingerprint ID card:
     var fingerprint = contact.fingerprint || '0000000000000000000000000000000000000000000000000000000000000000';
     var canvas = app.card.createIdCard(fingerprint, name, app.contactCardLabel);
