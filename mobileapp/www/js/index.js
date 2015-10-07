@@ -10,10 +10,10 @@ function onDeviceReady() {
   $('.header-wrap').hide();
 
   window.open = cordova.InAppBrowser.open;
-  
+
   cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
   // cordova.plugins.Keyboard.disableScroll(true);
-  
+
   $(function () {
     FastClick.attach(document.body);
   });
@@ -22,7 +22,7 @@ function onDeviceReady() {
   if(!window.localStorage.touchIdLoginEnabled) {
      window.localStorage.setItem('touchIdLoginEnabled', 0);
   }
-  
+
   // Now safe to use device APIs
   app.init();
 
@@ -61,8 +61,8 @@ var app = {
     console.log('app initializing!: ', arguments);
 
     $('#my-feed-entries').children().remove();
-    
-    // Check explicitly for 1 
+
+    // Check explicitly for 1
     if (window.localStorage.touchIdLoginEnabled == 1){
       touchid.authenticate(function () { app.login(); },
 			   function (err) { alert(err); },
@@ -173,7 +173,7 @@ var app = {
     }
     return null;
   },
-  
+
   APPNAME: 'Kloak',
 
   get contactCardLabel() { return app.APPNAME + ' contact card'; },
@@ -192,7 +192,7 @@ var app = {
   bindEvents: function bindEvents() {
     // onboarding events!!!
     app.onboarding.bindEvents();
-    
+
     $('.view').click(function () {
       app.hideMenu();
     });
@@ -301,7 +301,7 @@ var app = {
 	app.alert(passphrase, 'info');
       });
     });
-    
+
     $('.icon--contacts').click(function () {
       app.displayContacts();
       if (app.session.items.avatarHmacs) {
@@ -317,7 +317,7 @@ var app = {
       // app.displayMyFingerprint(true);
       app.switchView('my-fingerprint-id-wrapper', 'My Contact Card');
     });
-    
+
     $('#header-contacts .header-back').click(function () {
       if ($('#contacts-list-wrapper').is(':visible')) {
 	app.switchView('feed', 'Contacts');
@@ -334,15 +334,15 @@ var app = {
       // $('#feed')[0].scrollTop = 0;
       $('#feed').animate({ scrollTop: 0 }, "fast");
     });
-    
+
     $('#header-settings .header-back').click(function () {
       app.switchView('feed', 'Timeline');
     });
-    
+
     $('.icon--new-contact').click(function () {
       app.switchView('scan-select', null);
     });
-    
+
     $('#header-btn-contacts').click(function () {
       app.displayContacts();
     });
@@ -377,7 +377,7 @@ var app = {
         window.plugins.socialsharing.share(app.sharingMessage, app.sharingTitle, _base64Img, app.sharingUrl);
       }
     });
-    
+
     $('#retake-id-picture').click(function () {
       // app.newPhotoContactCardSheet();
       app.contactCard.newPhotoContactCardSheet();
@@ -388,7 +388,7 @@ var app = {
 	app.contactCard.displayCard('my-fingerprint-id');
       });
     });
-    
+
     $('.icon--settings').click(function () {
       // disable forget credentials if not supported
       if (!app.keyChain.supported) {
@@ -553,7 +553,7 @@ var app = {
     if (!$(htmlId).is(':visible')) {
       $(htmlId).show();
     }
-    
+
     $(htmlId).addClass('active');
     if (htmlId == '#login-progress') { // XXXddahl: special case hack. sigh.
       $('#login-progress').show();
@@ -848,7 +848,7 @@ var app = {
       callback(null, dataURL);
     };
   },
-  
+
   getInitialAvatar: function getInitialAvatar (dataUrl) {
     // 85, 325
     // create canvas
@@ -1011,7 +1011,7 @@ var app = {
       }
 
       window.localStorage.setItem('lastUserLogin', user);
-      
+
       // Save passphrase if the keychain is supported
       if (app.keyChain.supported) {
 	app.keyChain.init(user, function (err) {
@@ -1043,7 +1043,7 @@ var app = {
         }
 
         app.username = app.session.account.username;
-	
+
         if (!prefsItem.value.firstRun) {
           prefsItem.value = { firstRun: Date.now() };
           return;
@@ -1051,7 +1051,7 @@ var app = {
 
         $('#password-login').val('');
 	$('#password-generate-login').val('');
-	
+
 	app.session.getOrCreateItem('avatar', function (err, avatarItem) {
 	  if (err){
 	    console.error(err);
@@ -1129,7 +1129,7 @@ var app = {
   setProgressStatus: function (m) {
     // $('#login-status .status').text(m);
     // $('#login-status').show();
-    $("blink").text(m);
+    $("#progress-status").text(m);
   },
 
   clearLoginStatus: function (m) {
@@ -1298,7 +1298,7 @@ var app = {
     app.switchView('peer-fingerprint-id', 'Peer Fingerprint');
 
     var label = app.APPNAME + '  *  ' + username + '  *';
-    
+
     var canvas =
       app.card.createIdCard(fingerprint, username, label);
     $(canvas).css({ width: '290px'});
@@ -1338,7 +1338,7 @@ var app = {
     $('#my-fingerprint-id').append(idCard);
     $('#header').show();
     $('#header-contacts').show();
-    
+
     $('#share-my-id-card').click(function () {
       if (app.isNodeWebKit) {
         app.saveIdToDesktop_desktop(idCard);
@@ -1533,7 +1533,7 @@ var app = {
 	      avatar = app.avatars[contactNames[i]];
 	    }
 	  }
-	  
+
 	  if (!avatar) {
 	    userAvatar = '<img class="user-avatar-generic" src="svg/contact.svg" />';
 	  } else {
@@ -1615,7 +1615,7 @@ var app = {
     switch (buttonIdx) {
     case 1:
       // Take Photo
-      if (!uiCallback) { 
+      if (!uiCallback) {
 	app.retakeIdPicture(false);
       } else {
 	app.retakeIdPicture(true);
@@ -1664,7 +1664,7 @@ var app = {
 
   window.plugins.actionsheet.show(options, callback);
 },
-  
+
   get isMobile() {
     if (!device) {
       return false;
