@@ -559,7 +559,12 @@ app.loadNewTimeline = function loadNewTimeline () {
     console.error('Cannot get afterId');
     app.loadPastTimeline();
   }
+
   app.updateEmptyTimelineElements();
+
+  if (!app.fetchContactMetadataInterval) {
+    app.fetchContactMetadata();
+  }
 };
 
 app.statusNameHmac = function statusNameHmac() {
@@ -653,6 +658,9 @@ app.loadPastTimeline = function loadPastTimeline () {
     console.error('cannot get beforeId');
   }
   app.updateEmptyTimelineElements();
+  if (!app.fetchContactMetadataInterval) {
+    app.fetchContactMetadata();
+  }
 };
 
 app.renderTimeline = function renderTimeline (timeline, append) {
@@ -1385,6 +1393,7 @@ app.fetchContactMetadata = function fetchContactMetadata () {
   
   app.fetchContactMetadataInterval = setInterval(function contactMetadataLoop () {
     if (!contactList.length) {
+      app.fetchContactMetadataInterval = null;
       return;
     }
     var prop = contactList.pop();

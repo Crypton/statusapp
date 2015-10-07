@@ -1220,12 +1220,12 @@ input.onboarding-input {
 
 .onboarding-light-copy {
     color: white;
-    font-size: 90%;
+    font-size: 80%;
 }
 
 .onboarding-dark-copy {
     color: black;
-    font-size: 90%;
+    font-size: 80%;
 }
 
 #onboarding-no-account-step-2 {
@@ -1331,3 +1331,50 @@ input.onboarding-input {
     opacity: 0;
   }
 }
+
+#change-passphrase-info p {
+}
+
+#change-passphrase-info {
+    margin: 1em;
+}
+
+textarea#old-pass-change-passphrase-input.onboarding-input {
+    font-size: 1.1em !important;
+    width: 100% !important;
+    color: black !important;
+}
+
+textarea#change-passphrase-input.onboarding-input {
+    font-size: 1.1em;
+    width: 100% !important;
+    color: black !important;
+}
+
+button#change-passphrase-continue.btn.onboarding-btn {
+    width: 100% !important;
+}
+
+#change-passphrase-continue-wrapper p {
+    color: black !important;
+}
+
+#change-passphrase-continue-wrapper a {
+    color: black !important;
+}
+
+#regenerate-new-change-passphrase {
+    color: black;
+    font-size: 80%;
+}
+
+#new-passphrase-cancel {
+    color: black;
+    font-size: 80%;
+}
+
+#clear-new-change-passphrase {
+    color: black;
+    font-size: 80%;
+}
+

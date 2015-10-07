@@ -326,17 +326,9 @@ var app = {
 
     $('.icon--contacts').click(function () {
       app.displayContacts();
-      if (app.session.items.avatarHmacs) {
-	var usernames = Object.keys(app.getItem('avatarHmacs'));
-	console.log('usernames: ', usernames);
-	if (usernames) {
-	  app.getAvatars(usernames);
-	}
-      }
     });
 
     $('.icon--contact-card').click(function () {
-      // app.displayMyFingerprint(true);
       app.switchView('my-fingerprint-id-wrapper', 'My Contact Card');
     });
 
