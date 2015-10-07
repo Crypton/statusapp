@@ -484,50 +484,47 @@ height: 2.5rem;"></a>
 
       <!-- BEGIN NEW PASSPHRASE -->
 
-      <div id="new-passphrase" class="view intro-graphics">
-
-	<div id="create-new-passphrase">
-
-	  <div id="change-passphrase-info">
-	    <h3>Change Passphrase:</h3>
-	    <p>
-	      <textarea placeholder="Old Passphrase"
-			autocapitalize="off"
-			rows="3"
-			maxlength="256"
-			class="onboarding-input"
-			id="old-pass-change-passphrase-input"></textarea>
-	    </p>
-	    <p>
+      <div id="new-passphrase" class="view">
+	<div id="change-passphrase-info">
+	  <p>
+	    <p>Current Passphrase</p>
+	    <textarea placeholder="Old Passphrase"
+		      autocapitalize="off"
+		      rows="3"
+		      maxlength="256"
+		      class="onboarding-input"
+		      id="old-pass-change-passphrase-input"></textarea>
+	  </p>
+	  <p>
+	    <p>New Passphrase</p>
 	    <textarea placeholder="Enter New Passphrase"
 		      autocapitalize="off"
 		      rows="3"
 		      maxlength="256"
 		      class="onboarding-input"
 		      id="change-passphrase-input"></textarea>
+	  </p>
+	  <div class="change-passphrase-continue-wrapper">
+	    <button class="btn onboarding-btn"
+		    id="change-passphrase-continue">Continue</button>
+	    <p>
+	      <a href="#"
+		 id="regenerate-new-change-passphrase"
+		 class="onboarding-link">Regenerate Passphrase</a>
 	    </p>
-	    <div class="change-passphrase-continue-wrapper">
-	      <button class="btn onboarding-btn"
-		      id="change-passphrase-continue">Continue</button>
-	      <p>
-		<a href="#"
-		   id="regenerate-new-change-passphrase"
-		   class="onboarding-link">Regenerate Passphrase</a>
-	      </p>
-	      <p>
-		<a href="#"
-		   id="clear-new-change-passphrase"
+	    <p>
+	      <a href="#"
+		 id="clear-new-change-passphrase"
 		 class="onboarding-link">I'll choose my own Passphrase</a>
-	      </p>
-	    </div>
-	    <a href="#" class="onboarding-link" id="new-passphrase-cancel">Cancel</a>
-	    <p class="onboarding-light-copy">
-	      We have created a strong passphrase for you, please save it into your password wallet or write it down and put it in a safe place!
 	    </p>
 	  </div>
+	  <a href="#" class="onboarding-link" id="new-passphrase-cancel">Cancel</a>
+	  <p class="onboarding-dark-copy">
+	    We have created a strong passphrase for you, please save it into your password wallet or write it down and put it in a safe place!
+	  </p>
 	</div>
       </div>
-
+    
       <!-- END NEW PASSPHRASE -->
 
       <div id="images" class="view">
