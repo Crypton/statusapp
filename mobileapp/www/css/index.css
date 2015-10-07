@@ -1174,14 +1174,6 @@ input.onboarding-input {
     padding-right: 1em;
 }
 
-#change-passphrase-info p {
-    padding-right: 1em;
-}
-
-#change-passphrase-info {
-    margin: 1em;
-}
-
 #onboarding-create-passphrase h3 {
     font-size: 1em;
     margin-top: 10px;
