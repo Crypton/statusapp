@@ -368,7 +368,7 @@ h1 {
 }
 
 #login-buttons {
-    margin-bottom: 1em;
+    margin: 1em;
     text-align: center;
 }
 
@@ -1099,7 +1099,7 @@ div .logo {
 
 #onboarding-create-username {
     text-align: left;
-    width: 98%;
+    width: 90%;
     margin-left: 1em;
     margin-top: 2em;
 }
@@ -1111,7 +1111,7 @@ div .logo {
 
 #onboarding-create-passphrase {
     text-align: left;
-    width: 98%;
+    width: 90%;
     margin-left: 1em;
     margin-right: 1em;
     position: fixed;
@@ -1131,12 +1131,12 @@ input.onboarding-input {
 }
 
 #onboarding-check-username {
-    width: 95%;
+    width: 100%;
     font-size: 1.2em;
 }
 
 .onboarding-btn {
-    width: 95%;
+    width: 100%;
     font-size: 1em;
 }
 
@@ -1166,6 +1166,7 @@ input.onboarding-input {
 #onboarding-passphrase-input {
     font-size: 1.2em;
     background-color: transparent !important;
+    border: 1px solid white !important;
 }
 
 .onboarding-continue-wrapper {

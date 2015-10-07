@@ -8,8 +8,8 @@
     David Dahl
   </author>
     <content src="index.html" />
-    <access origin="https://kloakstaging.crypton.io" />
-    <allow-navigation href="https://kloakstaging.cryopton.io/*" />
+    <access origin="https://*.crypton.io" />
+    <allow-navigation href="https://*.cryopton.io/*" />
     <preference name="target-device" value="universal" />
     <preference name="BackupWebStorage" value="none" />
     <preference name="DisallowOverscroll" value="true" />
