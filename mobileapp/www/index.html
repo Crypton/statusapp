@@ -382,7 +382,7 @@ height: 2.5rem;"></a>
 		    class="btn btn-success option-btn">Display passphrase</button>
 	  </p>
 	  <p class="option">
-	    <button disabled type="button"
+	    <button type="button"
 		    id="change-passphrase"
 		    class="btn btn-success option-btn">Change passphrase</button>
 	  </p>
@@ -479,12 +479,60 @@ height: 2.5rem;"></a>
 		    class="btn btn-default">OK</button>
 	  </div>
 	</div>
+
       </div>
 
+      <!-- BEGIN NEW PASSPHRASE -->
+      
+      <div id="new-passphrase" class="view intro-graphics">
+
+	<div id="create-new-passphrase">
+	  
+	  <div id="change-passphrase-info">
+	    <h3>Change Passphrase:</h3>
+	    <p>
+	      <textarea placeholder="Old Passphrase"
+			autocapitalize="off"
+			rows="3"
+			maxlength="256"
+			class="onboarding-input"
+			id="old-pass-change-passphrase-input"></textarea>
+	    </p>
+	    <p>
+	    <textarea placeholder="Enter New Passphrase"
+		      autocapitalize="off"
+		      rows="3"
+		      maxlength="256"
+		      class="onboarding-input"
+		      id="change-passphrase-input"></textarea>
+	    </p>
+	    <div class="change-passphrase-continue-wrapper">
+	      <button class="btn onboarding-btn"
+		      id="change-passphrase-continue">Continue</button>
+	      <p>
+		<a href="#"
+		   id="regenerate-new-change-passphrase"
+		   class="onboarding-link">Regenerate Passphrase</a>
+	      </p>
+	      <p>
+		<a href="#"
+		   id="clear-new-change-passphrase"
+		 class="onboarding-link">I'll choose my own Passphrase</a>
+	      </p>
+	    </div>
+	    <a href="#" class="onboarding-link" id="new-passphrase-cancel">Cancel</a>
+	    <p class="onboarding-light-copy">
+	      We have created a strong passphrase for you, please save it into your password wallet or write it down and put it in a safe place!
+	    </p>
+	  </div>
+	</div>
+      </div>
+
+      <!-- END NEW PASSPHRASE -->
+      
       <div id="images" class="view">
 	<img id="picture"/>
       </div>
-
     </div>
 
     <div id="post-image-location-wrapper" class="post-wrapper">

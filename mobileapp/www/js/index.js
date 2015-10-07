@@ -243,6 +243,28 @@ var app = {
       //e.scrollIntoView({block: "end", behavior: "smooth"});
     });
 
+    $('#clear-new-change-passphrase').click(function () {
+      $('#change-passphrase-input').val('');
+      $('#change-passphrase-input').focus();
+    });
+
+    $('#new-passphrase-cancel').click(function (e) {
+      app.switchView('my-options-pane');
+    });
+    
+    $('#regenerate-new-change-passphrase').click(function () {
+      var pass = generatePassphrase();
+      $('#change-passphrase-input').val(pass);
+    });
+    
+    $('#change-passphrase-continue').click(function (e) {
+      app.updatePassphrase();
+    });
+
+    $('#change-passphrase').click(function (e) {
+      app.updatePassphraseUI();
+    });
+    
     $('#get-new-passphrase').click(function (e) {
       e.preventDefault();
       var pass = generatePassphrase();
@@ -793,7 +815,7 @@ var app = {
   getImage_desktop: function getImage_desktop () {
     function chooseFile(name) {
       var chooser = document.querySelector(name);
-      chooser.addEventListener("change", function (evt) {
+      chooser.addEventListener('change', function (evt) {
         console.log(this.files);
         console.log(this.value);
         // get image data
@@ -1518,25 +1540,12 @@ var app = {
 	  followingStatus = ' <span class="following-not-complete"> Follow Back?</span>';
 	}
 
-	var userAvatar;
-	var avatar;
-	if (app.session.items._trusted_peers.value[contactNames[i]]) {
-	  avatar = app.session.items._trusted_peers.value[contactNames[i]].avatar;
-	  if (!avatar) {
-	    var avatarMetaName = contactNames[i] + '-avatar-meta';
-	    if (app.session.items[avatarMetaName]) {
-	      avatar = app.session.items[avatarMetaName].value.avatar;
-	    }
-	  }
-	  if (!avatar) {
-	    if (app.avatars[contactNames[i]]) {
-	      avatar = app.avatars[contactNames[i]];
-	    }
-	  }
-
-	  if (!avatar) {
-	    userAvatar = '<img class="user-avatar-generic" src="svg/contact.svg" />';
-	  } else {
+	var userAvatar = '<img class="user-avatar-generic" src="svg/contact.svg" />';;
+	console.warn(contactNames[i]);
+	var cName = app.contactNameMap[contactNames[i]];
+	if (app.session.items._trusted_peers.value[cName]) {
+	  var avatar = app.session.items._trusted_peers.value[cName].avatar;
+	  if (avatar) {
 	    userAvatar = '<img class="user-avatar" src="' + avatar + '" />';
 	  }
 	}
@@ -1661,10 +1670,91 @@ var app = {
       return;
     }
   }
+    window.plugins.actionsheet.show(options, callback);
+  },
 
-  window.plugins.actionsheet.show(options, callback);
-},
+  updatePassphraseUI: function updatePassphraseUI () {
+    app.switchView('new-passphrase');
+    
+    var oldPass;
+    if (app.keyChain.supported) {
+      function getPassCB (err, passphrase) {
+	$('#old-pass-change-passphrase-input').val(passphrase);
+	var newPass = generatePassphrase();
+	$('#change-passphrase-input').val(newPass);
+      }
+      
+      app.keyChain.getPassphrase(getPassCB);
+    } else {
+      $('#old-pass-change-passphrase-input').focus();
+      var newPass = generatePassphrase();
+      $('#change-passphrase-input').val(newPass);
+    }
+  },
 
+  updatePassphrase: function updatePassphrase () {
+    var oldPass = $('#old-pass-change-passphrase-input').val();
+    var newPass = $('#change-passphrase-input').val();
+    if (oldPass && newPass) {
+      ProgressIndicator.showSimpleWithLabel(true, 'Changing Passphrase, one moment...');
+      app.session.account.changePassphrase(oldPass, newPass,
+      function changePassCB (err) {
+	if (err) {
+	  console.error(err);
+	  ProgressIndicator.hide();
+	  app.alert('Could not change passphrase at this time', 'danger');
+	  return;
+	}
+	// Success:
+	// Need to re-set the keychain pass:
+	var supported = app.keyChain.supported;
+	if (supported) {
+	  app.keyChain.removePassphrase(function removePassCB (err) {
+	    if (err) {
+	      console.error(err);
+	      ProgressIndicator.hide();
+	      app.alert('Could not remove old passphrase from keychain');
+	      return;
+	    }
+	    // re-set passphrase
+	    app.keyChain.setPassphrase(newPass, function setPassCB (err) {
+	      if (err) {
+		console.error(err);
+		ProgressIndicator.hide();
+		app.alert('Could not set new passphrase into keychain');
+		return;
+	      }
+	      // all done, need to re-login
+	      ProgressIndicator.hide();
+	      // Show login screen
+	      var lastUser = window.localStorage.getItem('lastUserLogin');
+	      $('#username-login').hide();
+	      $('#username-placeholder').html(lastUser).show();
+	      $('#password-login').hide();
+	      $('#password-login').val(newPass);
+	      app.enableLoginButtons();
+	      app.switchView('account-login');
+	      $('#login-btn').click();
+	    });
+	  });
+	} else {
+	  ProgressIndicator.hide();
+	  app.enableLoginButtons();
+	  $('#password-login').show();
+	  var lastUser = window.localStorage.getItem('lastUserLogin');
+	  $('#username-login').val(lastUser).show();
+	  $('#username-placeholder').hide();
+	  $('#password-login').focus();
+	  $('#password-login').val(newPass);
+	  app.switchView('account-login');
+	  $('#login-btn').click();
+	}
+      });
+    } else {
+      app.alert('Please enter the current passphrase and the new passphrase', 'danger');
+    }
+  },
+  
   get isMobile() {
     if (!device) {
       return false;
