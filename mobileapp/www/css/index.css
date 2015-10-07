@@ -892,8 +892,8 @@ a {
     margin-top: 1em;
 }
 
-#register-btn-wrapper div {
-    margin-bottom: 1em;
+#register-btn-wrapper {
+    margin-bottom: 2em;
 }
 
 #switch-user-btn {
@@ -1117,24 +1117,15 @@ div .logo {
 }
 
 .onboarding-input{
-    width: 90%;
+    width: 100%;
     font-size: 1em;
-    padding: 0.6em;
+    padding: 0.6em 0;
     color: white;
 }
 
 input.onboarding-input {
     /* -webkit-border-radius: 5px; */
     background-color: transparent !important;
-}
-
-input.onboarding-input:before {
-    position: absolute;
-    content: '@';
-    left: 0;
-    font-size: 1.2em;
-    top: 0;
-    display: block;
 }
 
 #onboarding-check-username {
