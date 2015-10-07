@@ -361,21 +361,13 @@ height: 2.5rem;"></a>
 	    <!--   <img src="svg/info.svg" /> -->
 	    <!-- </a> -->
 	  </p>
-	  <p class="option option-text">
-	    By default (on supported devices), your credentials are securely remembered to allow for fast login
-	  </p>
-	  <p class="option">
-	    <button type="button"
-		    id="forget-credentials"
-		    class="btn btn-success option-btn btn-danger">Forget credentials</button>
-	  </p>
-      <div id="touchid-wrapper">
-        <p class="option">
-        <button type="button"
-          id="use-touchid"
-          class="btn btn-success option-btn">Toggle Touch ID</button>
-        </p>
-      </div>
+	  <div id="touchid-wrapper">
+            <p class="option">
+              <button type="button"
+		      id="use-touchid"
+		      class="btn btn-success option-btn">Toggle Touch ID</button>
+            </p>
+	  </div>
 	  <p class="option">
 	    <button type="button"
 		    id="display-passphrase"
@@ -385,6 +377,14 @@ height: 2.5rem;"></a>
 	    <button type="button"
 		    id="change-passphrase"
 		    class="btn btn-success option-btn">Change passphrase</button>
+	  </p>
+	  <p class="option option-text">
+	    By default (on supported devices), your credentials are securely remembered to allow for fast login. Only 'Forget Credentials' if you know the password. <strong>This is a destructive option</strong>.
+	  </p>
+	  <p class="option">
+	    <button type="button"
+		    id="forget-credentials"
+		    class="btn btn-success option-btn btn-danger">Forget credentials</button>
 	  </p>
 
 	  <!-- <p class="option option-text"> 148 46 244
