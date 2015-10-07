@@ -2,7 +2,7 @@
 <widget id="io.crypton.statusapp" version="0.3.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Kloak</name>
     <description>
-    A Zero-Knowledge status application 
+    A Zero-Knowledge status application
   </description>
     <author email="ddahl@nulltxt.se" href="http://nulltxt.se">
     David Dahl
@@ -18,6 +18,8 @@
     <preference name="orientation" value="portrait" />
     <preference name="KeyboardDisplayRequiresUserAction" value="false" />
     <preference name="SuppressesIncrementalRendering" value="true" />
+    <preference name="StatusBarOverlaysWebView" value="true" />
+    <preference name="StatusBarStyle" value="lightcontent" />
     <platform name="ios">
         <preference name="SplashScreen" value="screen" />
         <preference name="SplashScreenDelay" value="2000" />
@@ -37,4 +39,5 @@
     <plugin name="com.telerik.plugins.wkwebview" spec="https://github.com/Telerik-Verified-Plugins/WKWebView" />
     <plugin name="cordova-plugin-webserver" spec="^1.0.3" />
     <plugin name="cordova-plugin-inappbrowser" spec="https://github.com/apache/cordova-plugin-inappbrowser" />
+    <plugin name="cordova-plugin-statusbar" spec="^1.0.1" />
 </widget>
