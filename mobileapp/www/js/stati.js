@@ -50,21 +50,22 @@ app.aboutView = function _aboutView () {
   var info = 'Kloak is an <strong>*experiment*</strong> in social networking that is un-dataminable. All data sent to the server is "end to end" encrypted and unreadable by the server operator. <br /> Kloak is in beta and <strong>should not be used to hide communications from well-equipped potential attackers</strong> <p><a onclick="window.open(\'https://github.com/Crypton/statusapp\', \'_system\')" class="media-link media-link-url">Kloak issue tracker</a> <br />Kloak is built with <a onclick="window.open(\'https://crypton.io\', \'_system\')" class="media-link media-link-url">Crypton</a> by <a onclick="window.open(\'https://spideroak.com\', \'_system\')" class="media-link media-link-url">SpiderOak</a></p>';
 
   var html = '<div id="about-view"><h4>'
-  + header
+	+ header
         + '</h4>'
-  + '<p>'
+	+ '<p>'
         + info
-  + '</p>'
-  + '<p>'
-  + logos
-  + '</p>'
-  + '</div>';
+	+ '</p>'
+	+ '<p>'
+	+ logos
+	+ '</p>'
+	+ '<p class="build-string">Build: ' + app.buildString + '</p>'
+	+ '</div>';
   $('#app-about').children().remove();
   $('#app-about').append($(html));
 };
 
 app.setCustomEvents = function setCustomEvents () {
-
+  
   window.addEventListener('native.keyboardhide',
   function keyboardShowHandler (e) {
     app.keyboardTopPos = 0;
@@ -164,9 +165,6 @@ app.setCustomEvents = function setCustomEvents () {
     var target = document.querySelector('#post-input-wrapper textarea');
     var observer = new MutationObserver(function(mutations) {
       mutations.forEach(function(mutation) {
-	// var newBottom = mutation.target.parentElement.clientHeight;
-	// console.log('newBottom: ', newBottom);
-	// $('#post-image-location-wrapper').css({ bottom: newBottom + 'px' });
 	app.repositionInput();
       });
     });
@@ -193,7 +191,7 @@ app.setCustomEvents = function setCustomEvents () {
       if (!startPageY) {
 	startPageY = e.pageY;
       }
-      if (e.pageY > (startPageY + 80)) {
+      if (e.pageY > (startPageY + 70)) {
 	startPageY = null;
 	app.lastTimelineLoad = Date.now();
 	app.loadNewTimeline();
@@ -201,6 +199,19 @@ app.setCustomEvents = function setCustomEvents () {
       }
     }, false);
   })();
+};
+
+app.setOnSharedItemSync = function setOnSharedItemSync () {
+  app.session.events.onSharedItemSync = function (item) {
+    console.log('onSharedItemSync()', item);
+
+    if (item.value.avatar) {
+      // this is an avatar update
+      console.log('we were handed an avatar Item!', item.value);
+      app.updateContactAvatar(item.creator.username, item.value);
+      return;
+    }
+  };
 };
 
 app.keyboardTopPos = 0; // default
@@ -359,6 +370,16 @@ app.viewActions = {
 
   'account-login': function vaAccountLogin () {
     $('#username-login').focus();
+  },
+
+  'onboarding-no-account-step-4': function vaOnboardingNoAccount3 () {
+    // show the card
+    app.contactCard.init('onboarding-contact-card-wrapper');
+  },
+
+  'my-fingerprint-id-wrapper': function vaMyContactCard () {
+    // display the card
+    app.contactCard.displayCard('my-fingerprint-id');
   }
 };
 
@@ -400,15 +421,12 @@ app.customInitialization = function customInitialization() {
   console.log('customInitialization()');
   var that = this;
 
-  // XXXddahl: need a indeterminate progress indicator
   app.createInitialItems(function (err) {
     if (err) {
-      // $('#top-progress-wrapper').hide();
       app.hideProgress();
       return console.error(err);
     }
     console.log('Initial items fetched or created');
-    // $('#top-progress-wrapper').hide();
     app.hideProgress();
     app.displayInitialView();
   });
@@ -449,10 +467,24 @@ app.createInitialItems = function createInitialItems (callback) {
 	  avatar: null
 	};
       }
+
+      // Lazy Get Avatar Hmacs
+      app.getAvatarHmacs();
+      
       if (!callbackFired) {
 	callback(null);
       }
     });
+  });
+};
+
+app.getAvatarHmacs = function getAvatarHmacs () {
+  console.log('Getting Avatar HMACS');
+  app.session.getOrCreateItem('avatarHmacs', function (err, list) {
+    if (err) {
+      return console.error('Cannot get avatarHmacs');
+    }
+    console.log('FetchedAvatar HMACS');
   });
 };
 
@@ -463,6 +495,7 @@ app.hideProgress = function hideProgress() {
   app.progressVisible = false;
   setTimeout(function () {
     $('#top-progress-wrapper').hide();
+    $('.overlay').hide();
     // ProgressIndicator.hide();
     app.setProgressStatus('Doing Stuff...');
   }, 1000);
@@ -475,6 +508,8 @@ app.showProgress = function showProgress(aMessage) {
     return;
   }
   app.progressVisible = true;
+
+  $('.overlay').show();
   
   if (!aMessage) {
     // ProgressIndicator.showSimple();
@@ -551,6 +586,9 @@ app.loadInitialTimeline = function loadInitialTimeline(callback) {
       $("#fetch-previous-items").show();
     }
     app.updateEmptyTimelineElements();
+    if (!app.fetchContactMetadataInterval) {
+      app.fetchContactMetadata();
+    }
   });
 };
 
@@ -707,10 +745,17 @@ app.renderTimeline = function renderTimeline (timeline, append) {
     data.itemId = timeline[i].timelineId;
     console.log('rendered timelineid: ', timeline[i].timelineId);
     node = app.createMediaElement(data, localUser);
+    
+    console.log('avatarMeta: ', timeline[i].value.avatarMeta);
+    console.log('timeline object: ', timeline[i]);
+
+    // XXXddahl: add each avatarMeta + updated time + creatorUsername to an array
+    // During "idle times", we go through the list and snatch the shared avatar
+    // Also save the nameHmac for the shared avatar data into the trustedPeers
+    
     if (!localUser && timeline[i].value.avatarMeta) {
       app.handleAvatar(timeline[i].creatorUsername, timeline[i].value.avatarMeta);
     }
-
 
     // Make sure to hide the "empty feed message"
     if ($("#first-run-empty-feed-msg").is(":visible")) {
@@ -735,61 +780,61 @@ app.handleAvatar = function handleAvatar(peerName, avatarMeta) {
     var avatarMetaName = peerName + '-avatar-meta';
     if (app.session.items[avatarMetaName]) {
       if (avatarMeta.updated > app.session.items[avatarMetaName].value.updated) {
-  // update the avatarMeta!
-  app.session.items[avatarMetaName].value.updated = avatarMeta.updated;
-  app.session.getOrCreateItem(avatarMetaName, function (err, item) {
-    if (err) {
-      console.error(err);
-      return;
-    }
+	// update the avatarMeta!
+	app.session.items[avatarMetaName].value.updated = avatarMeta.updated;
+	app.session.getOrCreateItem(avatarMetaName, function (err, item) {
+	  if (err) {
+	    console.error(err);
+	    return;
+	  }
 
-    app.session.getPeer(peerName, function (err, peer) {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      app.session.getSharedItem(avatarMeta.nameHmac, peer,
-      function (err, sharedItem) {
-        if (err) {
-    console.error(err);
-    return;
-        }
-        item.value = {
-    updated: avatarMeta.updated,
-    nameHmac: avatarMeta.nameHmac,
-    avatar: sharedItem.value.avatar
-        };
-
-      });
-    });
-  });
+	  app.session.getPeer(peerName, function (err, peer) {
+	    if (err) {
+              console.error(err);
+              return;
+	    }
+	    app.session.getSharedItem(avatarMeta.nameHmac, peer,
+	    function (err, sharedItem) {
+	      if (err) {
+		console.error(err);
+		return;
+              }
+	      item.value = {
+		updated: avatarMeta.updated,
+		nameHmac: avatarMeta.nameHmac,
+		avatar: sharedItem.value.avatar
+              };
+	      
+	    });
+	  });
+	});
       }
     } else {
       // add meta to the object
       app.session.getOrCreateItem(avatarMetaName, function (err, item) {
-  if (err) {
-    console.error(err);
-    return;
-  }
-  app.session.getPeer(peerName, function (err, peer) {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    app.session.getSharedItem(avatarMeta.nameHmac, peer,
-    function (err, sharedItem) {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      item.value = {
-        updated: avatarMeta.updated,
-        nameHmac: avatarMeta.nameHmac,
-        avatar: sharedItem.value.avatar
-      };
-      // XXX: update all avatars in the feed?
-    });
-  });
+	if (err) {
+	  console.error(err);
+	  return;
+	}
+	app.session.getPeer(peerName, function (err, peer) {
+	  if (err) {
+	    console.error(err);
+	    return;
+	  }
+	  app.session.getSharedItem(avatarMeta.nameHmac, peer,
+          function (err, sharedItem) {
+	    if (err) {
+	      console.error(err);
+              return;
+	    }
+	    item.value = {
+              updated: avatarMeta.updated || 0,
+              nameHmac: avatarMeta.nameHmac,
+              avatar: sharedItem.value.avatar
+	    };
+	    // XXX: update all avatars in the feed?
+	  });
+	});
       });
     }
   }
@@ -872,18 +917,18 @@ app.updateEmptyTimelineElements = function updateEmptyTimelineElements () {
     for (var i = 0; i < empties.length; i++) {
       var status;
       try {
-  status = history[empties[i]].value.status;
+	status = history[empties[i]].value.status;
       } catch (ex) {
-  console.warn('timelineItem has no status property: ', history[empties[i]]);
-  continue;
+	console.warn('timelineItem has no status property: ', history[empties[i]]);
+	continue;
       }
       if (status) {
-  // we have unknown update data
-  app.transformEmptyTimelineElement(empties[i], history[empties[i]]);
-  app.transformedTimelineElements[empties[i]] = Date.now();
+	// we have unknown update data
+	app.transformEmptyTimelineElement(empties[i], history[empties[i]]);
+	app.transformedTimelineElements[empties[i]] = Date.now();
       }
       if (i == (empties.length -1)) {
-  app.deferUpdateFeedAvatars();
+	app.deferUpdateFeedAvatars();
       }
     }
   }, 2000);
@@ -919,8 +964,16 @@ app.massageTimelineUpdate = function massageTimelineUpdate (data) {
       avatar = null;
     }
   }
+  console.log('massage: ', data);
+  var avatarMeta = {};
+  if (data.value.avatarMeta) {
+    avatarMeta.nameHmac = data.value.avatarMeta.nameHmac;
+    avatarMeta.updated = data.value.avatarMeta.updated;
+    avatarMeta.username = data.creatorUsername;
+  }
 
   return {
+    avatarMeta: avatarMeta,
     avatar: avatar,
     location: data.value.location,
     statusText: data.value.status,
@@ -942,19 +995,17 @@ app.toggleSetStatusProgress = function toggleSetStatusProgress() {
 };
 
 app.setMyStatus = function setMyStatus() {
-  // app.toggleSetStatusButton();
   // validate length of data to be sent
   var status = $('#post-textarea').val();
   status = app.escapeHtml(status);
 
   if (!status.length) {
-    return app.alert('Please enter a status update', 'danger');
+    status = ' ';
   }
   if (status.length > 512) {
     return app.alert('Status update is too long, please shorten it', 'danger');
   }
   // update the item
-  // app.toggleSetStatusProgress();
   var imageData;
   if ($('#image-data').children().length) {
     imageData = $('#image-data').children()[0].src;
@@ -974,6 +1025,10 @@ app.setMyStatus = function setMyStatus() {
     updateObj.imageData = imageData;
   }
 
+  if ((updateObj.status == ' ') && !updateObj.imageData && !updateObj.location) {
+    return app.alert('Status update requires text, location or photo', 'danger');
+  }
+  
   app.session.items.status.value.status = updateObj.status;
   app.session.items.status.value.location = updateObj.location;
   app.session.items.status.value.timestamp = updateObj.timestamp;
@@ -1003,6 +1058,7 @@ app.setMyStatus = function setMyStatus() {
 
 app.displayInitialView = function displayInitialView() {
   // Check for first run
+  // XXX: this is probably deprecated now
   if (!app.firstRunIsNow) {
     app.session.on('message', function (message) {
       console.log('session.on("message") event called', message);
@@ -1059,18 +1115,18 @@ function createAvatarUpdateElement(data) {
 
   var timestamp = app.formatDate(data.timestamp || data.updated, data.tz);
   var html = '<div id="' + data.itemId
-           + '" class="media attribution">'
-     + '<a class="img">'
-           + '<img class="media-avatar" src="' + data.avatar
-           + '" />'
-       + '</a>'
-           + '  <div class="bd media-metadata">'
-     + '    <span class="media-username">' + data.username + '</span>'
-     + '    <div class="media-avatar-update">'
-     + 'avatar updated ' + timestamp
-           + '</div>'
-           + '  </div>'
-           + '</div>';
+        + '" class="media attribution">'
+	+ '<a class="img">'
+        + '<img class="media-avatar" src="' + data.avatar
+        + '" />'
+	+ '</a>'
+        + '  <div class="bd media-metadata">'
+	+ '    <span class="media-username">' + data.username + '</span>'
+	+ '    <div class="media-avatar-update">'
+	+ 'avatar updated ' + timestamp
+        + '</div>'
+        + '  </div>'
+        + '</div>';
   return $(html);
 };
 
@@ -1085,17 +1141,41 @@ function createMediaElement(data, localUser, existingNode) {
   }
 
   var avatarMetaName = data.username + '-avatar-meta';
-  if (app.session.items[avatarMetaName]) {
-    data.avatar = app.session.items[avatarMetaName].value.avatar;
-  }
 
+  console.log('Data: ', data);
+  
+  var avatarDataMarkup;
+  var avatarHmac;
+  if (data.avatarMeta) {
+    avatarHmac = data.avatarMeta.nameHmac;
+    var avatarName = data.avatarMeta.username;
+    avatarDataMarkup = ' data-avatarHmac="' + avatarHmac
+	  + '" data-avatarName="' + avatarName + '" ';
+  }
+  
   var avatarMarkup;
   if (!data.avatar) {
     // Make a stand-in avatar
-    avatarMarkup = '<span class="media-generic-avatar" '
-      + 'data-username="' + data.username + '">'
+    avatarMarkup = '<span class="media-generic-avatar ' + avatarHmac + '" '
+      + 'data-username="' + data.username + avatarDataMarkup + '">'
       + data.username[0].toUpperCase()
       + '</span>';
+
+    var unfetched = { username: data.username,
+		      avatarHmac: data.avatarMeta.nameHmac };
+    
+    app.unfetchedContactList[data.username] = { username: data.username,
+						avatarHmac: data.avatarMeta.nameHmac };
+    
+    // store the hmac + name in our avatarHmacs object
+    if (app.session.items.avatarHmacs) {
+      if (!app.session.items.avatarHmacs.value[data.username]) {
+	app.session.items.avatarHmacs.value[data.username] = {
+	  avatarHmac: avatarHmac,
+	  updated: data.avatarMeta.updated
+	};
+      }
+    }
   } else {
     var avatarData;
     if (localUser) {
@@ -1103,7 +1183,8 @@ function createMediaElement(data, localUser, existingNode) {
     } else {
       avatarData  = data.avatar;
     }
-    avatarMarkup = '<img class="media-avatar" src="' + avatarData + '"/>';
+    avatarMarkup = '<img class="media-avatar"'
+      + avatarDataMarkup  + 'src="' + avatarData + '"/>';
   }
 
   var imageHtml;
@@ -1137,18 +1218,18 @@ function createMediaElement(data, localUser, existingNode) {
 	+ itemId + '"></div>';
 
   var html = '<a class="img">'
-           + avatarMarkup
-       + '  </a>'
-           + '  <div class="bd media-metadata">'
-           + '    <div class="status-block">'
-       + '    <div class="media-username">@' + data.username + '</div>'
-     + '    <span class="media-status">'
-     + status
-           + '</span></div>'
-     + '<footer class="media-footer"> <span class="media-timestamp">'
-           + data.humaneTimestamp + '</span>'
-           + '    <span class="media-location">'
-           + gps + '</span></footer>';
+        + avatarMarkup
+	+ '  </a>'
+        + '  <div class="bd media-metadata">'
+        + '    <div class="status-block">'
+	+ '    <div class="media-username">@' + data.username + '</div>'
+	+ '    <span class="media-status">'
+	+ status
+        + '</span></div>'
+	+ '<footer class="media-footer"> <span class="media-timestamp">'
+        + data.humaneTimestamp + '</span>'
+        + '    <span class="media-location">'
+        + gps + '</span></footer>';
   if (imageHtml) {
     html = html + imageHtml;
   }
@@ -1185,17 +1266,37 @@ function createMediaElement(data, localUser, existingNode) {
   }
 };
 
+app.createAvatar = function createAvatar (avatar, username, nameHmac) {
+  var avatarHmac = nameHmac;
+  var avatarName = username;
+  var avatarDataMarkup = ' data-avatarHmac="' + avatarHmac
+    + '" data-avatarName="' + avatarName + '" ';
+  
+  var avatarMarkup = '<img class="media-avatar"'
+	+ avatarDataMarkup  + 'src="' + avatar + '"/>';
+  return $(avatarMarkup);
+};
+
 app.linkOutput = function linkOutput(autolinker, match) {
   var text = match.getAnchorText();
   var href = match.getAnchorHref();
 
   function makeLink(url, klass) {
-    var link = '<a href="#" class="media-link media-link-'
-             + klass
-             + '" onclick="'
-             + 'window.open(\'' + url  + '\', \'_system\', \'\')">'
-             + text
-             + '</a>';
+    var link;
+    if (klass === 'twitter') {
+      link = '<a href="#" class="media-link media-link-'
+            + klass
+            + '">'
+            + text
+            + '</a>';
+    } else {
+      link = '<a href="#" class="media-link media-link-'
+            + klass
+            + '" onclick="'
+            + 'window.open(\'' + url  + '\', \'_system\', \'\')">'
+            + text
+            + '</a>';
+    }
     return link;
   }
 
@@ -1228,18 +1329,76 @@ app.shareStatus = function shareStatus (peerObj) {
       console.error(err, 'Cannot shareStatus!');
       return;
     }
-    if (app.session.items.avatar) {
-      app.session.items.avatar.share(peerObj, function (err) {
-  if (err) {
-    console.error(err);
-    console.error('cannot share avatar with ' + peerObj.username);
-  }
-  console.log('avatar shared with ' + peerObj.username);
-      });
-    } else {
-      console.error('app.session.items.avatar does not exist');
-    }
+
+    app.session.items.avatar.share(peerObj, function (err) {
+      if (err) {
+	console.error(err);
+	console.error('cannot share avatar with ' + peerObj.username);
+      }
+      console.log('avatar shared with ' + peerObj.username);
+    });
+
   });
+};
+
+app.getContactMetadata = function getContactMetadata(contactName, avatarHmac, callback) {
+  if (!avatarHmac || !contactName) {
+    return;
+  }
+  app.session.getPeer(contactName, function getPeerCB (err, peer) {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    app.session.getSharedItem(avatarHmac, peer, function getSharedCB(err, item) {
+      if (err) {
+	return console.error(err);
+      }
+      app.session.items._trusted_peers.value[contactName].avatar = item.value.avatar;
+      app.session.items._trusted_peers.value[contactName].biography = item.value.biography;
+      app.session.items._trusted_peers.value[contactName].updated = Date.now();
+      app.session.items._trusted_peers.save(function (err) {
+	if (err) {
+	  console.error(err);
+	}
+	if (typeof callback === 'function') {
+	  callback(err);
+	}
+      });
+    });
+  });
+};
+
+app.unfetchedContactList = {}; // { username, hmac }
+
+app.fetchContactMetadata = function fetchContactMetadata () {
+
+  var contactList = Object.keys(app.unfetchedContactList);
+  
+  app.fetchContactMetadataInterval = setInterval(function contactMetadataLoop () {
+    if (!contactList.length) {
+      return;
+    }
+    var prop = contactList.pop();
+    var contact = app.unfetchedContactList[prop];
+    if (contact.username && contact.avatarHmac) {
+      app.getContactMetadata(contact.username, contact.avatarHmac, function (err) {
+	if (!err) {
+	  app.updateFeedAvatar(
+	    app.session.items._trusted_peers.value[contact.username].avatar,
+	    contact.username,
+	    contact.avatarHmac
+	  );
+	  delete app.unfetchedContactList[contact.username];
+	}
+      });
+    }
+  }, 10000);
+};
+
+app.updateFeedAvatar = function updateFeedAvatar (avatar, username, avatarHmac) {
+  var newAvatar = app.createAvatar(avatar, username, avatarHmac);
+  $('span.' + avatarHmac).replaceWith(newAvatar);
 };
 
 // app.revokeSharedStatus = function revokeSharedStatus(peer) {
@@ -1247,72 +1406,7 @@ app.shareStatus = function shareStatus (peerObj) {
 // };
 
 app.handleMessage = function handleMessage (message) {
-  // just add the shared container hmac + username to the feed container
-  console.log('handleMessage();', arguments);
-
-  // XXXddahl: we no longer use the 'feed' item or depend on web sockets for the sharing of
-  //           status messages. Need to re-tool this for DMs or avatars
-
-  // if (message.headers.notification != 'sharedItem') {
-  //   return;
-  // }
-
-  // var itemNameHmac = message.payload.itemNameHmac;
-  // var username = message.payload.from;
-  // // cache the hmac sent to us!
-  // var newFeedHmac = {
-  //   fromUser: username,
-  //   itemNameHmac: itemNameHmac,
-  //   timestamp: Date.now()
-  // };
-
-  // if (app.session.items.feed.value.feedHmacs[itemNameHmac]) {
-  //   app.session.getPeer(username, function (err, peer) {
-  //     if (err) {
-  //       console.error(err);
-  //       return;
-  //     }
-  //     // We need to load and watch this container
-  //     app.session.getSharedItem(itemNameHmac, peer, function (err, statusItem) {
-  //       if (err) {
-  //         console.error(err);
-  //         return;
-  //       }
-  //       // delete this inbox message
-  //       app.deleteInboxMessage(message.messageId);
-  //  // If this is an avatar, save to contacts
-  //  if (statusItem.value.avatar) {
-  //    app.updateContactAvatar(username, statusItem.value);
-  //    // XXXddahl: Update timeline with a "new avatar message??"
-  //  } else {
-  //         // create status item, prepend to the top of the list
-  //         app.updatePeerStatus(username, statusItem.value);
-  //       }
-  //     });
-  //   });
-  // } else {
-  //   app.session.items.feed.value.feedHmacs[itemNameHmac] = newFeedHmac;
-  //   app.session.items.feed.save(function saveCallback (err) {
-  //     if (err) {
-  //       console.error(err);
-  //     }
-  //     app.session.getPeer(username, function (err, peer) {
-  //       if (err) {
-  //         console.error(err);
-  //         return;
-  //       }
-  //       // We need to load and watch this container
-  //       app.session.getSharedItem(itemNameHmac, peer, function (err, statusItem) {
-  //         if (err) {
-  //           console.error(err);
-  //           return;
-  //         }
-  //         // delete this inbox message
-  //         app.deleteInboxMessage(message.messageId);
-  //       });
-  //     });
-  //   });
-  // }
+  console.log('noop handleMessage();', arguments);
 };
 
 app.deleteInboxMessage = function (messageId) {

@@ -2,16 +2,14 @@
 <widget id="io.crypton.statusapp" version="0.3.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Kloak</name>
     <description>
-    A Zero-Knowledge status application 
+    A Zero-Knowledge status application
   </description>
     <author email="ddahl@nulltxt.se" href="http://nulltxt.se">
     David Dahl
   </author>
     <content src="index.html" />
     <access origin="https://kloakstaging.crypton.io" />
-    <access origin="https://zk.gs" />
     <allow-navigation href="https://kloakstaging.cryopton.io/*" />
-    <allow-navigation href="https://zk.gs/*" />
     <preference name="target-device" value="universal" />
     <preference name="BackupWebStorage" value="none" />
     <preference name="DisallowOverscroll" value="true" />
@@ -19,27 +17,27 @@
     <preference name="UIWebViewBounce" value="false" />
     <preference name="orientation" value="portrait" />
     <preference name="KeyboardDisplayRequiresUserAction" value="false" />
-    <preference name="SuppressesIncrementalRendering" value="true"/>
-
+    <preference name="SuppressesIncrementalRendering" value="true" />
+    <preference name="StatusBarOverlaysWebView" value="true" />
+    <preference name="StatusBarStyle" value="lightcontent" />
     <platform name="ios">
         <preference name="SplashScreen" value="screen" />
         <preference name="SplashScreenDelay" value="2000" />
-	<feature name="Keyboard">
-            <param name="ios-package" value="CDVKeyboard" onload="true" />
+        <feature name="Keyboard">
+            <param name="ios-package" onload="true" value="CDVKeyboard" />
         </feature>
     </platform>
     <platform name="android">
         <preference name="android-minSdkVersion" value="14" />
     </platform>
-    <plugin name="com.phonegap.plugins.barcodescanner" spec="~2.0.1" />
-    <plugin name="org.apache.cordova.geolocation" spec="~0.3.12" />
-    <plugin name="com.telerik.plugins.wkwebview" spec="~0.5.0" />
-    <plugin name="nl.x-services.plugins.socialsharing" spec="~4.3.19" />
-    <plugin name="org.apache.cordova.statusbar" spec="~0.1.10" />
-    <plugin name="org.apache.cordova.camera" spec="~0.3.6" />
-    <plugin name="org.devgeeks.privacyscreen" spec="~0.0.5" />
-    <plugin name="org.apache.cordova.inappbrowser" spec="~0.6.0" />
-    <plugin name="org.apache.cordova.device" spec="~0.3.0" />
-    <plugin name="com.crypho.plugins.securestorage" spec="~1.1.2" />
-    <plugin name="nl.x-services.plugins.actionsheet" spec="~1.1.7" />
+    <plugin name="cordova-plugin-whitelist" spec="^1.0.0" />
+    <plugin name="nl.x-services.plugins.actionsheet" spec="^1.1.7" />
+    <plugin name="com.ionic.keyboard" spec="^1.0.4" />
+    <plugin name="cordova-plugin-touchid" spec="^0.3.0" />
+    <plugin name="org.pbernasconi.progressindicator" spec="^1.1.0" />
+    <plugin name="org.apache.cordova.dialogs" spec="^0.3.0" />
+    <plugin name="com.telerik.plugins.wkwebview" spec="https://github.com/Telerik-Verified-Plugins/WKWebView" />
+    <plugin name="cordova-plugin-webserver" spec="^1.0.3" />
+    <plugin name="cordova-plugin-inappbrowser" spec="https://github.com/apache/cordova-plugin-inappbrowser" />
+    <plugin name="cordova-plugin-statusbar" spec="^1.0.1" />
 </widget>

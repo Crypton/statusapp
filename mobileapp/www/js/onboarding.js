@@ -44,8 +44,21 @@ app.onboarding = {
     });
 
     $('#onboarding-add-photo-btn').click(function () {
-      that.addPhotoToCard();
+      // that.addPhotoToCard();
+      app.contactCard.newPhotoContactCardSheet();
     });
+
+    $('#onboarding-username-input').keyup(function (e) {
+      this.value = this.value.toLowerCase();
+    });
+
+    $('#onboarding-username-input').keypress(function (e) {
+      if (e.which == 13) {
+	that.choosePassword();
+	return false;
+      }
+    });
+    
   },
 
   existingLogin: function existingLogin() {
@@ -80,6 +93,7 @@ app.onboarding = {
     var that = this;
 
     ProgressIndicator.showSimpleWithLabel(true, this.strings.en_US.ACCOUNT_GENERATE);
+    this.username = this.username.toLowerCase();
     // create account
     crypton.generateAccount(this.username, this.passphrase,
       function onboardCreateAcctCB (err) {
@@ -137,7 +151,6 @@ app.onboarding = {
 	  return;
 	}
 
-
 	app.session.getOrCreateItem('_prefs_', function(err, prefsItem) {
           console.log('getting _prefs_');
 
@@ -155,7 +168,6 @@ app.onboarding = {
 	    }
 	    ProgressIndicator.hide();
 	    // Display Contact Card onboarding screen:
-	    that.displayContactCard();
 	    app.switchView('onboarding-no-account-step-4');
 	  });
 	});
@@ -166,14 +178,28 @@ app.onboarding = {
   handleLoginErr: function handleLoginError (err) {
     app.alert(err, 'danger');
   },
+
+  currentErr: [],
   
   accountValidationErr: function accountValidationErr (err) {
     // parse errors and change UI
+    var error = { error: err, time: Date.now() };
+    this.currentErr.push(error);
+
     if (err == 'Username already taken.') {
-      this.currentErr = err;
       this.begin();
       app.alert('Please choose another username', 'danger');
+      return;
     }
+
+    if (err == 'Username is not valid: it is not alphanumeric!') {
+      this.begin();
+      app.alert('Usernames must be alphanumeric', 'danger');
+      return;
+    }
+    
+    this.begin();
+    app.alert(err, 'danger');
   },
 
   exit: function exit () {
@@ -195,15 +221,6 @@ app.onboarding = {
   },
 
   addPhotoToCard: function addPhotoToCard() {
-    // app.getPhoto(null, function addPhotoCB (err, imgData) {
-    //   // save avatar:
-    //   app.session.items.avatar.value.avatar = imgData;
-    //   app.session.items.avatar.save(function (err) {
-    // 	// add photo to the card
-    // 	var idCard = $('#onboarding-contact-card-wrapper canvas')[0];
-    // 	app.pasteAvatar(imgData, idCard);
-    //   });
-    // });
     app.newPhotoContactCardSheet(function () {
       $('#header').show();
     });

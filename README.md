@@ -19,7 +19,7 @@ Plugin list.
 -------------
 * com.phonegap.plugins.barcodescanner
 * org.apache.cordova.geolocation
-* com.telerik.plugins.wkwebview
+* com.telerik.plugins.wkwebview: `cordova plugin add https://github.com/Telerik-Verified-Plugins/WKWebView#0.6.0`
 * nl.x-services.plugins.socialsharing
 * org.apache.cordova.statusbar
 * org.apache.cordova.camera
@@ -29,6 +29,10 @@ Plugin list.
 * com.crypho.plugins.securestorage
 * nl.x-services.plugins.actionsheet
 * org.apache.cordova.statusbar
+* org.pbernasconi.progressindicator
+* cordova-plugin-touchid
+* cordova-plugin-whitelist
+* cordova-plugin-webserver
 * (Android Only) net.yoik.cordova.plugins.screenorientation.wkwebview
 
 Building and running.
