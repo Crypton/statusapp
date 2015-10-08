@@ -1132,7 +1132,6 @@ input.onboarding-input {
 
 #onboarding-check-username {
     width: 100%;
-    font-size: 1.2em;
 }
 
 .onboarding-btn {
@@ -1164,23 +1163,53 @@ input.onboarding-input {
 }
 
 #onboarding-passphrase-input {
-    font-size: 1.2em;
+    font-size: 1.1em;
+    text-align: center;
     background-color: transparent !important;
-    border: 1px solid white !important;
+    border: 1px dashed white !important;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0.6em;
+    box-sizing: border-box;
+    margin-bottom: 0.5em;
 }
 
+#onboarding-create-passphrase #clear-passphrase {
+    font-size:0.8em;
+    margin-bottom: 1em;
+}
 .onboarding-continue-wrapper {
     margin-bottom: 1em;
+    text-align: center;
+}
+
+#passphrase-info {
+    text-align: center;
 }
 
 #passphrase-info p {
     padding-right: 1em;
 }
 
+#change-passphrase-info p {
+    padding-right: 1em;
+}
+
+#change-passphrase-info {
+    margin: 1em;
+}
+
+
 #onboarding-create-passphrase h3 {
     font-size: 1em;
     margin-top: 10px;
     color: white;
+    float: left;
+}
+#onboarding-create-passphrase #regenerate-passphrase {
+    float: right;
+    margin-top: 11px;
+    font-weight: normal;
 }
 
 #onboarding-account-generation {
@@ -1240,6 +1269,20 @@ input.onboarding-input {
 
 .current-contact-card-canvas {
     width: 90%;
+}
+
+textarea#old-pass-change-passphrase-input.onboarding-input {
+    font-size: 1.2em !important;
+    width: 100% !important;
+}
+
+textarea#change-passphrase-input.onboarding-input {
+    font-size: 1.2em;
+    width: 100% !important;
+}
+
+button#change-passphrase-continue.btn.onboarding-btn {
+    width: 100% !important;
 }
 
 /* Spinning Cube thx to @tobiasahlin. */
