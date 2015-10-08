@@ -1132,7 +1132,6 @@ input.onboarding-input {
 
 #onboarding-check-username {
     width: 100%;
-    font-size: 1.2em;
 }
 
 .onboarding-btn {
@@ -1164,13 +1163,28 @@ input.onboarding-input {
 }
 
 #onboarding-passphrase-input {
-    font-size: 1.2em;
+    font-size: 1.1em;
+    text-align: center;
     background-color: transparent !important;
-    border: 1px solid white !important;
+    border: 1px dashed white !important;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0.6em;
+    box-sizing: border-box;
+    margin-bottom: 0.5em;
 }
 
+#onboarding-create-passphrase #clear-passphrase {
+    font-size:0.8em;
+    margin-bottom: 1em;
+}
 .onboarding-continue-wrapper {
     margin-bottom: 1em;
+    text-align: center;
+}
+
+#passphrase-info {
+    text-align: center;
 }
 
 #passphrase-info p {
@@ -1190,6 +1204,12 @@ input.onboarding-input {
     font-size: 1em;
     margin-top: 10px;
     color: white;
+    float: left;
+}
+#onboarding-create-passphrase #regenerate-passphrase {
+    float: right;
+    margin-top: 11px;
+    font-weight: normal;
 }
 
 #onboarding-account-generation {
