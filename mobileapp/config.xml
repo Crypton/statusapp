@@ -9,7 +9,7 @@
   </author>
     <content src="index.html" />
     <access origin="https://*.crypton.io" />
-    <allow-navigation href="https://*.cryopton.io/*" />
+    <allow-navigation href="https://*.crypton.io/*" />
     <preference name="target-device" value="universal" />
     <preference name="BackupWebStorage" value="none" />
     <preference name="DisallowOverscroll" value="true" />
