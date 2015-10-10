@@ -70,6 +70,11 @@ app.onboarding = {
   passphrase: null,
   
   begin: function begin () {
+    if (document.documentElement.clientHeight < 660) {
+      $('.onboarding-header-container img').css({height: '48px'});
+      $('.onboarding-header-container p').css({'font-size': '12px'});
+      $('#onboarding-create-passphrase').css({bottom: '50px'});
+    }
     app.switchView('onboarding-no-account');
   },
   
@@ -90,6 +95,7 @@ app.onboarding = {
     }
     this.passphrase = $('#onboarding-passphrase-input').val().trim();
     app.switchView('onboarding-no-account-step-3');
+    $('#onboarding-no-account-step-3.onboarding-header-container img').css({height: '128px'});
     var that = this;
 
     ProgressIndicator.showSimpleWithLabel(true, this.strings.en_US.ACCOUNT_GENERATE);

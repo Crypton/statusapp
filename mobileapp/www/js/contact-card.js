@@ -263,7 +263,7 @@ app.contactCard = {
   },
 
   updatePhoto: function updatePhoto () {
-    app.getPhoto({ width: 120, height: 160 }, function (err, imageData) {
+    app.getPhoto({ width: 120, height: 120 }, function (err, imageData) {
       var avatarItem = app.session.items.avatar;
       avatarItem.value.avatar = imageData;
       avatarItem.value.updated = Date.now();

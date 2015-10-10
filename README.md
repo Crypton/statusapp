@@ -33,6 +33,7 @@ Plugin list.
 * cordova-plugin-touchid
 * cordova-plugin-whitelist
 * cordova-plugin-webserver
+* org.apache.cordova.dialogs
 * (Android Only) net.yoik.cordova.plugins.screenorientation.wkwebview
 
 Building and running.
