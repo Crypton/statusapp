@@ -217,6 +217,10 @@ var app = {
       app.about();
     });
 
+    $('#feedback').click(function () {
+      window.open('https://spideroak.com/solutions/kloak/feedback/', '_system');
+    });
+
     $("#register-btn").click(function (e) {
       e.preventDefault();
       app.onboarding.begin();
