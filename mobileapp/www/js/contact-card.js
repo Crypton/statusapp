@@ -51,6 +51,10 @@ app.contactCard = {
   captureBio: function captureBio (callback) {
     var that = this;
     function onPrompt(results) {
+      if (results.buttonIndex == 2) {
+	console.log('Cancelled!');
+	return callback();
+      }
       if (results.input1.length > 96) {
 	app.alert('Sorry, your Biography is too long. 96 Characters Maximum.', 'danger');
 	return;
