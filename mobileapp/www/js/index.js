@@ -1006,7 +1006,7 @@ var app = {
     }
 
     if (!user || !pass) {
-      app.alert('Please enter a username and passphrase');
+      app.alert('Please enter a username and passphrase', 'warning');
       return;
     }
 
@@ -1693,6 +1693,9 @@ var app = {
   updatePassphrase: function updatePassphrase () {
     var oldPass = $('#old-pass-change-passphrase-input').val();
     var newPass = $('#change-passphrase-input').val();
+
+    var username = app.username;
+
     if (oldPass && newPass) {
       ProgressIndicator.showSimpleWithLabel(true, 'Changing Passphrase, one moment...');
       app.session.account.changePassphrase(oldPass, newPass,
@@ -1710,9 +1713,7 @@ var app = {
 	  app.keyChain.removePassphrase(function removePassCB (err) {
 	    if (err) {
 	      console.error(err);
-	      ProgressIndicator.hide();
-	      app.alert('Could not remove old passphrase from keychain');
-	      return;
+	      // Keep going to change passphrase as it was manually typed anyway
 	    }
 	    // re-set passphrase
 	    app.keyChain.setPassphrase(newPass, function setPassCB (err) {
@@ -1725,9 +1726,9 @@ var app = {
 	      // all done, need to re-login
 	      ProgressIndicator.hide();
 	      // Show login screen
-	      var lastUser = window.localStorage.getItem('lastUserLogin');
 	      $('#username-login').hide();
-	      $('#username-placeholder').html(lastUser).show();
+	      $('#username-login').val(username);
+	      $('#username-placeholder').html(username).show();
 	      $('#password-login').hide();
 	      $('#password-login').val(newPass);
 	      app.enableLoginButtons();
@@ -1739,9 +1740,8 @@ var app = {
 	  ProgressIndicator.hide();
 	  app.enableLoginButtons();
 	  $('#password-login').show();
-	  var lastUser = window.localStorage.getItem('lastUserLogin');
-	  $('#username-login').val(lastUser).show();
-	  $('#username-placeholder').hide();
+	  $('#username-login').val(username).show();
+	  $('#username-placeholder').html(username).hide();
 	  $('#password-login').focus();
 	  $('#password-login').val(newPass);
 	  app.switchView('account-login');
