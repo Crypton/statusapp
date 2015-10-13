@@ -276,6 +276,16 @@ app.contactCard = {
       avatarItem.value.avatar = imageData;
       avatarItem.value.updated = Date.now();
 
+      if (err) {
+	// Get photo cancelled or failed for whatever reason
+	if (err === 'no image selected') {
+	  console.warn(err);
+	  return;
+	}
+	app.alert(err, 'danger');
+	console.error(err);
+	return;
+      }
       app.alert('Saving photo to server...', 'info');
       
       avatarItem.save(function (err) {
@@ -289,8 +299,7 @@ app.contactCard = {
 	$('.current-contact-card-canvas').remove();
 	$('#contact-card-photo')[0].src = imageData;
 	that.cardPhoto = that.getAvatarImage();
-	that.ctx.drawImage(that.cardPhoto, 45, 118);
-	
+	that.ctx.drawImage(that.cardPhoto, 45, 118);	
       });
     });
   },
@@ -325,7 +334,7 @@ app.contactCard = {
 	app.getPhoto(options, function imgCallback(err, imgData) {
 	  if (err) {
 	    console.error(err);
-	    app.alert('danger', err);
+	    app.alert(err, 'info');
 	    return;
 	  }
 	  // Do something with the photo

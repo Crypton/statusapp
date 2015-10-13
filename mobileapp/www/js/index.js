@@ -792,7 +792,7 @@ var app = {
 
     function onFail (message) {
       callback(message);
-      app.alert('An error occured: ' + message, 'danger');
+      // app.alert('An error occured: ' + message, 'danger');
     }
 
     // Specify the source to get the photos.

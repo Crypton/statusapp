@@ -1423,3 +1423,10 @@ button#change-passphrase-continue.btn.onboarding-btn {
     font-size: 80%;
 }
 
+div#onboarding-account-contact-card p {
+    color: white !important;
+}
+
+div#onboarding-account-contact-card a {
+    color: white !important;
+}
