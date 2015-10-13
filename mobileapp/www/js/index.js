@@ -297,24 +297,7 @@ var app = {
     });
 
     $('#forget-credentials').click(function (e) {
-        if (window.localStorage.touchIdLoginEnabled == 1) {
-          app.alert("Please disable TouchID before Forgetting Credentials");
-        } else {
-          app.keyChain.removePassphrase(function (err) {
-            if (err) {
-            console.error(err);
-            app.alert('There is no passphrase to remove from keychain', 'warning');
-          } else {
-            app.alert('Passphrase removed!', 'info');
-          }
-          delete window.localStorage.lastUserLogin;
-          // re-set the login screen
-          $('#username-login').show();
-          $('#username-placeholder').html('').hide();
-          $('#password-login').show();
-          e.disabled = true;
-        });
-      }
+      app.options.forgetCredentialsSheet(e);
     });
 
     $('#display-passphrase').click(function (e) {
