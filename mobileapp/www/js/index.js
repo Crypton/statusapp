@@ -332,7 +332,6 @@ var app = {
     });
 
     $('#header-timeline #header--title').click(function () {
-      // $('#feed')[0].scrollTop = 0;
       $('#feed').animate({ scrollTop: 0 }, "fast");
     });
 

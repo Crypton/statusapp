@@ -525,6 +525,15 @@ a.header-back {
 
 }
 
+.icon--timeline {
+    width: 1.2rem;
+    height: 2rem;
+    background-size: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('../svg/kloak-logo.svg');
+}
+
 .icon--contact-card {
     width: 2.0rem;
     height: 2.5rem;
