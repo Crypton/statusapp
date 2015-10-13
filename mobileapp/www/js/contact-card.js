@@ -56,8 +56,12 @@ app.contactCard = {
 	return callback();
       }
       if (results.input1.length > 96) {
-	app.alert('Sorry, your Biography is too long. 96 Characters Maximum.', 'danger');
+	app.alert('Your Biography is too long. 96 Characters Maximum.', 'danger');
 	return;
+      }
+
+      if (!results.input1) {
+	return callback();
       }
       that.bio = results.input1;
 
@@ -128,6 +132,7 @@ app.contactCard = {
   },
   
   getAvatarImage: function getAvatarImage () {
+    this.cardPhoto = null;
     if (this.username !== app.username) {
       return this.getContactAvatarImage(this.username);
     }
@@ -272,22 +277,23 @@ app.contactCard = {
     app.getPhoto({ width: 120,
 		   height: 120,
 		   cameraDirection: FRONT_CAMERA }, function (err, imageData) {
-      var avatarItem = app.session.items.avatar;
-      avatarItem.value.avatar = imageData;
-      avatarItem.value.updated = Date.now();
-
       if (err) {
 	// Get photo cancelled or failed for whatever reason
 	if (err === 'no image selected') {
-	  console.warn(err);
 	  return;
 	}
 	app.alert(err, 'danger');
 	console.error(err);
 	return;
       }
+      if (!imageData) {
+	return;
+      }
       app.alert('Saving photo to server...', 'info');
-      
+		     
+      var avatarItem = app.session.items.avatar;
+      avatarItem.value.avatar = imageData;
+      avatarItem.value.updated = Date.now();
       avatarItem.save(function (err) {
         if (err) {
           var _err = 'Cannot save photo to server';
@@ -337,6 +343,11 @@ app.contactCard = {
 	    app.alert(err, 'info');
 	    return;
 	  }
+
+	  if (!imgData) {
+	    return;
+	  }
+
 	  // Do something with the photo
 	  app.session.items.avatar.value.avatar = imgData;
 	  app.session.items.avatar.value.avatar.updated = Date.now();
