@@ -1410,14 +1410,14 @@ button#change-passphrase-continue.btn.onboarding-btn {
 
 textarea#old-pass-change-passphrase-input.onboarding-input {
     font-size: 1em !important;
-    width: 100% !important;
+    width: 98% !important;
     color: black !important;
     height: 3em;
 }
 
 textarea#change-passphrase-input.onboarding-input {
     font-size: 1em;
-    width: 100% !important;
+    width: 98% !important;
     color: black !important;
     height: 3em;
 }
