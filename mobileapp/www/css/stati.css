@@ -406,6 +406,7 @@
     margin:0.25rem 0.5rem;
     border-radius:0;
     min-height: 2rem;
+    max-height: 5rem;
     border: 1px solid black;
     font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif ;
     background-color: rgba(255, 255, 255, 0.95);

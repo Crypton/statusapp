@@ -773,8 +773,9 @@ var app = {
     }
 
     function onFail (message) {
+      console.warn('getPhoto onFail:');
+      console.warn(message);
       callback(message);
-      // app.alert('An error occured: ' + message, 'danger');
     }
 
     // Specify the source to get the photos.

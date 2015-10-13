@@ -1282,13 +1282,21 @@ input.onboarding-input {
 }
 
 textarea#old-pass-change-passphrase-input.onboarding-input {
-    font-size: 1.2em !important;
+    font-size: 1em !important;
     width: 100% !important;
+    border-radius: 0;
+    border: 1px dashed #1c1c1c;
+    background-color: whitesmoke;
+    padding: 3px;
 }
 
 textarea#change-passphrase-input.onboarding-input {
-    font-size: 1.2em;
+    font-size: 1em;
     width: 100% !important;
+    border-radius: 0;
+    border: 1px dashed #1c1c1c;
+    background-color: whitesmoke;
+    padding: 3px;
 }
 
 button#change-passphrase-continue.btn.onboarding-btn {
@@ -1387,6 +1395,13 @@ button#change-passphrase-continue.btn.onboarding-btn {
 }
 
 #change-passphrase-info p {
+
+}
+
+.change-pass-label {
+    font-size: 80%;
+    margin-bottom: 4px;
+    margin-top: 4px;    
 }
 
 #change-passphrase-info {
@@ -1394,15 +1409,17 @@ button#change-passphrase-continue.btn.onboarding-btn {
 }
 
 textarea#old-pass-change-passphrase-input.onboarding-input {
-    font-size: 1.1em !important;
+    font-size: 1em !important;
     width: 100% !important;
     color: black !important;
+    height: 3em;
 }
 
 textarea#change-passphrase-input.onboarding-input {
-    font-size: 1.1em;
+    font-size: 1em;
     width: 100% !important;
     color: black !important;
+    height: 3em;
 }
 
 button#change-passphrase-continue.btn.onboarding-btn {

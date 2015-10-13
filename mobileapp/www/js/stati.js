@@ -146,7 +146,8 @@ app.setCustomEvents = function setCustomEvents () {
   });
 
   $('#post-attach').click(function () {
-    app.postingUIActionSheet();
+    function cancelCallback() { $('#post-textarea').focus(); }; 
+    app.postingUIActionSheet(cancelCallback);
   });
   
   $('#feed').click(function () {
@@ -253,7 +254,7 @@ app.makeNewPost = function makeNewPost() {
   // $('#post-input-wrapper').click();
 };
 
-app.postingUIActionSheet = function postingUIActionSheet () {
+app.postingUIActionSheet = function postingUIActionSheet (cancelCB) {
   var options = {
     'androidTheme' : window.plugins.actionsheet.ANDROID_THEMES.THEME_HOLO_LIGHT,
     'buttonLabels': ['Add Location', 'Take Photo', 'Choose Photo'],
@@ -279,6 +280,12 @@ app.postingUIActionSheet = function postingUIActionSheet () {
 	};
       app.getPhoto(options, function imgCallback(err, imgData) {
 	if (err) {
+	  if (err === 'no image selected') {
+	    if (typeof cancelCB === 'function') {
+	      cancelCB();
+	    }
+	    return;
+	  }
 	  console.error(err);
 	  app.alert(err, 'danger');
 	  return;
@@ -299,6 +306,13 @@ app.postingUIActionSheet = function postingUIActionSheet () {
 	};
       app.getPhoto(options, function imgCallback(err, imgData) {
 	if (err) {
+	  if (err === 'no image selected') {
+	    // re-focus the status input
+	    if (typeof cancelCB === 'function') {
+	      cancelCB();
+	    }
+	    return;
+	  }
 	  console.error(err);
 	  app.alert('danger', err);
 	  return;
