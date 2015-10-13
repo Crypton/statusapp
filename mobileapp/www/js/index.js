@@ -769,7 +769,7 @@ var app = {
     var cameraDirectionOptions = { FRONT: 1, BACK: 0 };
 
     var width = 120;
-    var height = 160;
+    var height = 120;
     var quality = 75;
     var cameraDirection = cameraDirectionOptions.BACK;
     var pictureSourceType = navigator.camera.PictureSourceType.CAMERA;
