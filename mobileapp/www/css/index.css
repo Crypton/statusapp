@@ -661,9 +661,9 @@ a.header-back {
 
 #contacts-list-wrapper {
     padding-top: 5px;
-    height: 95%;
+    border-bottom: 1px solid gray;
+    height: 110%;
     overflow-y: auto;
-    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -1025,16 +1025,20 @@ body {
 }
 
 .user-avatar-generic {
-    height: 35px;
     margin-right: 10px;
     margin-top: 5px;
+    height: 29px;
+    margin-left: 2px;
+    margin-bottom: -2px;
 }
 
 .user-avatar {
-    margin-right: 10px;
+    margin-top: 4px;
+    margin-right: 8px;
     width: 30px;
     -webkit-border-radius: 5px;
     border: 1px solid #aaaaaa;
+    margin-bottom: -3px;
 }
 
 #retake-id-picture {
