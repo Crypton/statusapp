@@ -1132,8 +1132,6 @@ var app = {
   },
 
   setProgressStatus: function (m) {
-    // $('#login-status .status').text(m);
-    // $('#login-status').show();
     $("#progress-status").text(m);
   },
 
@@ -1153,23 +1151,20 @@ var app = {
   },
 
   verifyUser: function (username, fingerprint) {
-    if (username == app.username) {
+    if (username === app.username) {
       app.alert('Cannot verify your own account', 'danger');
       return;
     }
+
     if (!fingerprint) {
-      var error = 'Contact data was not extracted';
+      var error = 'Contact data was not extracted, card cannot be verified';
       app.alert(error, 'danger');
-      return console.error(error);
+      console.error(error);
+      return;
     }
 
     var rawFingerprintArr = fingerprint.split(' ');
     var rawFingerprint = rawFingerprintArr.join('').toLowerCase();
-    // XXXddahl: the above ^^ is a hack to make this work for now
-
-    $('#verify-user-success-msg').children().remove();
-    $('#verify-user-failure-msg').children().remove();
-    $('#verify-trust-failure-ok').hide();
 
     app.session.getPeer(username, function(err, peer) {
       if (err) {
@@ -1180,7 +1175,7 @@ var app = {
       function success () {
         peer.trust(function (err) {
           if (err) {
-            console.log('peer trust failed: ' + err);
+            console.error('peer trust failed: ' + err);
             app.alert(err, 'danger');
           } else {
             app.alert(username + ' is now a trusted contact', 'info');
@@ -1193,71 +1188,17 @@ var app = {
         });
       }
 
-      function cancelTrust () {
-        $('#verify-user-success-msg').children().remove();
-        $('#verify-user-failure-msg').children().remove();
-        // TODO: remove click events from buttons
-        if (app.isNodeWebKit) {
-          app.switchView('scan-select-desktop', 'Verify Contact Card');
-        } else {
-          app.switchView('scan-select', 'Verify Contact Card');
-        }
-      }
-
-      function resizeIdCard(canvas) {
-        var oldCanvas = canvas.toDataURL("image/png");
-        var img = new Image();
-        img.src = oldCanvas;
-        img.onload = function () {
-          canvas.height = 120;
-          canvas.width = 120;
-          var ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0);
-        };
-      }
-
       var outOfBandFingerprint = rawFingerprint;
       var outOfBandFingerprintArr =
         app.card.createFingerprintArr(outOfBandFingerprint);
-      var colorArr = app.card.createColorArr(outOfBandFingerprintArr);
-      var outOfBandIdGrid = app.card.createIdentigrid(colorArr);
-      resizeIdCard(outOfBandIdGrid);
-
       var peerFingerprintArr = app.card.createFingerprintArr(peer.fingerprint);
-      var peerColorArr = app.card.createColorArr(peerFingerprintArr);
-      var peerIdGrid = app.card.createIdentigrid(peerColorArr);
-      resizeIdCard(peerIdGrid);
 
-      if (peer.fingerprint == outOfBandFingerprint) {
+      if (crypton.constEqual(peer.fingerprint, outOfBandFingerprint)) {
 	success();
       } else {
         // Failure to match fingerprints
-        $('#verify-user-success').hide();
-        $('#verify-user-failure').show();
-        $('#verify-trust-failure-ok').show();
-        $('#verify-trust-save').hide();
-        $('#verify-trust-cancel').hide();
-
-        var conf = '<p>The server supplied</strong> '
-                 + 'Contact color grid for <strong>'
-             + username
-             + '</strong> is: <p/>'
-             + '<p id="server-idgrid-canvas"></p>'
-             + '<p>The <strong>scanned</strong> Contact Card is :</p>'
-             + '<p id="outofband-idgrid-canvas"></p>'
-             + '<p>It is NOT A MATCH</p> <strong>'
-             + username
-             + ' </strong>*Cannot* be a trusted contact.';
-
-        var msg = $(conf);
-        $('#verify-user-failure-msg').append(msg);
-        // add canvases to DOM
-        $('#server-idgrid-canvas').append(peerIdGrid);
-        $('#outofband-idgrid-canvas').append(outOfBandIdGrid);
-
-        $('#verify-trust-failure-ok').click(function () {
-          cancelTrust();
-        });
+	app.alert('Contact card cannot be verified with the server!', 'danger');
+	console.warn(peer.fingerprint, outOfBandFingerprint);
       }
     });
   },
