@@ -302,10 +302,13 @@ app.contactCard = {
         }
 	
         // photo is saved to the server
-	$('.current-contact-card-canvas').remove();
 	$('#contact-card-photo')[0].src = imageData;
+	that.displayCard(that.parentNodeId);
 	that.cardPhoto = that.getAvatarImage();
-	that.ctx.drawImage(that.cardPhoto, 45, 118);	
+	// that.ctx.drawImage(that.cardPhoto, 45, 118);
+	setTimeout(function () {
+	  that.displayCard(that.parentNodeId); // XXX a hack for now
+	}, 500);
       });
     });
   },
@@ -357,10 +360,14 @@ app.contactCard = {
               console.error(_err + ' ' + err);
               return app.alert(_err);
             }
-	    $('.current-contact-card-canvas').remove();
+
 	    $('#contact-card-photo')[0].src = imgData;
+	    that.displayCard(that.parentNodeId);
 	    that.cardPhoto = that.getAvatarImage();
-	    that.ctx.drawImage(that.cardPhoto, 45, 118);
+	    // that.ctx.drawImage(that.cardPhoto, 45, 118);
+	    setTimeout(function () {
+	      that.displayCard(that.parentNodeId); // XXX a hack for now
+	    }, 500);
 	  });
 	});
 	break;
