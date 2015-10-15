@@ -310,7 +310,8 @@ var app = {
 	  console.error(err);
 	  return app.alert('Cannot get passphrase from keychain', 'danger');
 	}
-	app.alert(passphrase, 'info');
+	// app.alert(passphrase, 'info');
+	app.displayPassphrase(passphrase);
       });
     });
 
@@ -613,6 +614,28 @@ var app = {
     }, 3500);
   },
 
+  displayPassphrase: function displayPassphrase (passphrase) {
+    var html = '<textarea class="passphrase-text">' +
+	  passphrase + 
+	  '</textarea>' + 
+          '<button class="btn close-display-passphrase">Close</button>';
+    $('#display-passphrase-output').children().remove();
+
+    if (!$('.overlay').is(':visible')) {
+      $('.overlay').show();
+    }
+
+    $('#display-passphrase-output').addClass('active');
+    
+    $('#display-passphrase-output').append($(html));
+    
+    $('.close-display-passphrase').click(function (e) {
+      $('#display-passphrase-output').removeClass('active');
+      $('.overlay').hide();
+      $('#display-passphrase-output').children().remove();
+    });
+  },
+  
   logout: function logout () {
     app.session = null;
     $('#header-button-bar').hide();

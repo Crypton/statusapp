@@ -58,5 +58,5 @@ ddahl to complete.
 
 Credits
 -------------
-StatusApp is built by @daviddahl, @helveticade, @BennyOak, @devgeeks and others
+StatusApp is built by {github users} @daviddahl, @helveticade, @BennyOak, @devgeeks and others
 
