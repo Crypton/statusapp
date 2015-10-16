@@ -190,6 +190,8 @@ var app = {
 
   // Bind Event Listeners
   bindEvents: function bindEvents() {
+    jQuery.easing.def = "easeOutSine";
+
     // onboarding events!!!
     app.onboarding.bindEvents();
 
@@ -406,12 +408,12 @@ var app = {
         function() {
           if (!app.passphraseInKeychain) {
             console.error('Passphrase NOT Stored');
-            $('#touchid-wrapper').hide();
+            $('#touchid-wrapper').hide('slow');
           }
         },
         function() {
           console.error("TouchID NOT Supported");
-          $('#touchid-wrapper').hide();
+          $('#touchid-wrapper').hide('slow');
         });
 
       // Set touchID message
@@ -567,9 +569,9 @@ var app = {
     }
 
     if (htmlId == "#feed") {
-      $('#post-button-floating-wrapper').show();
+      $('#post-button-floating-wrapper').show('slow');
     } else {
-      $('#post-button-floating-wrapper').hide();
+      $('#post-button-floating-wrapper').hide('slow');
     }
   },
 
@@ -609,7 +611,7 @@ var app = {
     window.setTimeout(function () {
       node.slideUp(100, function () {
         node.remove();
-	$('.overlay').hide();
+	$('.overlay').hide('slow');
       });
     }, 3500);
   },
@@ -631,7 +633,7 @@ var app = {
     
     $('.close-display-passphrase').click(function (e) {
       $('#display-passphrase-output').removeClass('active');
-      $('.overlay').hide();
+      $('.overlay').hide('slow');
       $('#display-passphrase-output').children().remove();
     });
   },

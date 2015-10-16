@@ -424,6 +424,16 @@ input[type="password"]:focus {
     color: red;
 }
 
+.btn-small {
+    border: 1px solid currentColor;
+    background-color: transparent;
+    font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif;
+    padding: 0rem 0.3rem;
+    font-weight: normal;
+    margin: 0rem 0.1rem;
+    font-size: 60%;
+}
+
 #login-status {
     padding: 2em;
 }
