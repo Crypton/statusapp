@@ -20,14 +20,24 @@ function generatePassphrase() {
     return min + (byteArray[0] % range);
   }
 
+  function containsAllAscii(str) {
+    return  /^[\040-\177]*$/.test(str) ;
+  }
+  
   var passLen = 7;
 
   var passphraseArr = [];
 
   for (var i = 0; i < passLen; i++) {
     var idx = getRandomInt(0, (size - 1));
-    passphraseArr.push(passphraseCorpus[idx]);
+    if (!containsAllAscii(passphraseCorpus[idx])) {
+      if (i !== 0) {
+	i--;
+      }
+      continue;
+    }
+    passphraseArr.push(passphraseCorpus[idx].trim());
   }
 
-  return passphraseArr.join(' ').toLowerCase();
+  return passphraseArr.join(' ').toLowerCase().trim();
 }
