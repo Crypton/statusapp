@@ -408,12 +408,12 @@ var app = {
         function() {
           if (!app.passphraseInKeychain) {
             console.error('Passphrase NOT Stored');
-            $('#touchid-wrapper').hide('slow');
+            $('#touchid-wrapper').hide();
           }
         },
         function() {
           console.error("TouchID NOT Supported");
-          $('#touchid-wrapper').hide('slow');
+          $('#touchid-wrapper').hide();
         });
 
       // Set touchID message

@@ -68,16 +68,12 @@ app.setCustomEvents = function setCustomEvents () {
   window.addEventListener('native.keyboardhide',
   function keyboardShowHandler (e) {
     app.keyboardTopPos = 0;
-    app.repositionInput();
     console.log('hidden Keyboard height is: ' + e.keyboardHeight);
   });
 
   window.addEventListener('native.keyboardshow',
   function keyboardShowHandler (e) {
     app.keyboardTopPos = e.keyboardHeight;
-    if ($('#feed').is(':visible')) {
-      app.repositionInput();
-    }
     console.log('Keyboard height is: ' + e.keyboardHeight);
   });
 
@@ -132,7 +128,6 @@ app.setCustomEvents = function setCustomEvents () {
   $('#post-button-floating').click(function () {
     app.makeNewPost();
     $('#post-textarea').focus();
-    app.repositionInput();
   });
 
   $('#include-gps-btn').click(function () {
@@ -166,26 +161,25 @@ app.setCustomEvents = function setCustomEvents () {
     }
   });
 
-  // Mutation Observer for the input textarea which helps us re-position the
-  // image and location piece of the input widget
-  (function inputMutationObs() {
-    var target = document.querySelector('#post-input-wrapper textarea');
-    var observer = new MutationObserver(function(mutations) {
-      mutations.forEach(function(mutation) {
-	app.repositionInput();
-      });
-    });
+  // // Mutation Observer for the input textarea which helps us re-position the
+  // // image and location piece of the input widget
+  // (function inputMutationObs() {
+  //   var target = document.querySelector('#post-input-wrapper textarea');
+  //   var observer = new MutationObserver(function(mutations) {
+  //     mutations.forEach(function(mutation) {
+  //     });
+  //   });
 
-    // configuration of the observer: // XXX: May not need all of these
-    var config = {
-      attributes: true,
-      childList: false,
-      characterData: false
-    };
+  //   // configuration of the observer: // XXX: May not need all of these
+  //   var config = {
+  //     attributes: true,
+  //     childList: false,
+  //     characterData: false
+  //   };
     
-    // pass in the target node, as well as the observer options
-    observer.observe(target, config);
-  })();
+  //   // pass in the target node, as well as the observer options
+  //   observer.observe(target, config);
+  // })();
 
   (function () {
     // handle pull to refresh event:
@@ -223,34 +217,30 @@ app.setOnSharedItemSync = function setOnSharedItemSync () {
 
 app.keyboardTopPos = 0; // default
 
-app.lastRepositionPoint = null;
+// app.repositionInput = function repositionInput () {
+//   return;
+//   console.log('Reposition...');
+//   console.log('keyboardTopPos: ', app.keyboardTopPos);
 
-app.repositionInput = function repositionInput () {
-  return;
-  console.log('Reposition...');
-  console.log('keyboardTopPos: ', app.keyboardTopPos);
-
-  // Check if there is a location and display it
-  if($('#geoloc-name').html()) {
-    // location data exists, need to show it
-    $('#post-image-location-wrapper').show('slow');
-  }
+//   // Check if there is a location and display it
+//   if($('#geoloc-name').html()) {
+//     // location data exists, need to show it
+//     $('#post-image-location-wrapper').show('slow');
+//   }
   
-  $('#post-input-wrapper').css({ bottom: app.keyboardTopPos + 'px'});
-  // Check if the location and image widget is visible and reposition it
-  if ($('#post-image-location-wrapper').is(':visible')) {
-    var inputHeight = $('#post-input-wrapper')[0].offsetHeight;
-    var imgLocWrapBottom = inputHeight + app.keyboardTopPos;
-    $('#post-image-location-wrapper').css({ bottom: imgLocWrapBottom + 'px' });
-  }
-  $('#post-textarea').focus(); //trigger('input');
-};
+//   $('#post-input-wrapper').css({ bottom: app.keyboardTopPos + 'px'});
+//   // Check if the location and image widget is visible and reposition it
+//   if ($('#post-image-location-wrapper').is(':visible')) {
+//     var inputHeight = $('#post-input-wrapper')[0].offsetHeight;
+//     var imgLocWrapBottom = inputHeight + app.keyboardTopPos;
+//     $('#post-image-location-wrapper').css({ bottom: imgLocWrapBottom + 'px' });
+//   }
+//   $('#post-textarea').focus(); //trigger('input');
+// };
 
 app.hidePostUI = function hidePostUI () {
-  $('#post-input-wrapper textarea').trigger('input');
   $('#post-button-floating-wrapper').show();
   $('body').removeClass('posting');
-  app.lastRepositionPoint = null;
 };
 
 app.makeNewPost = function makeNewPost() {
@@ -276,7 +266,6 @@ app.postingUIActionSheet = function postingUIActionSheet (cancelCB) {
       // Add Location
       console.log('Add location!');
       $('#post-image-location-wrapper').show('slow');
-      app.repositionInput();
       app.setMyLocation();
       break;
     case 2:
@@ -305,7 +294,6 @@ app.postingUIActionSheet = function postingUIActionSheet (cancelCB) {
 	  $('#post-textarea').focus();
 	});
 	$('#post-image-location-wrapper').show('slow');
-	app.repositionInput();
       });
       break;
 
@@ -336,13 +324,11 @@ app.postingUIActionSheet = function postingUIActionSheet (cancelCB) {
 	  $('#post-textarea').focus();
 	});
 	$('#post-image-location-wrapper').show('slow');
-	app.repositionInput();
       });
       break;
 
     case 4:
       // Cancel
-      app.repositionInput();
       return;
     default:
       return;
@@ -1054,11 +1040,20 @@ app.setMyStatus = function setMyStatus() {
   }
 
   // Get rid of the X
-  $('#location-data button').remove();
+  // $('#location-data button').remove();
 
+  app.hidePostUI();
+
+  var locData;
+  try {
+    locData = $('#location-data').text().split('X')[0];
+  } catch (ex) {
+    locData = null;
+  }
+  
   var updateObj= {
     status: status,
-    location: $('#location-data').text(),
+    location: locData,
     timestamp: Date.now(),
     imageData: null,
     avatarMeta: {
@@ -1094,7 +1089,6 @@ app.setMyStatus = function setMyStatus() {
       return app.alert('Cannot update status', 'danger');
     }
     app.hideProgress();
-    app.hidePostUI();
     $('#post-textarea').val('');
     $('#image-data').children().remove();
     $('#post-image-location-wrapper').hide('slow');
@@ -1524,13 +1518,11 @@ app.setMyLocation = function setMyLocation(callback) {
       e.preventDefault();
     });
     $('#post-image-location-wrapper').show('slow');
-    app.repositionInput();
   };
 
   function error (err) {
     console.error('Cannot set location');
     console.error(err);
-    app.repositionInput();
   };
 
   navigator.geolocation.getCurrentPosition(success, error, options);
