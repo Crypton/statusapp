@@ -396,47 +396,83 @@ var app = {
     });
 
     $('.icon--settings').click(function () {
+      if (!touchid) {
+	// hide touchid UI
+	$('#touchid-wrapper').hide();
+	return;
+      }
+      
       // disable forget credentials if not supported
       if (!app.keyChain.supported) {
 	$('#forget-credentials')[0].disabled = true;
 	$('#display-passphrase')[0].disabled = true;
       }
 
-      // Hide touchID button if touchID not supported
-      // or no passphrase stored.
-      touchid.checkSupport(
-        function() {
-          if (!app.passphraseInKeychain) {
-            console.error('Passphrase NOT Stored');
-            $('#touchid-wrapper').hide();
-          }
-        },
-        function() {
-          console.error("TouchID NOT Supported");
-          $('#touchid-wrapper').hide();
-        });
-
-      // Set touchID message
-      if (window.localStorage.touchIdLoginEnabled == 0) {
-        $('#use-touchid').html("Turn On TouchID");
+      if (app.keyChain.supported) {
+	if(!app.keyChain.prefix) {
+	  app.keyChain.init(app.username, function keychainCB (err) {
+	    var keyChainInit = true;
+	    if (err) {
+	      console.error(err);
+	      keyChainInit = false;
+	    }
+	    // ok, we have initialized the keychain
+	    // Hide touchID button if touchID not supported
+	    // or no passphrase stored.
+	    touchid.checkSupport(
+              function() {
+		if (!keyChainInit) {
+		  console.error('Passphrase NOT Stored');
+		  window.localStorage.setItem("touchIdLoginEnabled", '0');
+		} else {
+		  window.localStorage.setItem("touchIdLoginEnabled", '1');
+		}
+		// Set touchID message
+		if (window.localStorage.touchIdLoginEnabled == 0) {
+		  $('#use-touchid').html("Turn On TouchID");
+		} else {
+		  $('#use-touchid').html("Turn Off TouchID");
+		}
+		$('#touchid-wrapper').show();
+		app.switchView('my-options-pane', 'Options');
+		return;
+              },
+              function() {
+		console.error("TouchID NOT Supported");
+		window.localStorage.setItem("touchIdLoginEnabled", '0');
+		$('#touchid-wrapper').hide();
+		app.switchView('my-options-pane', 'Options');
+		return;
+              });
+	  });
+	} else {
+	  // we have a prefix
+	  // Check touchid support here
+	  touchid.checkSupport(
+            function() {
+	      // assume passphrase is stored here
+	      window.localStorage.setItem("touchIdLoginEnabled", '1');
+	      // Set touchID message
+	      $('#use-touchid').html("Turn Off TouchID");
+	      $('#touchid-wrapper').show();
+	      app.switchView('my-options-pane', 'Options');
+	      return;
+            },
+            function() {
+	      console.error("TouchID NOT Supported");
+	      window.localStorage.setItem("touchIdLoginEnabled", '0');
+	      $('#touchid-wrapper').hide();
+	      app.switchView('my-options-pane', 'Options');
+	      return;
+            });
+	}
       } else {
-        $('#use-touchid').html("Turn Off TouchID");
+	// touchid not supported if keychain is not supported
+	$('#touchid-wrapper').hide();
+	app.switchView('my-options-pane', 'Options');
+	return;
       }
-
-      app.switchView('my-options-pane', 'Options');
     });
-
-    // $('#my-options').click(function () {
-    //   app.hideMenu();
-
-    //   // disable forget credentials if not supported
-    //   if (!app.keyChain.supported) {
-    // 	$('#forget-credentials')[0].disabled = true;
-    // 	$('#display-passphrase')[0].disabled = true;
-    //   }
-
-    //   app.switchView('my-options-pane', 'Options');
-    // });
 
     $('#find-users').click(function () {
       app.switchView('find-users-view', 'Find Users');
