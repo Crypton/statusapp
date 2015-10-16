@@ -480,20 +480,20 @@ var app = {
 
     $('#contact-yes-delete-btn').click(function () {
       $('#confirm-delete-contact-wrapper').hide();
-      $('#top-progress-wrapper').show();
+      app.showProgress('Deleting contact...');
       // unshare status feed
       var username = app.currentContact;
       if (!username) {
 	console.error('Cannot delete and unshare without a username!');
 	$('#contact-details-buttons').show();
-	$('#top-progress-wrapper').hide();
+	app.hideProgress();
 	return;
       }
       app.session.getPeer(username, function (err, peer) {
 	if (err) {
 	  console.error('Cannot get user data from server');
 	  $('#contact-details-buttons').show();
-	  $('#top-progress-wrapper').hide();
+	  app.hideProgress();
 	  return;
 	}
 	// XXXddahl: Move this into a 'cleanUpDeleteUser' function in subclass
@@ -501,7 +501,7 @@ var app = {
 	  if (err) {
 	    console.error('Cannot unshare status from ' + peer.username);
 	    $('#contact-details-buttons').show();
-	    $('#top-progress-wrapper').hide();
+	    app.hideProgress();
 	    return;
 	    // XXX: also need to unshare avatar!!!
 	  }
@@ -511,7 +511,7 @@ var app = {
 	    if (err) {
 	      console.error('Cannot delete ' + peer.username + ' from contacts');
 	      $('#contact-details-buttons').show();
-	      $('#top-progress-wrapper').hide();
+	      app.hideProgress();
 	      return;
 	    }
 	    // XXXddahl: send a message to the deleted peer
@@ -521,7 +521,7 @@ var app = {
 	    app.alert('Contact ' + peer.username + ' deleted', 'info');
 	    app.displayContacts();
 	    $('#contact-details-buttons').show();
-	    $('#top-progress-wrapper').hide();
+	    app.hideProgress();
 	  });
 	});
       });
@@ -1025,7 +1025,6 @@ var app = {
       return;
     }
 
-    //$('#top-progress-wrapper').show();
     app.showProgress('Logging In...');
     $('.alert').remove();
 
