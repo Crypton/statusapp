@@ -249,6 +249,11 @@ app.makeNewPost = function makeNewPost() {
   $('#post-input-wrapper textarea').trigger('input');  
   $('#post-button-floating-wrapper').hide();
   $('body').addClass('posting');
+  
+  // Check if there is an image or location and show() them
+  if ($('#image-data').html() || $('#location-data').html()) {
+    $('#post-image-location-wrapper').show();
+  }
 };
 
 app.postingUIActionSheet = function postingUIActionSheet (cancelCB) {
