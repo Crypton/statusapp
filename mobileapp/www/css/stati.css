@@ -348,9 +348,9 @@
 
 #post-image-location-wrapper {
     display: none;
-    background-color: rgba(50, 50, 50, 0.85);
+    /* background-color: rgba(50, 50, 50, 0.85); */
     z-index: 10000;
-    position: fixed;
+    /* position: fixed; */
     z-index: 1000;
     width: 100%;
     text-align: center;
@@ -362,9 +362,11 @@
 }
 
 #post-input-wrapper {
+    border-radius: 0 0 3px 3px;
+    box-shadow: 0 2px 3px 0 rgba(0,0,0,0.40);
     position: fixed;
-    width: 100%;
-    bottom: 0;
+    width: 95%;
+    top: 62px;
     background-color: rgba(50, 50, 50, 0.85);
     z-index: 10000;
     left: 0;
@@ -382,22 +384,31 @@
 }
 
 .posting #post-input-wrapper {
+    display: block;
+    /* display: -webkit-flex; */
+}
+
+#post-inner-wrapper {
     display: flex;
     display: -webkit-flex;
+    padding-top: 0.5em;
 }
+
 .posting #app {
-    opacity: 0.5;
+    opacity: 0.8;
 }
 /* Ugly solution, but will do for now. -C. */
 
 #post-input-wrapper .icon:first-child {
     margin-left: 0.5rem;
     margin-bottom: 0;
+    margin-top: 1.2em;
 }
 
 #post-input-wrapper .icon:last-child {
     margin-right: 0.5rem;
     margin-bottom: 0.25rem;
+    padding-top: 1em;
 }
 
 #post-input-wrapper textarea {
@@ -405,6 +416,7 @@
     -webkit-flex: 1;
     margin:0.25rem 0.5rem;
     border-radius:0;
+    height: 4em !important;
     min-height: 2rem;
     max-height: 5rem;
     border: 1px solid black;
@@ -436,7 +448,8 @@
     font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif ;
     color: white;
     text-decoration: none;
-    padding: 0 0.65rem 0.65rem 0.24rem
+    padding: 0 0.65rem 0.65rem 0.24rem;
+    margin-top: 1.5em;
 }
 
 #location-data {
@@ -447,12 +460,16 @@
 }
 
 #image-data img {
-    height: 80px;
+    height: 100px;
     vertical-align: top;
-    margin-top: 0.5em;
+    margin: 0;
     border: 2px solid #fff;
 }
 
 .is-mention {
     background-color: #D1CCFF;
+}
+
+#geoloc-name {
+    font-size: 90%;
 }

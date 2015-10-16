@@ -81,12 +81,12 @@ app.setCustomEvents = function setCustomEvents () {
     console.log('Keyboard height is: ' + e.keyboardHeight);
   });
 
-  $('#post-image-location-wrapper').click(function(e) {
-    if(!$('#post-textarea').is(':focus')) {
-      $('#post-textarea').focus();
-    }
-    // preventDefault?
-  });
+  // $('#post-image-location-wrapper').click(function(e) {
+  //   if(!$('#post-textarea').is(':focus')) {
+  //     $('#post-textarea').focus();
+  //   }
+  //   // preventDefault?
+  // });
   
   app.tz = jstz.determine();
 
@@ -160,7 +160,7 @@ app.setCustomEvents = function setCustomEvents () {
     try {
       $('body').removeClass('posting');
       $('#post-image-location-wrapper').hide('slow');
-      $('#post-button-floating-wrapper').show('slow');
+      $('#post-button-floating-wrapper').show();
     } catch (ex) {
       console.warn(ex);
     }
@@ -226,6 +226,7 @@ app.keyboardTopPos = 0; // default
 app.lastRepositionPoint = null;
 
 app.repositionInput = function repositionInput () {
+  return;
   console.log('Reposition...');
   console.log('keyboardTopPos: ', app.keyboardTopPos);
 
@@ -247,7 +248,7 @@ app.repositionInput = function repositionInput () {
 
 app.hidePostUI = function hidePostUI () {
   $('#post-input-wrapper textarea').trigger('input');
-  $('#post-button-floating-wrapper').show('slow');
+  $('#post-button-floating-wrapper').show();
   $('body').removeClass('posting');
   app.lastRepositionPoint = null;
 };
@@ -255,12 +256,8 @@ app.hidePostUI = function hidePostUI () {
 app.makeNewPost = function makeNewPost() {
   // show input UI which will trigger the keyboard
   $('textarea.js-auto-size').textareaAutoSize();
-  $('#post-input-wrapper textarea').trigger('input');
-
-  // re-position the inputwrapper above keyboard
-  app.repositionInput();
-  
-  $('#post-button-floating-wrapper').hide('slow');
+  $('#post-input-wrapper textarea').trigger('input');  
+  $('#post-button-floating-wrapper').hide();
   $('body').addClass('posting');
 };
 
@@ -300,9 +297,13 @@ app.postingUIActionSheet = function postingUIActionSheet (cancelCB) {
 	  app.alert(err, 'danger');
 	  return;
 	}
-	var img = $('<img src="'  + imgData  +  '" />');
+	var img = $('<img src="'  + imgData  +  '" /> <button class="btn-small">X</button> ');
 	$('#image-data').children().remove();
 	$('#image-data').append(img);
+	$('#image-data button').click(function (e) {
+	  app.removeImage();
+	  $('#post-textarea').focus();
+	});
 	$('#post-image-location-wrapper').show('slow');
 	app.repositionInput();
       });
@@ -327,9 +328,13 @@ app.postingUIActionSheet = function postingUIActionSheet (cancelCB) {
 	  app.alert('danger', err);
 	  return;
 	}
-	var img = $('<img src="'  + imgData  +  '" />');
+	var img = $('<img src="'  + imgData  +  '" /> <button class="btn-small">X</button> ');
 	$('#image-data').children().remove();
 	$('#image-data').append(img);
+	$('#image-data button').click(function (e) {
+	  app.removeImage();
+	  $('#post-textarea').focus();
+	});
 	$('#post-image-location-wrapper').show('slow');
 	app.repositionInput();
       });
@@ -1444,10 +1449,6 @@ app.updateFeedAvatar = function updateFeedAvatar (avatar, username, avatarHmac) 
   $('span.' + avatarHmac).replaceWith(newAvatar);
 };
 
-// app.revokeSharedStatus = function revokeSharedStatus(peer) {
-//   // revoke shared status with peer
-// };
-
 app.handleMessage = function handleMessage (message) {
   console.log('noop handleMessage();', arguments);
 };
@@ -1487,9 +1488,10 @@ app.purgeInboxMessage = function purgeInboxMessage (id) {
 
 app.removeLocation = function removeLocation () {
   $('#geoloc-name').remove();
-  if (!$('#image-data').html()) {
-    $('#post-image-location-wrapper').slideDown('slow');
-  }
+};
+
+app.removeImage = function removeImage () {
+  $('#image-data').children().remove();
 };
 
 app.setMyLocation = function setMyLocation(callback) {
@@ -1512,9 +1514,9 @@ app.setMyLocation = function setMyLocation(callback) {
     var geoIdx = lat + '__' + lng;
 
     var name = app.getPlaceName(geoIdx);
-    var html = ' <span id="geoloc-name"><button class="btn-small">X</button> <i>near</i> '
+    var html = ' <span id="geoloc-name"><i>near</i> '
 	  + name
-	  + '</span>';
+	  + ' <button class="btn-small">X</button></span>';
     $('#location-data').append($(html));
     $('#geoloc-name button').click(function (e) {
       app.removeLocation();
