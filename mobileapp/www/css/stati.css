@@ -362,18 +362,17 @@
 }
 
 #post-input-wrapper {
-    border-radius: 0 0 3px 3px;
+    border-radius: 5px;
     box-shadow: 0 2px 3px 0 rgba(0,0,0,0.40);
     position: fixed;
     width: 95%;
-    top: 62px;
+    top: 72px;
     background-color: rgba(50, 50, 50, 0.85);
     z-index: 10000;
     left: 0;
     right: 0;
     margin: 0 auto;
     display: none;
-
     -webkit-box-align: center;
     -webkit-align-items: flex-end;
     align-items: flex-end;

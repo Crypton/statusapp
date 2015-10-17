@@ -188,6 +188,50 @@ var app = {
 
   get fingerprint() { return app.session.account.fingerprint; },
 
+  progressIndicator:  {
+
+    get indicator() {
+      if (device.platform === 'iOS') {
+      	return {
+      	  show: function show (message) {
+      	    ProgressIndicator.showSimpleWithLabel(true, message);
+      	  },
+      	  hide: function hide () {
+      	    ProgressIndicator.hide();
+      	  }
+      	};
+      } else {
+	return {
+	  show: function show (message) {
+	    app.showProgress(message);
+	  },
+
+	  hide: function hide () {
+	    app.hideProgress();
+	  }
+	};
+      }
+    },
+    
+    active: false,
+    
+    show: function show (message) {
+      if (this.active) {
+	return;
+      }
+      this.active = true;
+      this.indicator.show(message);
+    },
+
+    hide: function hide () {
+      if (!this.active) {
+	return;
+      }
+      this.active = false;
+      this.indicator.hide();
+    }
+  },
+  
   // Bind Event Listeners
   bindEvents: function bindEvents() {
     jQuery.easing.def = "easeOutSine";
@@ -396,9 +440,10 @@ var app = {
     });
 
     $('.icon--settings').click(function () {
-      if (!touchid) {
+      if (!touchid || device.platform !== 'iOS') {
 	// hide touchid UI
 	$('#touchid-wrapper').hide();
+	app.switchView('my-options-pane', 'Options');
 	return;
       }
       
@@ -1688,12 +1733,12 @@ var app = {
     var username = app.username;
 
     if (oldPass && newPass) {
-      ProgressIndicator.showSimpleWithLabel(true, 'Changing Passphrase, one moment...');
+      app.progressIndicator.show('Changing Passphrase, one moment...');
       app.session.account.changePassphrase(oldPass, newPass,
       function changePassCB (err) {
 	if (err) {
 	  console.error(err);
-	  ProgressIndicator.hide();
+	  app.progressIndicator.hide();
 	  app.alert('Could not change passphrase at this time', 'danger');
 	  return;
 	}
@@ -1710,12 +1755,12 @@ var app = {
 	    app.keyChain.setPassphrase(newPass, function setPassCB (err) {
 	      if (err) {
 		console.error(err);
-		ProgressIndicator.hide();
+		app.progressIndicator.hide();
 		app.alert('Could not set new passphrase into keychain');
 		return;
 	      }
 	      // all done, need to re-login
-	      ProgressIndicator.hide();
+	      app.progressIndicator.hide();
 	      // Show login screen
 	      $('#username-login').hide();
 	      $('#username-login').val(username);
@@ -1728,7 +1773,7 @@ var app = {
 	    });
 	  });
 	} else {
-	  ProgressIndicator.hide();
+	  app.progressIndicator.hide();
 	  app.enableLoginButtons();
 	  $('#password-login').show();
 	  $('#username-login').val(username).show();
