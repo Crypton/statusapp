@@ -782,7 +782,7 @@ a.header-back {
     /* right: 0; */
     top: 100px;
     left: 7%;
-    z-index: 25000;
+    z-index: 60000;
     width: 100%;
 }
 
