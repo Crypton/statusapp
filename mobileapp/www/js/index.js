@@ -234,7 +234,7 @@ var app = {
   
   // Bind Event Listeners
   bindEvents: function bindEvents() {
-    jQuery.easing.def = "easeOutSine";
+    // jQuery.easing.def = "easeOutSine";
 
     // onboarding events!!!
     app.onboarding.bindEvents();
@@ -692,7 +692,7 @@ var app = {
     window.setTimeout(function () {
       node.slideUp(100, function () {
         node.remove();
-	$('.overlay').hide('slow');
+	$('.overlay').hide();
       });
     }, 3500);
   },
@@ -714,7 +714,7 @@ var app = {
     
     $('.close-display-passphrase').click(function (e) {
       $('#display-passphrase-output').removeClass('active');
-      $('.overlay').hide('slow');
+      $('.overlay').hide();
       $('#display-passphrase-output').children().remove();
     });
   },

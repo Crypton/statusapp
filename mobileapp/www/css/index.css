@@ -1092,7 +1092,7 @@ body {
 }
 
 #my-options-pane.view.active {
-    overflow: scroll;
+    overflow: auto;
 }
 
 .intro-graphics {
