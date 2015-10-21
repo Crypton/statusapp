@@ -76,8 +76,12 @@ var app = {
     this.card =  new crypton.Card();
     this.bindEvents();
     $('#password-login').show();
-    $('#username-login').show();
-
+    if (app.accountPickerUI().val()) {
+      $('#login-buttons').prepend(app.accountPickerUI());
+      $('#username-placeholder').html(app.accountPickerUI().val()).hide();
+    } else {
+      $('#username-login').show();
+    }
     function defaultLoginBehavior () {
       app.enableLoginButtons();
       app.switchView('account-login');
@@ -88,6 +92,9 @@ var app = {
     var lastUser = window.localStorage.getItem('lastUserLogin');
     if (lastUser && app.keyChain.supported) {
       $('#username-login').val(lastUser);
+      if (app.accountPickerUI().val()) {
+	app.accountPickerUI().val(lastUser);
+      }
       // initialize keychain
       app.keyChain.init(lastUser, function _keychain_initCB (err) {
 	if (err) {
@@ -104,8 +111,9 @@ var app = {
 	  }
 	  // we have a passphrase!
 	  $('#username-login').hide();
-	  $('#username-placeholder').html(lastUser).show();
-
+	  if (!$('#account-names')) {
+	    $('#username-placeholder').html(lastUser).show();
+	  }
 	  // XXX: hide the login passphrase field, etc
 	  $('#password-login').hide();
 	  $('#password-login').val(passphrase);
@@ -159,6 +167,78 @@ var app = {
 
   },
 
+  get knownAccounts() {
+    var _accountNames = window.localStorage.getItem('knownAccounts');
+    if (_accountNames) {
+      var accountNames = JSON.parse(_accountNames);
+      return accountNames;
+    }
+    return {};
+  },
+
+  setAccountName: function setAccountName (name) {
+    var accts = app.knownAccounts;
+    if (accts) {
+      if (typeof accts === 'object') {
+	if (!accts[name]) {
+	  accts[name] = Date.now();
+	  var savedNames = JSON.stringify(accts);
+	  window.localStorage.setItem('knownAccounts', savedNames);
+	  return;
+	}
+      } else {
+	// null? Wut?
+	var account = {};
+	account[name] = Date.now();
+	window.localStorage.setItem('knownAccounts',
+				    JSON.stringify(account));
+	return;
+      }
+    } else {
+      var account = {};
+      account[name] = Date.now();
+      window.localStorage.setItem('knownAccounts',
+				  JSON.stringify(account));
+      return;
+    }
+  },
+
+  accountPickerUI: function accountPickerUI () {
+    var names = Object.keys(this.knownAccounts).sort();
+    if (names) {
+      var html = $('<select id="account-names"></select>');
+      var options = '';
+      for (var i = 0; i < names.length; i++) {
+	options = options + '<option>' + names[i]  + '</option>';
+      }
+      html.append($(options));
+      // XXX: bind change event
+      html.change(function (e) {
+	$('#username-placeholder').html($('#account-names').val()).hide();
+	// Check for password in KeyChain
+	var keyName = $('#account-names').val() + '-' + app.APPNAME;
+	app.keyChain.getPassphrase(function CB(err, passphrase) {
+	  if (err) {
+	    // show passphrase input
+	    $("#login-btn").click(function () {
+	      app.login();
+	    });
+	    $('#password-login').val(passphrase).show();
+	    return;
+	  }
+	  // Set passphrase into hidden UI
+	  $('#password-login').val(passphrase);
+	  $("#login-btn").click(function () {
+	    app.login();
+	  });
+	  return;
+	}, keyName);
+      });
+      return html;
+    }
+    return null;
+  },
+  
   getItem: function getItem (itemName) {
     if (app.session.items[itemName]) {
       return app.session.items[itemName].value;
@@ -714,8 +794,6 @@ var app = {
   
   logout: function logout () {
     app.session = null;
-    $('#header-button-bar').hide();
-    $('#logout-page-title').show();
     // cleanup function:
     if (typeof app.logoutCleanup == 'function') {
       app.logoutCleanup();
@@ -746,7 +824,6 @@ var app = {
       }
     }
 
-    app.hideMenu();
     app.switchView('account-login', app.APPNAME);
     $('#tasks-btn').removeClass('active');
     $('#header-button-bar').hide();
@@ -812,7 +889,6 @@ var app = {
       button.onclick = function() {
         canvas.getContext("2d").drawImage(video, 0, 0, 200, 200, 0, 0, 200, 200);
         var img = canvas.toDataURL("image/png");
-        // console.log(img);
         // pass off the image data to callback
         callback(null, img);
       };
@@ -964,9 +1040,6 @@ var app = {
       ctx.drawImage(img, 0, 0);
     };
     img.src = dataUrl;
-
-    // XXX TODO: use smartcrop.crop()
-
     // get the photo from X=85, Y=325, W=120, H=160
   },
 
@@ -1085,8 +1158,12 @@ var app = {
   },
 
   login: function _login () {
-
-    var user = $('#username-login').val();
+    var user;
+    if (app.accountPickerUI().val()) {
+      user = app.accountPickerUI().val();
+    } else {
+      user = $('#username-login').val();
+    }
     var pass = $('#password-login').val();
 
     if (!user || !pass) {
@@ -1112,7 +1189,7 @@ var app = {
         $('#password-login').val('');
         return;
       }
-
+      app.setAccountName(user);	
       window.localStorage.setItem('lastUserLogin', user);
 
       // Save passphrase if the keychain is supported

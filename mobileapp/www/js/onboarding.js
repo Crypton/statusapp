@@ -110,6 +110,7 @@ app.onboarding = {
 	  return;
 	}
 	app.progressIndicator.hide();
+
 	// OK, we can now login
 	that.login();
       });
@@ -132,6 +133,8 @@ app.onboarding = {
       app.username = that.username;
       app.session = session;
       window.localStorage.setItem('lastUserLogin', that.username);
+      // save the accountName, just in case
+      app.setAccountName(that.username);
 
       if (app.keyChain.supported) {
 	app.keyChain.init(that.username, function (err) {

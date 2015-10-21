@@ -507,12 +507,10 @@ app.showProgress = function showProgress(aMessage) {
   $('.overlay').show();
   
   if (!aMessage) {
-    // ProgressIndicator.showSimple();
     $('#top-progress-wrapper').show();
   } else {
     $('#top-progress-wrapper').show();
     app.setProgressStatus(aMessage);
-    // ProgressIndicator.showSimpleWithLabel(aMessage);
   }
 };
 
@@ -524,7 +522,6 @@ app.loadNewTimeline = function loadNewTimeline () {
   }
   app.feedIsLoading = true;
 
-  // $('#top-progress-wrapper').show();
   app.showProgress('Loading Timeline...');
   var afterId = $("#my-feed-entries").children().first().attr('id');
   if (typeof parseInt(afterId) == 'number') {
@@ -563,7 +560,6 @@ app.loadInitialTimeline = function loadInitialTimeline(callback) {
   if (app.feedIsLoading) {
     return;
   }
-  // $('#top-progress-wrapper').show();
   app.showProgress('Getting Timeline');
 
   app.feedIsLoading = true;
@@ -574,12 +570,10 @@ app.loadInitialTimeline = function loadInitialTimeline(callback) {
     if (err) {
       console.error(err);
       app.feedIsLoading = false;
-      // $('#top-progress-wrapper').hide();
       app.hideProgress();
       return app.alert('Cannot get feed', 'info');
     }
     app.renderTimeline(timeline);
-    // $('#top-progress-wrapper').hide();
     app.hideProgress();
     app.feedIsLoading = false;
     if (!$("#fetch-previous-items").is(":visible")) {
@@ -614,7 +608,6 @@ app.loadPastTimeline = function loadPastTimeline () {
   }
   app.feedIsLoading = true;
 
-  // $('#top-progress-wrapper').show();
   app.showProgress('Getting Timeline');
   var beforeId = $("#my-feed-entries").children().last().attr('id');
   if (typeof parseInt(beforeId) == 'number') {
@@ -1055,7 +1048,6 @@ app.setMyStatus = function setMyStatus() {
   
   app.session.items.status.save(function (err) {
     if (err) {
-      // app.toggleSetStatusProgress();
       app.hideProgress();
       console.error(err);
       return app.alert('Cannot update status', 'danger');
@@ -1147,7 +1139,6 @@ app.createMediaElement =
 function createMediaElement(data, localUser, existingNode) {
   var gps;
   if (data.location && data.location != 'undisclosed location') {
-    // gps = app.obfuscateLocation(data.location);
     gps = data.location;
   } else {
     gps = '';
@@ -1336,7 +1327,6 @@ app.linkOutput = function linkOutput(autolinker, match) {
 
 app.shareStatus = function shareStatus (peerObj) {
   console.log('shareStatus()', arguments);
-
   app.session.items.status.share(peerObj, function (err) {
     if (err) {
       console.error(err, 'Cannot shareStatus!');
