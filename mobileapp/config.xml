@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="io.crypton.statusapp" version="0.3.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="io.crypton.statusapp" version="0.7.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Kloak</name>
     <description>
     A Zero-Knowledge status application
@@ -8,8 +8,8 @@
     David Dahl
   </author>
     <content src="index.html" />
-    <access origin="https://kloakstaging.crypton.io" />
-    <allow-navigation href="https://kloakstaging.cryopton.io/*" />
+    <access origin="https://*.crypton.io" />
+    <allow-navigation href="https://*.crypton.io/*" />
     <preference name="target-device" value="universal" />
     <preference name="BackupWebStorage" value="none" />
     <preference name="DisallowOverscroll" value="true" />

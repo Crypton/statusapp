@@ -13,7 +13,6 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'unsafe-inline' 'self' https: wss: data: gap: android-webview-video-poster: https://*.crypton.io https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" />
     <link rel="stylesheet" type="text/css" href="css/index.css" />
     <link rel="stylesheet" type="text/css" href="css/stati.css" />
-    <link rel="stylesheet" type="text/css" href="css/vendor/animated.css" />
     <link rel="stylesheet" type="text/css" href="css/vendor/offline-theme-default.css" />
     <link rel="stylesheet" type="text/css" href="css/vendor/offline-language-english.css" />
     <link rel="stylesheet" type="text/css" href="css/vendor/offline-language-english-indicator.css" />
@@ -33,7 +32,7 @@
           <a href="#" class="header-icon icon--settings">Settings</a>
 	</nav>
 	<nav id="header--title" class="header-item">
-          <span>Timeline</span>
+	  <a href="#" class="header-icon icon--timeline">Timeline</a>
 	</nav>
 	<nav id="header--right-action" class="header-item">
           <a href="#" class="header-icon icon--contacts">Contacts</a>
@@ -69,9 +68,13 @@ height: 2.5rem;"></a>
 
     <div id="top-progress-wrapper" class="progress">
       <div id="blink-wrapper">
-	<blink>
-	  Doing Stuff...
-	</blink>
+        <div class="sk-folding-cube">
+          <div class="sk-cube1 sk-cube"></div>
+          <div class="sk-cube2 sk-cube"></div>
+          <div class="sk-cube4 sk-cube"></div>
+          <div class="sk-cube3 sk-cube"></div>
+        </div>
+    	  <span id="progress-status">Doing Stuff...</span>
       </div>
     </div>
 
@@ -150,7 +153,7 @@ height: 2.5rem;"></a>
 <div id="onboarding-no-account" class="view intro-graphics">
   <div class="onboarding-header-container">
     <img src="svg/kloak-full-logo.svg" />
-    <p>A social network you own.</p>
+    <p>Own your social network</p>
   </div>
   <div id="onboarding-create-username">
       <form class="input-group input-group-lg">
@@ -168,56 +171,47 @@ height: 2.5rem;"></a>
 
 
       <div id="onboarding-no-account-step-2" class="view intro-graphics">
-	<div class="logo">
-	  <img class="company-logo" src="img/spideroak-white.png" />
-	  <img src="svg/kloak-logo.svg" />
-	  <!-- <h1>Kloak</h1> -->
-	</div>
+	<div class="onboarding-header-container">
+      <img src="svg/kloak-full-logo.svg" />
+  </div>
 
 	<div id="onboarding-create-passphrase">
 	  <h3>Passphrase:</h3>
-
+    <a href="#"
+       id="regenerate-passphrase"
+       class="onboarding-link">Regenerate</a>
 	  <div id="passphrase-info">
 	    <textarea placeholder="Enter Passphrase"
 		      autocapitalize="off"
-		      rows="3"
+		      rows="2"
 		      maxlength="256"
 		      class="onboarding-input"
 		      id="onboarding-passphrase-input"></textarea>
-	    <div class="onboarding-continue-wrapper">
-	      <button class="btn onboarding-btn"
-		      id="onboarding-create-account">Continue</button>
-	      <p>
-		<a href="#"
-		   id="regenerate-passphrase"
-		   class="onboarding-link">Regenerate Passphrase</a>
-	      </p>
-	      <p>
-		<a href="#"
-		   id="clear-passphrase"
-		 class="onboarding-link">I'll choose my own Passphrase</a>
-	      </p>
-	    </div>
-	    <a href="#" class="onboarding-link" id="onboarding-cancel">Cancel</a>
+    <a href="#"
+       id="clear-passphrase"
+     class="onboarding-link">I'll choose my own Passphrase</a>
+      <p class="onboarding-light-copy">
+        You will only be asked for your passphrase when you delete Kloak, or need to sign in on a new device.
+      </p>
 	    <p class="onboarding-light-copy">
-	      We have created a strong passphrase for you, please save it into your password wallet or write it down and put it in a safe place! You cannot ask SpiderOak to recover a forgotten passphrase. We <strong>do not</strong> store it outside the device.
-	    </p>
-	    <p class="onboarding-light-copy">
-	      If your device supports the "Keychain" or "Secure Storage", your passphrase will be automatically securely saved for you and you will be able to recall it in Kloak's Options.
+	      <strong>Note:</strong> Make sure you store your passphrase in a safe place. If you lose it, your account is unrecoverable!
 	    </p>
 	  </div>
+      <div class="onboarding-continue-wrapper" style="margin-top: 3rem;">
+        <button class="btn onboarding-btn" id="onboarding-create-account">Complete signup</button>
+        <a href="#" class="onboarding-link" id="onboarding-cancel">Cancel</a>
+
+      </div>
 	</div>
       </div>
 
       <div id="onboarding-no-account-step-3" class="view intro-graphics">
-	<div class="logo">
-	  <img class="company-logo" src="img/spideroak-white.png" />
-	  <img src="svg/kloak-logo.svg" />
-	  <!-- <h1>Kloak</h1> -->
-	</div>
+	  <div class="onboarding-header-container">
+      <img src="svg/kloak-full-logo.svg" />
+    </div>
 
 	<div id="onboarding-account-generation">
-	  <h3>Account Validation &amp; Creation</h3>
+	  <h3>Welcome to Kloak. Please hang tight!</h3>
 
 	  <div id="generation-info">
 	  </div>
@@ -248,11 +242,11 @@ height: 2.5rem;"></a>
   <div id="account-login" class="view active intro-graphics">
     <div class="onboarding-header-container">
       <img src="svg/kloak-full-logo.svg" />
-      <p>A social network you own.</p>
+      <p>Own your social network</p>
     </div>
     <form id="login-form" class="input-group input-group-lg">
       <input placeholder="Username" autocapitalize="off" size="12" maxlength="32" class="onboarding-input" id="username-login" type="text" />
-      <input placeholder="Passphrase" size="12" maxlength="32" class="onboarding-input" id="password-login" type="password" autocomplete="off" />
+      <input placeholder="Passphrase" size="12" class="onboarding-input" id="password-login" type="password" autocomplete="off" />
     </form>
     <div id="login-buttons">
       <h3 id="username-placeholder"></h3>
@@ -351,27 +345,24 @@ height: 2.5rem;"></a>
 	  <p class="option">
 
 	    <button type="button"
+		    id="feedback"
+		    class="btn btn-success option-btn">Feedback</button>
+	  </p>
+	  <p class="option">
+	    <button type="button"
 		    id="about"
 		    class="btn btn-success option-btn">About Kloak</button>
 	    <!-- <a href="#" id="about"> -->
 	    <!--   <img src="svg/info.svg" /> -->
 	    <!-- </a> -->
 	  </p>
-	  <p class="option option-text">
-	    By default (on supported devices), your credentials are securely remembered to allow for fast login
-	  </p>
-	  <p class="option">
-	    <button type="button"
-		    id="forget-credentials"
-		    class="btn btn-success option-btn btn-danger">Forget credentials</button>
-	  </p>
-      <div id="touchid-wrapper">
-        <p class="option">
-        <button type="button"
-          id="use-touchid"
-          class="btn btn-success option-btn">Toggle Touch ID</button>
-        </p>
-      </div>
+	  <div id="touchid-wrapper">
+            <p class="option">
+              <button type="button"
+		      id="use-touchid"
+		      class="btn btn-success option-btn">Toggle Touch ID</button>
+            </p>
+	  </div>
 	  <p class="option">
 	    <button type="button"
 		    id="display-passphrase"
@@ -381,6 +372,14 @@ height: 2.5rem;"></a>
 	    <button type="button"
 		    id="change-passphrase"
 		    class="btn btn-success option-btn">Change passphrase</button>
+	  </p>
+	  <p class="option option-text">
+	    On supported devices, your credentials are securely stored to allow for fast login. <strong>'Forget credentials' is a destructive option</strong>.
+	  </p>
+	  <p class="option">
+	    <button type="button"
+		    id="forget-credentials"
+		    class="btn btn-success option-btn btn-danger">Forget credentials</button>
 	  </p>
 
 	  <!-- <p class="option option-text"> 148 46 244
@@ -422,129 +421,71 @@ height: 2.5rem;"></a>
       <div id="app-about" class="view">
       </div>
 
-      <!-- <div id="first-run" class="view"> -->
-      <!-- 	<h3>Initial Setup</h3> -->
-      <!-- 	<p><strong>Congratulations! You've signed up for Kloak.</strong></p> -->
-      <!-- 	<p> -->
-      <!-- 	  Now that you have an account, you need to create your <strong>Contact Card</strong>, which identifies you to other users you would like to communicate with. -->
-      <!-- 	</p> -->
-      <!-- 	<p> -->
-      <!-- 	  Once you share your <strong>Contact Card</strong> with another user, and you have received theirs, you can privately communicate. -->
-      <!-- 	</p> -->
-      <!-- 	<p> -->
-      <!-- 	  The first step is taking a photo for your contact card -->
-      <!-- 	</p> -->
-      <!-- 	<br /> -->
-      <!-- 	<p class="text-center"> -->
-      <!-- 	  <button class="btn btn-success" -->
-      <!-- 		  id="create-id-card">Take Contact Card Photo</button> -->
-      <!-- 	</p> -->
-      <!-- </div> -->
-
-      <div id="verify-user" class="view">
-	<div id="verify-user-success">
-	  <p><strong>Successfully captured fingerprint</strong></p>
-	  <p>
-	    The following images are generated from the key fingerprint data from
-	    the server and the scan, respectively. Ensure the following images are identical.
-	  </p>
-	  <div id="verify-user-success-msg"></div>
-	  <p>
-	    The computer thinks these <strong>match</strong>.
-	  </p>
-	  <p>
-	    If they do, tap <strong>Trust</strong> below.
-	  </p>
-	  <p>
-	    If not, take a screenshot of this, press <strong>Cancel</strong>,
-	    and speak with the person who sent you this Contact card.
-	  </p>
-	  <div id="verify-user-buttons">
-	    <button id="verify-trust-save"
-		    class="btn btn-success">Trust</button>
-	    <button id="verify-trust-cancel"
-		    class="btn btn-danger">Cancel</button>
-	  </div>
-	</div>
-
-	<div id="verify-user-failure">
-	  <p><strong>Failed to capture fingerprint</strong></p>
-	  <div id="verify-user-failure-msg"></div>
-	  <div>
-	    <button id="verify-trust-failure-ok"
-		    class="btn btn-default">OK</button>
-	  </div>
-	</div>
-
-      </div>
-
       <!-- BEGIN NEW PASSPHRASE -->
-      
-      <div id="new-passphrase" class="view intro-graphics">
 
-	<div id="create-new-passphrase">
-	  
-	  <div id="change-passphrase-info">
-	    <h3>Change Passphrase:</h3>
-	    <p>
-	      <textarea placeholder="Old Passphrase"
-			autocapitalize="off"
-			rows="3"
-			maxlength="256"
-			class="onboarding-input"
-			id="old-pass-change-passphrase-input"></textarea>
-	    </p>
-	    <p>
+      <div id="new-passphrase" class="view">
+	<div id="change-passphrase-info">
+	  <p>
+	  <p class="change-pass-label">Current Passphrase</p>
+	    <textarea placeholder="Old Passphrase"
+		      autocapitalize="off"
+		      rows="3"
+		      maxlength="256"
+		      class="onboarding-input"
+		      id="old-pass-change-passphrase-input"></textarea>
+	  </p>
+	  <p>
+	    <p class="change-pass-label">New Passphrase</p>
 	    <textarea placeholder="Enter New Passphrase"
 		      autocapitalize="off"
 		      rows="3"
 		      maxlength="256"
 		      class="onboarding-input"
 		      id="change-passphrase-input"></textarea>
+	  </p>
+	  <div class="change-passphrase-continue-wrapper">
+	    <button class="btn onboarding-btn"
+		    id="change-passphrase-continue">Continue</button>
+	    <p>
+	      <a href="#"
+		 id="regenerate-new-change-passphrase"
+		 class="onboarding-link">Regenerate Passphrase</a>
 	    </p>
-	    <div class="change-passphrase-continue-wrapper">
-	      <button class="btn onboarding-btn"
-		      id="change-passphrase-continue">Continue</button>
-	      <p>
-		<a href="#"
-		   id="regenerate-new-change-passphrase"
-		   class="onboarding-link">Regenerate Passphrase</a>
-	      </p>
-	      <p>
-		<a href="#"
-		   id="clear-new-change-passphrase"
+	    <p>
+	      <a href="#"
+		 id="clear-new-change-passphrase"
 		 class="onboarding-link">I'll choose my own Passphrase</a>
-	      </p>
-	    </div>
-	    <a href="#" class="onboarding-link" id="new-passphrase-cancel">Cancel</a>
-	    <p class="onboarding-light-copy">
-	      We have created a strong passphrase for you, please save it into your password wallet or write it down and put it in a safe place!
 	    </p>
 	  </div>
+	  <a href="#" class="onboarding-link" id="new-passphrase-cancel">Cancel</a>
+	  <p class="onboarding-dark-copy">
+	    We have created a strong passphrase for you, please save it into your password wallet or write it down and put it in a safe place!
+	  </p>
 	</div>
       </div>
 
       <!-- END NEW PASSPHRASE -->
-      
+
       <div id="images" class="view">
 	<img id="picture"/>
       </div>
     </div>
 
-    <div id="post-image-location-wrapper" class="post-wrapper">
-      <div id="image-data"></div>
-      <div id="img-location-wrapper">
-      	<div id="location-data"></div>
-      </div>
-    </div>
-
     <!-- POST INPUT WRAPPER -->
     <div id="post-input-wrapper" class="post-wrapper">
-      <a id="post-attach" href="#" class="icon icon--attach">Add Attachment...</a>
-      <textarea rows="1" id="post-textarea" class="js-auto-size post-textarea" placeholder="Enlighten us, please!"></textarea>
-
-      <a id="post-send" href="#" class="">Post</a>
-
+      <div id="post-inner-wrapper">
+	<a id="post-attach" href="#" class="icon icon--attach">Add Attachment...</a>
+	<textarea rows="1" id="post-textarea" class="js-auto-size post-textarea" placeholder="Enlighten us, please!"></textarea>
+	
+	<a id="post-send" href="#" class="">Post</a>
+      </div>
+      <div id="post-image-location-wrapper" class="post-wrapper">
+	<div id="image-data"></div>
+	<div id="img-location-wrapper">
+      	  <div id="location-data"></div>
+	</div>
+      </div>
+      
     </div>
 
     <!-- POST BUTTON -->
@@ -564,6 +505,11 @@ height: 2.5rem;"></a>
 	   id="contact-card-photo-default" />
     </div>
 
+    <!-- Passphrase display widget -->
+    <div id="display-passphrase-output">
+    </div>
+    <!-- END Passphrase display widget -->
+    
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="js/crypton.js"></script>
     <script type="text/javascript" src="js/index.js"></script>
@@ -571,14 +517,17 @@ height: 2.5rem;"></a>
     <script type="text/javascript" src="js/contact-card.js"></script>
     <script type="text/javascript" src="js/stati.js"></script>
     <script type="text/javascript" src="js/configuration.js"></script>
+    <script type="text/javascript" src="js/options.js"></script>
     <script type="text/javascript" src="js/day-of-year.js"></script>
     <script type="text/javascript" src="js/jquery.min.js"></script>
+    <!-- <script type="text/javascript" src="js/vendor/jquery.easing.min.js"></script> -->
     <script type="text/javascript" src="js/vendor/humane.js"></script>
     <script type="text/javascript" src="js/vendor/autoresize.js"></script>
     <script type="text/javascript" src="js/vendor/canvas-toBlob.js"></script>
     <script type="text/javascript" src="js/vendor/FileSaver.js"></script>
     <script async type="text/javascript" src="js/passphrase-corpus.js"></script>
     <script type="text/javascript" src="js/vendor/fastclick.js"></script>
+    <script type="text/javascript" src="js/zepto-touch.js"></script>
     <!-- BEGIN QR Code Reader -->
     <script type="text/javascript" src="js/vendor/jsqrcode/grid.js"></script>
     <script type="text/javascript" src="js/vendor/jsqrcode/version.js"></script>

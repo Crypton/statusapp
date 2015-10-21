@@ -51,9 +51,17 @@ app.contactCard = {
   captureBio: function captureBio (callback) {
     var that = this;
     function onPrompt(results) {
+      if (results.buttonIndex == 2) {
+	console.log('Cancelled!');
+	return callback();
+      }
       if (results.input1.length > 96) {
-	app.alert('Sorry, your Biography is too long. 96 Characters Maximum.', 'danger');
+	app.alert('Your Biography is too long. 96 Characters Maximum.', 'danger');
 	return;
+      }
+
+      if (!results.input1) {
+	return callback();
       }
       that.bio = results.input1;
 
@@ -120,13 +128,11 @@ app.contactCard = {
   
   getContactAvatarImage: function getContactAvatarImage () {
     var imgData = app._contacts[this.username].avatar;
-    if (!imgData) {
-      imgData = app.avatars[this.username];
-    }
     return this.base64UrlToCanvas(imgData);
   },
   
   getAvatarImage: function getAvatarImage () {
+    this.cardPhoto = null;
     if (this.username !== app.username) {
       return this.getContactAvatarImage(this.username);
     }
@@ -163,7 +169,7 @@ app.contactCard = {
   },
   
   assembleContactCard: function assembleContactCard (contactName) {
-
+    console.log('assembleContactCard', contactName);
     var fingerArr = this.getFingerprintArr(contactName);
     // Create the card, get the QR code only
     this.qrCodeCanvas =
@@ -266,13 +272,28 @@ app.contactCard = {
   },
 
   updatePhoto: function updatePhoto () {
-    app.getPhoto({ width: 120, height: 160 }, function (err, imageData) {
+    var that = this;
+    var FRONT_CAMERA = 1;
+    app.getPhoto({ width: 120,
+		   height: 120,
+		   cameraDirection: FRONT_CAMERA }, function (err, imageData) {
+      if (err) {
+	// Get photo cancelled or failed for whatever reason
+	if (err === 'no image selected') {
+	  return;
+	}
+	app.alert(err, 'danger');
+	console.error(err);
+	return;
+      }
+      if (!imageData) {
+	return;
+      }
+      app.alert('Saving photo to server...', 'info');
+		     
       var avatarItem = app.session.items.avatar;
       avatarItem.value.avatar = imageData;
       avatarItem.value.updated = Date.now();
-
-      app.alert('Saving photo to server...', 'info');
-      
       avatarItem.save(function (err) {
         if (err) {
           var _err = 'Cannot save photo to server';
@@ -281,15 +302,13 @@ app.contactCard = {
         }
 	
         // photo is saved to the server
-	// $('.current-contact-card-canvas').remove();
 	$('#contact-card-photo')[0].src = imageData;
-	this.cardPhoto = this.getAvatarImage();
-	// this.contactCardCanvas = this.getContactCardTemplate();
-	// this.fillCardTemplate();
-
-	// JUST NEED TO write the new photo over
-	this.ctx.drawImage(this.cardPhoto, 45, 118);
-	
+	that.displayCard(that.parentNodeId);
+	that.cardPhoto = that.getAvatarImage();
+	// that.ctx.drawImage(that.cardPhoto, 45, 118);
+	setTimeout(function () {
+	  that.displayCard(that.parentNodeId); // XXX a hack for now
+	}, 500);
       });
     });
   },
@@ -319,14 +338,19 @@ app.contactCard = {
 	    pictureSourceType: navigator.camera.PictureSourceType.SAVEDPHOTOALBUM,
 	    allowEdit: true,
 	    width: 120,
-	    height: 160 
+	    height: 120 
 	  };
 	app.getPhoto(options, function imgCallback(err, imgData) {
 	  if (err) {
 	    console.error(err);
-	    app.alert('danger', err);
+	    app.alert(err, 'info');
 	    return;
 	  }
+
+	  if (!imgData) {
+	    return;
+	  }
+
 	  // Do something with the photo
 	  app.session.items.avatar.value.avatar = imgData;
 	  app.session.items.avatar.value.avatar.updated = Date.now();
@@ -336,13 +360,14 @@ app.contactCard = {
               console.error(_err + ' ' + err);
               return app.alert(_err);
             }
-	    $('.current-contact-card-canvas').remove();
+
 	    $('#contact-card-photo')[0].src = imgData;
+	    that.displayCard(that.parentNodeId);
 	    that.cardPhoto = that.getAvatarImage();
-	    // this.contactCardCanvas = this.getContactCardTemplate();
-	    // this.fillCardTemplate();
-	    that.ctx.drawImage(that.cardPhoto, 45, 118);
-	    
+	    // that.ctx.drawImage(that.cardPhoto, 45, 118);
+	    setTimeout(function () {
+	      that.displayCard(that.parentNodeId); // XXX a hack for now
+	    }, 500);
 	  });
 	});
 	break;

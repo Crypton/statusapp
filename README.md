@@ -33,6 +33,7 @@ Plugin list.
 * cordova-plugin-touchid
 * cordova-plugin-whitelist
 * cordova-plugin-webserver
+* org.apache.cordova.dialogs
 * (Android Only) net.yoik.cordova.plugins.screenorientation.wkwebview
 
 Building and running.
@@ -57,5 +58,5 @@ ddahl to complete.
 
 Credits
 -------------
-StatusApp is built by @daviddahl, @helveticade, @BennyOak, @devgeeks and others
+StatusApp is built by {github users} @daviddahl, @helveticade, @BennyOak, @devgeeks and others
 

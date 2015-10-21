@@ -368,7 +368,7 @@ h1 {
 }
 
 #login-buttons {
-    margin-bottom: 1em;
+    margin: 1em;
     text-align: center;
 }
 
@@ -422,6 +422,18 @@ input[type="password"]:focus {
 
 .btn-danger {
     color: red;
+}
+
+.btn-small {
+    border: 2px solid currentColor;
+    background-color: transparent;
+    font-family: -apple-system-body, "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif;
+    padding: 0rem 0.3rem;
+    font-weight: normal;
+    margin: 0rem 0.3rem;
+    font-size: 90%;
+    color: whitesmoke;
+    border-radius: 50%;
 }
 
 #login-status {
@@ -523,6 +535,15 @@ a.header-back {
 
 #header-timeline {
 
+}
+
+.icon--timeline {
+    width: 1.2rem;
+    height: 2rem;
+    background-size: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('../svg/kloak-logo.svg');
 }
 
 .icon--contact-card {
@@ -652,9 +673,9 @@ a.header-back {
 
 #contacts-list-wrapper {
     padding-top: 5px;
-    height: 95%;
+    border-bottom: 1px solid gray;
+    height: 110%;
     overflow-y: auto;
-    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -761,7 +782,7 @@ a.header-back {
     /* right: 0; */
     top: 100px;
     left: 7%;
-    z-index: 25000;
+    z-index: 60000;
     width: 100%;
 }
 
@@ -803,17 +824,23 @@ a.header-back {
 
 #top-progress-wrapper {
     display: none;
-    height: 6em;
-    border-radius: 2em;
+    border-radius: 5rem;
     z-index: 11000;
-    padding: 0.5em;
+    padding: 1.25rem 0;
     color: whitesmoke;
     background-color: rgba(50, 50, 50, 0.85);
-    width: 92%;
+    width: 90%;
     position: fixed;
-    left: 0.3em;
+    left: 5%;
     bottom: 50%;
     text-align: center;
+}
+
+#top-progress-wrapper span {
+    position: relative;
+    top: -6px;
+    margin-left: 1rem;
+    margin-right: 1rem;
 }
 
 @-webkit-keyframes blink {
@@ -830,10 +857,6 @@ blink {
     -webkit-animation-iteration-count: infinite;
     -webkit-animation-timing-function: cubic-bezier(1.0, 0, 0, 1.0);
     -webkit-animation-duration: 2.5s;
-}
-
-#blink-wrapper {
-    margin-top: 1.5em;
 }
 
 h3 {
@@ -914,7 +937,8 @@ a {
 }
 
 .option {
-
+    margin-bottom: 0;
+    margin-top: 0;
 }
 
 #about img {
@@ -1013,16 +1037,20 @@ body {
 }
 
 .user-avatar-generic {
-    height: 35px;
     margin-right: 10px;
     margin-top: 5px;
+    height: 29px;
+    margin-left: 2px;
+    margin-bottom: -2px;
 }
 
 .user-avatar {
-    margin-right: 10px;
+    margin-top: 4px;
+    margin-right: 8px;
     width: 30px;
     -webkit-border-radius: 5px;
     border: 1px solid #aaaaaa;
+    margin-bottom: -3px;
 }
 
 #retake-id-picture {
@@ -1064,7 +1092,7 @@ body {
 }
 
 #my-options-pane.view.active {
-    overflow: scroll;
+    overflow: auto;
 }
 
 .intro-graphics {
@@ -1097,7 +1125,7 @@ div .logo {
 
 #onboarding-create-username {
     text-align: left;
-    width: 98%;
+    width: 90%;
     margin-left: 1em;
     margin-top: 2em;
 }
@@ -1109,7 +1137,7 @@ div .logo {
 
 #onboarding-create-passphrase {
     text-align: left;
-    width: 98%;
+    width: 90%;
     margin-left: 1em;
     margin-right: 1em;
     position: fixed;
@@ -1129,12 +1157,11 @@ input.onboarding-input {
 }
 
 #onboarding-check-username {
-    width: 95%;
-    font-size: 1.2em;
+    width: 100%;
 }
 
 .onboarding-btn {
-    width: 95%;
+    width: 100%;
     font-size: 1em;
 }
 
@@ -1162,12 +1189,28 @@ input.onboarding-input {
 }
 
 #onboarding-passphrase-input {
-    font-size: 1.2em;
+    font-size: 1.1em;
+    text-align: center;
     background-color: transparent !important;
+    border: 1px dashed white !important;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0.6em;
+    box-sizing: border-box;
+    margin-bottom: 0.5em;
 }
 
+#onboarding-create-passphrase #clear-passphrase {
+    font-size:0.8em;
+    margin-bottom: 1em;
+}
 .onboarding-continue-wrapper {
     margin-bottom: 1em;
+    text-align: center;
+}
+
+#passphrase-info {
+    text-align: center;
 }
 
 #passphrase-info p {
@@ -1182,10 +1225,17 @@ input.onboarding-input {
     margin: 1em;
 }
 
+
 #onboarding-create-passphrase h3 {
     font-size: 1em;
     margin-top: 10px;
     color: white;
+    float: left;
+}
+#onboarding-create-passphrase #regenerate-passphrase {
+    float: right;
+    margin-top: 11px;
+    font-weight: normal;
 }
 
 #onboarding-account-generation {
@@ -1226,16 +1276,17 @@ input.onboarding-input {
 
 .onboarding-light-copy {
     color: white;
-    font-size: 90%;
+    font-size: 80%;
 }
 
 .onboarding-dark-copy {
     color: black;
-    font-size: 90%;
+    font-size: 80%;
 }
 
 #onboarding-no-account-step-2 {
     padding-top: 2em;
+    display: none;
 }
 
 #onboarding-contact-card-wrapper canvas {
@@ -1247,15 +1298,205 @@ input.onboarding-input {
 }
 
 textarea#old-pass-change-passphrase-input.onboarding-input {
-    font-size: 1.2em !important;
+    font-size: 1em !important;
     width: 100% !important;
+    border-radius: 0;
+    border: 1px dashed #1c1c1c;
+    background-color: whitesmoke;
+    padding: 3px;
 }
 
 textarea#change-passphrase-input.onboarding-input {
-    font-size: 1.2em;
+    font-size: 1em;
     width: 100% !important;
+    border-radius: 0;
+    border: 1px dashed #1c1c1c;
+    background-color: whitesmoke;
+    padding: 3px;
 }
 
 button#change-passphrase-continue.btn.onboarding-btn {
     width: 100% !important;
+}
+
+/* Spinning Cube thx to @tobiasahlin. */
+.sk-folding-cube {
+    margin: 0 auto;
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+
+    position: relative;
+    -webkit-transform: rotateZ(45deg);
+    transform: rotateZ(45deg);
+}
+
+.sk-folding-cube .sk-cube {
+  float: left;
+  width: 50%;
+  height: 50%;
+  position: relative;
+  -webkit-transform: scale(1.1);
+      -ms-transform: scale(1.1);
+          transform: scale(1.1);
+}
+.sk-folding-cube .sk-cube:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  -webkit-animation: sk-foldCubeAngle 2.4s infinite linear both;
+          animation: sk-foldCubeAngle 2.4s infinite linear both;
+  -webkit-transform-origin: 100% 100%;
+      -ms-transform-origin: 100% 100%;
+          transform-origin: 100% 100%;
+}
+.sk-folding-cube .sk-cube2 {
+  -webkit-transform: scale(1.1) rotateZ(90deg);
+          transform: scale(1.1) rotateZ(90deg);
+}
+.sk-folding-cube .sk-cube3 {
+  -webkit-transform: scale(1.1) rotateZ(180deg);
+          transform: scale(1.1) rotateZ(180deg);
+}
+.sk-folding-cube .sk-cube4 {
+  -webkit-transform: scale(1.1) rotateZ(270deg);
+          transform: scale(1.1) rotateZ(270deg);
+}
+.sk-folding-cube .sk-cube2:before {
+  -webkit-animation-delay: 0.3s;
+          animation-delay: 0.3s;
+}
+.sk-folding-cube .sk-cube3:before {
+  -webkit-animation-delay: 0.6s;
+          animation-delay: 0.6s;
+}
+.sk-folding-cube .sk-cube4:before {
+  -webkit-animation-delay: 0.9s;
+          animation-delay: 0.9s;
+}
+@-webkit-keyframes sk-foldCubeAngle {
+  0%, 10% {
+    -webkit-transform: perspective(140px) rotateX(-180deg);
+            transform: perspective(140px) rotateX(-180deg);
+    opacity: 0;
+  } 25%, 75% {
+    -webkit-transform: perspective(140px) rotateX(0deg);
+            transform: perspective(140px) rotateX(0deg);
+    opacity: 1;
+  } 90%, 100% {
+    -webkit-transform: perspective(140px) rotateY(180deg);
+            transform: perspective(140px) rotateY(180deg);
+    opacity: 0;
+  }
+}
+
+@keyframes sk-foldCubeAngle {
+  0%, 10% {
+    -webkit-transform: perspective(140px) rotateX(-180deg);
+            transform: perspective(140px) rotateX(-180deg);
+    opacity: 0;
+  } 25%, 75% {
+    -webkit-transform: perspective(140px) rotateX(0deg);
+            transform: perspective(140px) rotateX(0deg);
+    opacity: 1;
+  } 90%, 100% {
+    -webkit-transform: perspective(140px) rotateY(180deg);
+            transform: perspective(140px) rotateY(180deg);
+    opacity: 0;
+  }
+}
+
+#change-passphrase-info p {
+
+}
+
+.change-pass-label {
+    font-size: 80%;
+    margin-bottom: 4px;
+    margin-top: 4px;    
+}
+
+#change-passphrase-info {
+    margin: 1em;
+}
+
+textarea#old-pass-change-passphrase-input.onboarding-input {
+    font-size: 1em !important;
+    width: 98% !important;
+    color: black !important;
+    height: 3em;
+}
+
+textarea#change-passphrase-input.onboarding-input {
+    font-size: 1em;
+    width: 98% !important;
+    color: black !important;
+    height: 3em;
+}
+
+button#change-passphrase-continue.btn.onboarding-btn {
+    width: 100% !important;
+}
+
+#change-passphrase-continue-wrapper p {
+    color: black !important;
+}
+
+#change-passphrase-continue-wrapper a {
+    color: black !important;
+}
+
+#regenerate-new-change-passphrase {
+    color: black;
+    font-size: 80%;
+}
+
+#new-passphrase-cancel {
+    color: black;
+    font-size: 80%;
+}
+
+#clear-new-change-passphrase {
+    color: black;
+    font-size: 80%;
+}
+
+div#onboarding-account-contact-card p {
+    color: white !important;
+}
+
+div#onboarding-account-contact-card a {
+    color: white !important;
+}
+
+#display-passphrase-output {
+    z-index: 40000;
+    width: 80%;
+    display: none;
+}
+
+#display-passphrase-output.active {
+    display: block;
+    position: absolute;
+    top: 120px;
+    padding: 1.1em;
+    margin: 1em;
+    background: whitesmoke;
+    box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.16), 0px 1px 2.5px 0px rgba(0, 0, 0, 0.26);
+}
+
+#display-passphrase-output textarea {
+    width: 100%;
+    height: 4rem;
+    font-size: 1em;
+    border-radius: 0;
+    border: 1px dashed #000;
+}
+
+#display-passphrase-output button {
+    width: 100%;
 }

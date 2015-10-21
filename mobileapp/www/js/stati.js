@@ -5,9 +5,9 @@
 // This file is the application specific code and includes all
 // implemented functions expected by index.js
 
-app.sharingUrl = 'https://kloak.io/';
+app.sharingUrl = 'https://spideroak.com/solutions/kloak/';
 
-app.sharingMessage = 'I would like to share messages with you privately via an app called "Kloak". \n\nThis message\'s attachment is my \'App Contact card\', which users exchange in order to establish a private connection. \n\nFor more information: https://spideroak.com/solutions/kloak';
+app.sharingMessage = 'I would like to share messages with you privately via an app called "Kloak". \n\nThis message\'s attachment is my \'App Contact Card\', which users exchange in order to establish a private connection.\n\n';
 
 app.sharingTitle = 'Just started using Kloak...';
 
@@ -40,7 +40,6 @@ app.resumeEventHandler = function resumeEventHandler () {
 
 app.pauseEventHandler = function pauseEventHandler () {
   app.feedIsLoading = false;
-  // $('#top-progress-wrapper').hide();
   app.hideProgress();
 };
 
@@ -69,19 +68,22 @@ app.setCustomEvents = function setCustomEvents () {
   window.addEventListener('native.keyboardhide',
   function keyboardShowHandler (e) {
     app.keyboardTopPos = 0;
-    app.repositionInput();
     console.log('hidden Keyboard height is: ' + e.keyboardHeight);
   });
 
   window.addEventListener('native.keyboardshow',
   function keyboardShowHandler (e) {
     app.keyboardTopPos = e.keyboardHeight;
-    if ($('#feed').is(':visible')) {
-      app.repositionInput();
-    }
     console.log('Keyboard height is: ' + e.keyboardHeight);
   });
 
+  // $('#post-image-location-wrapper').click(function(e) {
+  //   if(!$('#post-textarea').is(':focus')) {
+  //     $('#post-textarea').focus();
+  //   }
+  //   // preventDefault?
+  // });
+  
   app.tz = jstz.determine();
 
   $('#my-stati').click(function () {
@@ -126,7 +128,6 @@ app.setCustomEvents = function setCustomEvents () {
   $('#post-button-floating').click(function () {
     app.makeNewPost();
     $('#post-textarea').focus();
-    app.repositionInput();
   });
 
   $('#include-gps-btn').click(function () {
@@ -146,59 +147,48 @@ app.setCustomEvents = function setCustomEvents () {
   });
 
   $('#post-attach').click(function () {
-    app.postingUIActionSheet();
+    function cancelCallback() { $('#post-textarea').focus(); }; 
+    app.postingUIActionSheet(cancelCallback);
   });
   
   $('#feed').click(function () {
     try {
       $('body').removeClass('posting');
-      $('#post-image-location-wrapper').hide();
+      $('#post-image-location-wrapper').hide('slow');
       $('#post-button-floating-wrapper').show();
     } catch (ex) {
       console.warn(ex);
     }
   });
 
-  // Mutation Observer for the input textarea which helps us re-position the
-  // image and location piece of the input widget
-  (function inputMutationObs() {
-    var target = document.querySelector('#post-input-wrapper textarea');
-    var observer = new MutationObserver(function(mutations) {
-      mutations.forEach(function(mutation) {
-	app.repositionInput();
-      });
-    });
+  $('#header-timeline #header--title').tap(function () {
+    $('#feed').animate({ scrollTop: 0 }, "fast");
+  });
 
-    // configuration of the observer: // XXX: May not need all of these
-    var config = {
-      attributes: true,
-      childList: false,
-      characterData: false
-    };
-    
-    // pass in the target node, as well as the observer options
-    observer.observe(target, config);
-  })();
-
+  $('#header-timeline #header--title').doubleTap(function () {
+    $('#feed').animate({ scrollTop: 0 }, "fast");
+    app.loadNewTimeline();
+  });
+  
   (function () {
     // handle pull to refresh event:
     var el = $("#my-feed-entries")[0];
     var startPageY = null;
     el.addEventListener("touchmove", function (e) {
       if (!$("#feed").is(":visible")) {
-	return;
+  	return;
       }
       if (!startPageY) {
-	startPageY = e.pageY;
+  	startPageY = e.pageY;
       }
-      if (e.pageY > (startPageY + 70)) {
-	startPageY = null;
-	app.lastTimelineLoad = Date.now();
-	app.loadNewTimeline();
-	return;
+      if (e.pageY > (startPageY + 30)) {
+  	startPageY = null;
+  	app.loadNewTimeline();
+  	return;
       }
     }, false);
   })();
+
 };
 
 app.setOnSharedItemSync = function setOnSharedItemSync () {
@@ -216,44 +206,25 @@ app.setOnSharedItemSync = function setOnSharedItemSync () {
 
 app.keyboardTopPos = 0; // default
 
-app.lastRepositionPoint = null;
-
-app.repositionInput = function repositionInput () {
-  console.log('Reposition...');
-  console.log('keyboardTopPos: ', app.keyboardTopPos);
-  
-  $('#post-input-wrapper').css({ bottom: app.keyboardTopPos + 'px'});
-  // Check if the location and image widget is visible and reposition it
-  if ($('#post-image-location-wrapper').is(':visible')) {
-    var inputHeight = $('#post-input-wrapper')[0].offsetHeight;
-    var imgLocWrapBottom = inputHeight + app.keyboardTopPos;
-    $('#post-image-location-wrapper').css({ bottom: imgLocWrapBottom + 'px' });
-  }
-  $('#post-textarea').focus(); //trigger('input');
-};
-
 app.hidePostUI = function hidePostUI () {
-  $('#post-input-wrapper textarea').trigger('input');
   $('#post-button-floating-wrapper').show();
   $('body').removeClass('posting');
-  app.lastRepositionPoint = null;
 };
 
 app.makeNewPost = function makeNewPost() {
   // show input UI which will trigger the keyboard
   $('textarea.js-auto-size').textareaAutoSize();
-  $('#post-input-wrapper textarea').trigger('input');
-
-  // re-position the inputwrapper above keyboard
-  app.repositionInput();
-  
+  $('#post-input-wrapper textarea').trigger('input');  
   $('#post-button-floating-wrapper').hide();
   $('body').addClass('posting');
-
-  // $('#post-input-wrapper').click();
+  
+  // Check if there is an image or location and show() them
+  if ($('#image-data').html() || $('#location-data').html()) {
+    $('#post-image-location-wrapper').show();
+  }
 };
 
-app.postingUIActionSheet = function postingUIActionSheet () {
+app.postingUIActionSheet = function postingUIActionSheet (cancelCB) {
   var options = {
     'androidTheme' : window.plugins.actionsheet.ANDROID_THEMES.THEME_HOLO_LIGHT,
     'buttonLabels': ['Add Location', 'Take Photo', 'Choose Photo'],
@@ -267,8 +238,7 @@ app.postingUIActionSheet = function postingUIActionSheet () {
     case 1:
       // Add Location
       console.log('Add location!');
-      $('#post-image-location-wrapper').show();
-      app.repositionInput();
+      $('#post-image-location-wrapper').show('slow');
       app.setMyLocation();
       break;
     case 2:
@@ -279,15 +249,24 @@ app.postingUIActionSheet = function postingUIActionSheet () {
 	};
       app.getPhoto(options, function imgCallback(err, imgData) {
 	if (err) {
+	  if (err === 'no image selected') {
+	    if (typeof cancelCB === 'function') {
+	      cancelCB();
+	    }
+	    return;
+	  }
 	  console.error(err);
 	  app.alert(err, 'danger');
 	  return;
 	}
-	var img = $('<img src="'  + imgData  +  '" />');
+	var img = $('<img src="'  + imgData  +  '" /> <button class="btn-small">X</button> ');
 	$('#image-data').children().remove();
 	$('#image-data').append(img);
-	$('#post-image-location-wrapper').show();
-	app.repositionInput();
+	$('#image-data button').click(function (e) {
+	  app.removeImage();
+	  $('#post-textarea').focus();
+	});
+	$('#post-image-location-wrapper').show('slow');
       });
       break;
 
@@ -299,21 +278,30 @@ app.postingUIActionSheet = function postingUIActionSheet () {
 	};
       app.getPhoto(options, function imgCallback(err, imgData) {
 	if (err) {
+	  if (err === 'no image selected') {
+	    // re-focus the status input
+	    if (typeof cancelCB === 'function') {
+	      cancelCB();
+	    }
+	    return;
+	  }
 	  console.error(err);
 	  app.alert('danger', err);
 	  return;
 	}
-	var img = $('<img src="'  + imgData  +  '" />');
+	var img = $('<img src="'  + imgData  +  '" /> <button class="btn-small">X</button> ');
 	$('#image-data').children().remove();
 	$('#image-data').append(img);
-	$('#post-image-location-wrapper').show();
-	app.repositionInput();
+	$('#image-data button').click(function (e) {
+	  app.removeImage();
+	  $('#post-textarea').focus();
+	});
+	$('#post-image-location-wrapper').show('slow');
       });
       break;
 
     case 4:
       // Cancel
-      app.repositionInput();
       return;
     default:
       return;
@@ -368,6 +356,14 @@ app.viewActions = {
     $('#onboarding-username-input').focus();
   },
 
+  'onboarding-no-account-step-2': function vaOnboardingNoAccount2 () {
+    $('#onboarding-no-account-step-2').show()();
+  },
+  
+  'onboarding-no-account-step-3': function vaOnboardingNoAccount3 () {
+    $('#onboarding-no-account-step-2').hide();
+  },
+  
   'account-login': function vaAccountLogin () {
     $('#username-login').focus();
   },
@@ -496,8 +492,7 @@ app.hideProgress = function hideProgress() {
   setTimeout(function () {
     $('#top-progress-wrapper').hide();
     $('.overlay').hide();
-    // ProgressIndicator.hide();
-    app.setProgressStatus('Doing Stuff...');
+    app.setProgressStatus('One moment...');
   }, 1000);
 };
 
@@ -551,7 +546,12 @@ app.loadNewTimeline = function loadNewTimeline () {
     console.error('Cannot get afterId');
     app.loadPastTimeline();
   }
+
   app.updateEmptyTimelineElements();
+
+  if (!app.fetchContactMetadataInterval) {
+    app.fetchContactMetadata();
+  }
 };
 
 app.statusNameHmac = function statusNameHmac() {
@@ -624,13 +624,11 @@ app.loadPastTimeline = function loadPastTimeline () {
       if (err) {
 	console.error(err);
 	app.feedIsLoading = false;
-	// $('#top-progress-wrapper').hide();
 	app.hideProgress();
 	return app.alert('Cannot get feed', 'info');
       }
       // TRY??
       app.renderTimeline(timeline, true);
-      // $('#top-progress-wrapper').hide();
       app.hideProgress();
       app.feedIsLoading = false;
       var newEmptyItems = $('.empty-timeline-element').length;
@@ -639,12 +637,14 @@ app.loadPastTimeline = function loadPastTimeline () {
       // }
     });
   } else {
-    // $('#top-progress-wrapper').hide();
     app.hideProgress();
     app.feedIsLoading = false;
     console.error('cannot get beforeId');
   }
   app.updateEmptyTimelineElements();
+  if (!app.fetchContactMetadataInterval) {
+    app.fetchContactMetadata();
+  }
 };
 
 app.renderTimeline = function renderTimeline (timeline, append) {
@@ -1010,17 +1010,31 @@ app.setMyStatus = function setMyStatus() {
   if ($('#image-data').children().length) {
     imageData = $('#image-data').children()[0].src;
   }
-   var updateObj= {
-     status: status,
-     location: $('#location-data').text(),
-     timestamp: Date.now(),
-     imageData: null,
-     avatarMeta: {
-       nameHmac: app.session.items.avatar.nameHmac,
-       updated: app.session.items.avatar.value.updated
-     },
-     __meta: { timelineVisible: 't' }
-   };
+
+  // Get rid of the X
+  // $('#location-data button').remove();
+
+  app.hidePostUI();
+
+  var locData;
+  try {
+    locData = $('#location-data').text().split('X')[0];
+  } catch (ex) {
+    locData = null;
+  }
+  
+  var updateObj= {
+    status: status,
+    location: locData,
+    timestamp: Date.now(),
+    imageData: null,
+    avatarMeta: {
+      nameHmac: app.session.items.avatar.nameHmac,
+      updated: app.session.items.avatar.value.updated
+    },
+    __meta: { timelineVisible: 't' }
+  };
+
   if (imageData) {
     updateObj.imageData = imageData;
   }
@@ -1047,11 +1061,10 @@ app.setMyStatus = function setMyStatus() {
       return app.alert('Cannot update status', 'danger');
     }
     app.hideProgress();
-    app.hidePostUI();
     $('#post-textarea').val('');
     $('#image-data').children().remove();
-    $('#post-image-location-wrapper').hide();
-    // app.toggleSetStatusProgress();
+    $('#post-image-location-wrapper').hide('slow');
+    $('#location-data').children().remove();
     app.loadNewTimeline();
   });
 };
@@ -1377,6 +1390,7 @@ app.fetchContactMetadata = function fetchContactMetadata () {
   
   app.fetchContactMetadataInterval = setInterval(function contactMetadataLoop () {
     if (!contactList.length) {
+      app.fetchContactMetadataInterval = null;
       return;
     }
     var prop = contactList.pop();
@@ -1400,10 +1414,6 @@ app.updateFeedAvatar = function updateFeedAvatar (avatar, username, avatarHmac) 
   var newAvatar = app.createAvatar(avatar, username, avatarHmac);
   $('span.' + avatarHmac).replaceWith(newAvatar);
 };
-
-// app.revokeSharedStatus = function revokeSharedStatus(peer) {
-//   // revoke shared status with peer
-// };
 
 app.handleMessage = function handleMessage (message) {
   console.log('noop handleMessage();', arguments);
@@ -1442,6 +1452,14 @@ app.purgeInboxMessage = function purgeInboxMessage (id) {
   delete app.session.inbox.messages[id];
 };
 
+app.removeLocation = function removeLocation () {
+  $('#geoloc-name').remove();
+};
+
+app.removeImage = function removeImage () {
+  $('#image-data').children().remove();
+};
+
 app.setMyLocation = function setMyLocation(callback) {
   // set location data to the location div
   var accuracy = true;
@@ -1462,18 +1480,21 @@ app.setMyLocation = function setMyLocation(callback) {
     var geoIdx = lat + '__' + lng;
 
     var name = app.getPlaceName(geoIdx);
-    var html = ' <span id="geoloc-name"> <i>near</i> '
+    var html = ' <span id="geoloc-name"><i>near</i> '
 	  + name
-	  + '</span>';
+	  + ' <button class="btn-small">X</button></span>';
     $('#location-data').append($(html));
-    $('#post-image-location-wrapper').show();
-    app.repositionInput();
+    $('#geoloc-name button').click(function (e) {
+      app.removeLocation();
+      $('#post-textarea').focus();
+      e.preventDefault();
+    });
+    $('#post-image-location-wrapper').show('slow');
   };
 
   function error (err) {
     console.error('Cannot set location');
     console.error(err);
-    app.repositionInput();
   };
 
   navigator.geolocation.getCurrentPosition(success, error, options);
