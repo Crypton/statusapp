@@ -178,9 +178,7 @@ var app = {
 
   get contactCardLabel() { return app.APPNAME + ' contact card'; },
 
-  URL: 'https://zk.gs',
-
-  VERSION: "0.5.0",
+  URL: 'https://spideroak.com/solutions/kloak',
 
   get isNodeWebKit() { return (typeof process == "object"); },
 
@@ -356,7 +354,6 @@ var app = {
 	  console.error(err);
 	  return app.alert('Cannot get passphrase from keychain', 'danger');
 	}
-	// app.alert(passphrase, 'info');
 	app.displayPassphrase(passphrase);
       });
     });
@@ -379,10 +376,6 @@ var app = {
 
     $('#header-contacts #header--title').click(function () {
       app.switchView('contacts', 'Contacts');
-    });
-
-    $('#header-timeline #header--title').click(function () {
-      $('#feed').animate({ scrollTop: 0 }, "fast");
     });
 
     $('#header-settings .header-back').click(function () {

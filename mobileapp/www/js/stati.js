@@ -161,45 +161,34 @@ app.setCustomEvents = function setCustomEvents () {
     }
   });
 
-  // // Mutation Observer for the input textarea which helps us re-position the
-  // // image and location piece of the input widget
-  // (function inputMutationObs() {
-  //   var target = document.querySelector('#post-input-wrapper textarea');
-  //   var observer = new MutationObserver(function(mutations) {
-  //     mutations.forEach(function(mutation) {
-  //     });
-  //   });
+  $('#header-timeline #header--title').tap(function () {
+    $('#feed').animate({ scrollTop: 0 }, "fast");
+  });
 
-  //   // configuration of the observer: // XXX: May not need all of these
-  //   var config = {
-  //     attributes: true,
-  //     childList: false,
-  //     characterData: false
-  //   };
-    
-  //   // pass in the target node, as well as the observer options
-  //   observer.observe(target, config);
-  // })();
-
+  $('#header-timeline #header--title').doubleTap(function () {
+    $('#feed').animate({ scrollTop: 0 }, "fast");
+    app.loadNewTimeline();
+  });
+  
   (function () {
     // handle pull to refresh event:
     var el = $("#my-feed-entries")[0];
     var startPageY = null;
     el.addEventListener("touchmove", function (e) {
       if (!$("#feed").is(":visible")) {
-	return;
+  	return;
       }
       if (!startPageY) {
-	startPageY = e.pageY;
+  	startPageY = e.pageY;
       }
-      if (e.pageY > (startPageY + 70)) {
-	startPageY = null;
-	app.lastTimelineLoad = Date.now();
-	app.loadNewTimeline();
-	return;
+      if (e.pageY > (startPageY + 30)) {
+  	startPageY = null;
+  	app.loadNewTimeline();
+  	return;
       }
     }, false);
   })();
+
 };
 
 app.setOnSharedItemSync = function setOnSharedItemSync () {
@@ -216,27 +205,6 @@ app.setOnSharedItemSync = function setOnSharedItemSync () {
 };
 
 app.keyboardTopPos = 0; // default
-
-// app.repositionInput = function repositionInput () {
-//   return;
-//   console.log('Reposition...');
-//   console.log('keyboardTopPos: ', app.keyboardTopPos);
-
-//   // Check if there is a location and display it
-//   if($('#geoloc-name').html()) {
-//     // location data exists, need to show it
-//     $('#post-image-location-wrapper').show('slow');
-//   }
-  
-//   $('#post-input-wrapper').css({ bottom: app.keyboardTopPos + 'px'});
-//   // Check if the location and image widget is visible and reposition it
-//   if ($('#post-image-location-wrapper').is(':visible')) {
-//     var inputHeight = $('#post-input-wrapper')[0].offsetHeight;
-//     var imgLocWrapBottom = inputHeight + app.keyboardTopPos;
-//     $('#post-image-location-wrapper').css({ bottom: imgLocWrapBottom + 'px' });
-//   }
-//   $('#post-textarea').focus(); //trigger('input');
-// };
 
 app.hidePostUI = function hidePostUI () {
   $('#post-button-floating-wrapper').show();
@@ -524,8 +492,7 @@ app.hideProgress = function hideProgress() {
   setTimeout(function () {
     $('#top-progress-wrapper').hide();
     $('.overlay').hide();
-    // ProgressIndicator.hide();
-    app.setProgressStatus('Doing Stuff...');
+    app.setProgressStatus('One moment...');
   }, 1000);
 };
 
