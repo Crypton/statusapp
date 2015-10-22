@@ -348,10 +348,6 @@
 
 #post-image-location-wrapper {
     display: none;
-    /* background-color: rgba(50, 50, 50, 0.85); */
-    z-index: 10000;
-    /* position: fixed; */
-    z-index: 1000;
     width: 100%;
     text-align: center;
     padding-top: 0.5em;

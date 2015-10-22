@@ -642,7 +642,7 @@ a.header-back {
 }
 
 .main-btn a {
-    color: #black;
+    color: black;
     font-size: 1.4em;
     padding: 13px 15px ;
 }
@@ -777,10 +777,7 @@ a.header-back {
 
 #alerts {
     position: absolute;
-    /* bottom: 0; */
-    /* left: 0; */
-    /* right: 0; */
-    top: 100px;
+    top: 150px;
     left: 7%;
     z-index: 60000;
     width: 100%;
@@ -795,7 +792,7 @@ a.header-back {
     text-align: center;
     padding: 15px 20px;
     width: 60%;
-    z-axis: 30000;
+    z-index: 60000;
 }
 
 .alert-danger {
